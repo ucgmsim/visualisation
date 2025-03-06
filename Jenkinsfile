@@ -2,7 +2,7 @@ pipeline {
     agent {
         docker {
             image 'python:3.13'
-            // The -u 0 flags means run commands inside the contaire
+            // The -u 0 flags means run commands inside the container
             // as the user with uid = 0. This user is, by default, the
             // root user. So it is effectively saying run the commands
             // as root.
