@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Plot slip-rise-rake for segments."""
+
 from enum import StrEnum
 from pathlib import Path
 from typing import Annotated, NamedTuple, Optional
@@ -539,7 +540,7 @@ def plot_slip_rise_rake(
             ax = fig.add_subplot(gs[np.unravel_index(i, (rows, cols))])
             plot_functions[plot_type](ax, i)
             ax.set_title(
-                f"{plot_names.get(plot_type, plot_type).capitalize()} on segment {i}"
+                f"{plot_names.get(plot_type, plot_type).capitalize()} on segment {i + 1}"
             )
 
         map_ax = fig.add_subplot(gs[:, cols])
