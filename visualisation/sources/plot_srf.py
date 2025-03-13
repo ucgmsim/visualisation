@@ -360,8 +360,9 @@ def plot_srf(
         realisation_ffp=realisation_ffp,
         title=title,
     )
-    with fig.inset(position=f"jTR+w{np.sqrt(width)}c", margin=0.2):
-        show_map(fig, region)
+    if show_inset:
+        with fig.inset(position=f"jTR+w{np.sqrt(width)}c", margin=0.2):
+            show_map(fig, region)
 
     fig.savefig(
         output_ffp,
