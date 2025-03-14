@@ -1,6 +1,7 @@
 diffimg
 matplotlib
 numpy
+pygmt
 pygmt_helper @ git+https://github.com/ucgmsim/pygmt_helper.git
 source_modelling @ git+https://github.com/ucgmsim/source_modelling.git
 workflow @ git+https://github.com/ucgmsim/workflow.git@pegasus

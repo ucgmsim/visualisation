@@ -5,71 +5,120 @@ from pathlib import Path
 from typing import Annotated, Optional
 
 import numpy as np
+import pygmt
 import typer
 
 from pygmt_helper import plotting
 from qcore import cli, coordinates
 from source_modelling import srf
+from visualisation import utils
 
 app = typer.Typer()
 
 
-@cli.from_docstring(app)
-def plot_srf(
-    srf_ffp: Annotated[Path, typer.Argument(exists=True, dir_okay=False)],
-    output_ffp: Annotated[Path, typer.Argument(dir_okay=False)],
-    dpi: Annotated[float, typer.Option()] = 300,
-    title: Annotated[Optional[str], typer.Option()] = None,
-    levels: Annotated[float, typer.Option(metavar="LEVELS", min=0)] = 1,
-    realisation_ffp: Annotated[Optional[Path], typer.Option(exists=True)] = None,
-    latitude_pad: Annotated[float, typer.Option()] = 0,
-    longitude_pad: Annotated[float, typer.Option()] = 0,
-    annotations: Annotated[bool, typer.Option()] = True,
-    width: Annotated[float, typer.Option(min=0)] = 17,
+NZ_REGION = [166, 179, -47, -34]
+
+
+def show_map(
+    fig: pygmt.Figure,
+    highlight_region: tuple[float, float, float, float],
+    projection: str = "M?",
 ) -> None:
-    """Plot multi-segment rupture with slip.
+    """Show an overview map with a highlighted rectangle.
 
     Parameters
     ----------
-    srf_ffp : Path
-        Path to SRF file to plot.
-    output_ffp : Path
-        Output plot image.
-    dpi : float
-        Plot output DPI (higher is better).
-    title : Optional[str]
-        Plot title to use.
-    levels : float
-        Plot time as contours of every `levels` seconds.
-    realisation_ffp : Optional[Path]
-        Path to realisation, used to mark jump points.
-    latitude_pad : float
-        Latitude padding to apply (degrees).
-    longitude_pad : float
-        Longitude padding to apply (degrees).
-    annotations : bool
-        Label contours.
-    width : float
-        Width of plot (in cm).
-    """
-    srf_data = srf.read_srf(srf_ffp)
+    fig : pygmt.Figure
+        The figure to plot into.
+    highlight_region : tuple[float, float, float, float]
+        The region to highlight.
+    projection : str
+        The projection to apply to the basemap. Defaults to an autoexpanding mercator projection.
 
-    region = (
-        srf_data.points["lon"].min() - longitude_pad,
-        srf_data.points["lon"].max() + longitude_pad,
-        srf_data.points["lat"].min() - latitude_pad,
-        srf_data.points["lat"].max() + latitude_pad,
+    Examples
+    --------
+    >>> import pygmt
+    >>> fig = pygmt.Figure()
+    >>> highlight_region = (172.5, 174.0, -44.0, -43.0)
+    >>> show_map(fig, highlight_region, projection="M6i")
+    >>> fig.show()  # Displays the plot with the highlighted region
+    """
+    fig.basemap(region=NZ_REGION, projection=projection, frame=["f"])
+    fig.coast(shorelines=True, resolution="i", water="lightblue", land="lightgray")
+    rectangle = [
+        [
+            highlight_region[0],
+            highlight_region[2],
+            highlight_region[1],
+            highlight_region[3],
+        ]
+    ]
+    fig.plot(data=rectangle, style="r+s", pen="1p,red")
+
+
+def show_slip(
+    fig: pygmt.Figure,
+    region: tuple[float, float, float, float],
+    srf_data: srf.SrfFile,
+    annotations: bool,
+    projection: str = "M?",
+    realisation_ffp: Optional[Path] = None,
+    title: Optional[str] = None,
+):
+    """Show a slip map with optional contours.
+
+    Parameters
+    ----------
+    fig : pygmt.Figure
+        The figure to plot onto.
+    region : tuple[float, float, float, float]
+        The region to plot the slip map in.
+    srf_data : srf.SrfFile
+        The SRF file.
+    annotations : bool
+        If True, display annotations of slip times.
+    projection : str
+        The projection to apply. Defaults to autoexpanding mercator projection.
+    realisation_ffp : Optional[Path]
+        The realisation to use for jump points, if any.
+    title : Optional[str]
+        The title of the slip plot.
+
+    Examples
+    --------
+    >>> import pygmt
+    >>> from source_modelling import srf
+    >>> srf_data = srf.read_srf("tests/srfs/rupture_1.srf")
+    >>> fig = pygmt.Figure()
+    >>> region = (172.0, 175.0, -45.0, -43.0)
+    >>> show_slip(fig, region, srf_data, annotations=True, projection="M6i", title="Slip Distribution")
+    >>> fig.show()  # Displays the slip map with optional annotations
+    """
+    subtitle = utils.format_description(
+        srf_data.points["slip"], units="cm", compact=True
+    )
+    title_args = [f"+t{title}+s{subtitle}".replace(" ", r"\040")] if title else []
+    # Compute slip limits
+    fig.basemap(
+        region=region,
+        projection=projection,
+        frame=plotting.DEFAULT_PLT_KWARGS["frame_args"] + title_args,
+    )
+    fig.coast(
+        shorelines=["1/0.1p,black", "2/0.1p,black"],
+        resolution="f",
+        land="#666666",
+        water="skyblue",
     )
 
-    # Compute slip limits
     slip_quantile = srf_data.points["slip"].quantile(0.98)
     slip_cb_max = max(int(np.round(slip_quantile, -1)), 10)
     cmap_limits = (0, slip_cb_max, slip_cb_max / 10)
-
-    fig = plotting.gen_region_fig(
-        title, projection=f"M{width}c", region=region, map_data=None
+    slip_stats = utils.format_description(
+        srf_data.points["slip"], compact=True, units="cm"
     )
-
+    dx = srf_data.header.iloc[0]["len"] / srf_data.header.iloc[0]["nstk"]
+    subtitle = f"Slip: {slip_stats}, dx = {dx:.2f} km, {len(srf_data.header)} planes"
     for (_, segment), segment_points in zip(
         srf_data.header.iterrows(), srf_data.segments
     ):
@@ -99,7 +148,7 @@ def plot_srf(
             transparency=0,
             reverse_cmap=True,
             plot_contours=False,
-            cb_label="slip",
+            cb_label="Slip (cm)",
             continuous_cmap=True,
         )
 
@@ -228,6 +277,92 @@ def plot_srf(
                 pen="1p,black",
                 fill="white",
             )
+
+
+@cli.from_docstring(app)
+def plot_srf(
+    srf_ffp: Annotated[Path, typer.Argument(exists=True, dir_okay=False)],
+    output_ffp: Annotated[Path, typer.Argument(dir_okay=False)],
+    dpi: Annotated[float, typer.Option()] = 300,
+    title: Annotated[Optional[str], typer.Option()] = None,
+    realisation_ffp: Annotated[Optional[Path], typer.Option(exists=True)] = None,
+    latitude_pad: Annotated[float, typer.Option()] = 0,
+    longitude_pad: Annotated[float, typer.Option()] = 0,
+    annotations: Annotated[bool, typer.Option()] = True,
+    width: Annotated[float, typer.Option(min=0)] = 17,
+    show_inset: bool = False,
+) -> None:
+    """Plot multi-segment rupture with slip.
+
+    Parameters
+    ----------
+    srf_ffp : Path
+        Path to SRF file to plot.
+    output_ffp : Path
+        Output plot image.
+    dpi : float
+        Plot output DPI (higher is better).
+    title : Optional[str]
+        Plot title to use.
+    realisation_ffp : Optional[Path]
+        Path to realisation, used to mark jump points.
+    latitude_pad : float
+        Latitude padding to apply (degrees).
+    longitude_pad : float
+        Longitude padding to apply (degrees).
+    annotations : bool
+        Label contours.
+    width : float
+        Width of plot (in cm).
+    show_inset : bool
+        If True, show an inset overview map.
+
+    Examples
+    --------
+    >>> plot_srf(
+    ...     srf_ffp="tests/srfs/rupture_1.srf",
+    ...     output_ffp="slip_plot.png",
+    ...     dpi=300,
+    ...     title="Rupture Slip Distribution",
+    ...     realisation_ffp="tests/srfs/realisation.json",
+    ...     latitude_pad=0.5,
+    ...     longitude_pad=0.5,
+    ...     annotations=True,
+    ...     width=15,
+    ...     show_inset=True,
+    ... )
+    >>> # The above code would plot the slip distribution of the SRF file 'rupture_1.srf'
+    >>> # and save it as 'slip_plot.png'.
+    >>> # The plot will have a DPI of 300.
+    >>> # The plot will have the title "Rupture Slip Distribution".
+    >>> # The plot will have jump points marked from the realisation file 'realisation.json'.
+    >>> # The plot will have a latitude and longitude padding of 0.5 degrees.
+    >>> # The plot will have annotations of slip times and an inset map.
+    """
+    srf_data = srf.read_srf(srf_ffp)
+    region = (
+        srf_data.points["lon"].min() - longitude_pad,
+        srf_data.points["lon"].max() + longitude_pad,
+        srf_data.points["lat"].min() - latitude_pad,
+        srf_data.points["lat"].max() + latitude_pad,
+    )
+
+    fig = pygmt.Figure()
+
+    pygmt.config(FONT_SUBTITLE="9p,Helvetica,black", FORMAT_GEO_MAP="ddd.xx")
+
+    show_slip(
+        fig,
+        region,
+        srf_data,
+        annotations,
+        projection=f"M{width}c",
+        realisation_ffp=realisation_ffp,
+        title=title,
+    )
+    if show_inset:
+        with fig.inset(position=f"jTR+w{np.sqrt(width)}c", margin=0.2):
+            show_map(fig, region)
 
     fig.savefig(
         output_ffp,
