@@ -318,7 +318,7 @@ def tslice_get(xyts_file: XYTSFile, index: int, downsample: int = 1) -> np.ndarr
         frame_data = xyts_file.data[index]  # shape: (3, ny, nx)
     accum = np.zeros(frame_data.shape[1:], dtype=np.float32)
     for i in range(3):
-        np.add(accum, xyts_file.data[index, i] ** 2, out=accum)
+        np.add(accum, frame_data[i] ** 2, out=accum)
     np.sqrt(accum, out=accum)
     return accum
 
