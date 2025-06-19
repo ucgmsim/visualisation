@@ -529,7 +529,7 @@ def animate_low_frequency_mpl_nztm(
 
         # Get current data and create new pcolormesh
         current_data = tslice_get(xyts_file, frame_index, downsample)
-        pcm = ax.pcolormesh(
+        new_pcm = ax.pcolormesh(
             xr,
             yr,
             current_data,
