@@ -311,8 +311,11 @@ def waveform_coordinates(nztm_corners: np.ndarray, nx: int, ny: int) -> np.ndarr
     )
     return coords_nztm[::-1, :, :]  # Reverse order to (x, y) for NZTM
 
-def tslice_get(xyts_file: XYTSFile, index: int) -> np.ndarray:
-    frame_data = xyts_file.data[index]  # shape: (3, ny, nx)
+def tslice_get(xyts_file: XYTSFile, index: int, downsample: int = 1) -> np.ndarray:
+    if downsample > 1:
+        frame_data = xyts_file.data[index, :, ::downsample, ::downsample]
+    else:
+        frame_data = xyts_file.data[index]  # shape: (3, ny, nx)
     accum = np.zeros(frame_data.shape[1:], dtype=np.float32)
     for i in range(3):
         np.add(accum, xyts_file.data[index, i] ** 2, out=accum)
@@ -340,6 +343,7 @@ def animate_low_frequency_mpl_nztm(
     zoom: Annotated[float, typer.Option()] = 1,
     simple_map: Annotated[bool, typer.Option()] = False,
     map_quality: Annotated[int, typer.Option()] = 4,
+    downsample: Annotated[int, typer.Option(min=1)] = 1,
 ) -> None:
     """Render low-frequency output as a 2D video of ground motions.
 
@@ -381,6 +385,9 @@ def animate_low_frequency_mpl_nztm(
     map_quality : int, optional
         The quality of the map, by default 4. Has no effect if using a
         simple map. Lower values have lower quality but render faster.
+    downsample : int, optional
+        The factor by which to downsample the spatial grid, by default 1 (no downsampling).
+        Higher values increase performance at the cost of resolution.
     """
     ffmpeg = shutil.which("ffmpeg")
     if not ffmpeg:
@@ -409,6 +416,11 @@ def animate_low_frequency_mpl_nztm(
 
     frame_count = frame_count or xyts_file.nt
     xr, yr = waveform_coordinates(nztm_corners, xyts_file.nx, xyts_file.ny)
+
+    # Downsample coordinate arrays if requested
+    if downsample > 1:
+        xr = xr[::downsample, ::downsample]
+        yr = yr[::downsample, ::downsample]
 
     # Create a new figure for this frame
     cm = 1 / 2.54
@@ -453,11 +465,12 @@ def animate_low_frequency_mpl_nztm(
         crs=NZTM_CRS,
     )
 
-    # Initial pcolormesh
+    # Initial pcolormesh with correctly shaped (potentially downsampled) data
+    initial_data = np.zeros((xr.shape[0], xr.shape[1]))
     pcm = ax.pcolormesh(
         xr,
         yr,
-        np.zeros((xyts_file.ny, xyts_file.nx)),
+        initial_data,
         cmap=cmap,
         vmin=0,
         vmax=max_motion,
@@ -490,7 +503,7 @@ def animate_low_frequency_mpl_nztm(
     cbar.set_label("Ground Motion (cm/s)")
 
     def update(frame_index):
-        current_data = tslice_get(xyts_file, frame_index)
+        current_data = tslice_get(xyts_file, frame_index, downsample)
         pcm.set_array(current_data.ravel())
         current_time = frame_index * xyts_file.dt
         time_text.set_text(f"Time: {current_time:.2f} s")
@@ -552,6 +565,7 @@ def animate_srf_slip_times(
     simple_map: Annotated[bool, typer.Option()] = False,
     map_quality: Annotated[int, typer.Option()] = 4,
     frame_dt: Annotated[int, typer.Option(min=0)] = 20,
+    downsample: Annotated[int, typer.Option(min=1)] = 1,
 ) -> None:
     """Render SRF slip times as a 2D video.
 
@@ -593,6 +607,9 @@ def animate_srf_slip_times(
         simple map. Lower values have lower quality but render faster.
     frame_dt : int, optional
         The number of timeslices per dt-step, default is 20.
+    downsample : int, optional
+        The factor by which to downsample the spatial points, by default 1 (no downsampling).
+        Higher values increase performance at the cost of resolution.
     """
     ffmpeg = shutil.which("ffmpeg")
     if not ffmpeg:
@@ -610,6 +627,17 @@ def animate_srf_slip_times(
 
     nztm_corners = coordinates.wgs_depth_to_nztm(domain_config.domain.corners)[:, ::-1]
     slip = srf_file.slipt1_array.tocsc()
+    coords = coordinates.wgs_depth_to_nztm(srf_file.points[["lat", "lon"]].values)[
+        :, ::-1
+    ]
+
+    # Downsample coordinate and slip arrays if requested
+    if downsample > 1:
+        num_points = slip.shape[0]
+        indices_to_keep = np.arange(0, num_points, downsample)
+        coords = coords[indices_to_keep]
+        slip = slip[indices_to_keep, :]
+
     map_extent_nztm = map_extents(nztm_corners, padding)
 
     if zoom != 1:
@@ -688,9 +716,7 @@ def animate_srf_slip_times(
 
     if title:
         fig.suptitle(title, fontsize=16)
-    coords = coordinates.wgs_depth_to_nztm(srf_file.points[["lat", "lon"]].values)[
-        :, ::-1
-    ]
+
     x, y = coords[:, 0], coords[:, 1]
     init_x, init_y, init_z = non_zero_data_points(x, y, slip[:, 0].todense())
     scat = ax.scatter(

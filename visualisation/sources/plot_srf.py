@@ -2,7 +2,7 @@
 """Plot multi-segment rupture with slip."""
 
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated, Optional, NamedTuple
 
 import numpy as np
 import pygmt
@@ -56,6 +56,56 @@ def show_map(
     fig.plot(data=rectangle, style="r+s", pen="1p,red")
 
 
+class PlotRegion(NamedTuple):  # Renamed to avoid conflict with other 'Region' types
+    min_lon: float
+    max_lon: float
+    min_lat: float
+    max_lat: float
+
+
+def plot_base_map(
+    title: str, region: PlotRegion, fig: pygmt.Figure | None = None
+) -> pygmt.Figure:
+    # Convert PlotRegion to tuple if it's not "NZ"
+
+    grid = pygmt.datasets.load_earth_relief(resolution="03s", region=region)
+    grid = pygmt.grdclip(grid, below=[0.1, np.nan])
+
+    pygmt.makecpt(cmap="gray", series=[-900, 3100, 1], continuous=True, reverse=True)
+    fig = fig or pygmt.Figure()
+    fig.basemap(
+        region=region,
+        projection="M17c",
+        frame=[
+            "af",
+            "xaf+lLongitude",
+            "yaf+lLatitude",
+            f"+t{title}".replace(" ", r"\040"),
+        ],
+    )
+    fig.grdimage(
+        grid=grid,
+        projection="M17c",
+        region=region,
+        cmap=True,
+        shading=True,
+        nan_transparent=True,
+    )
+    fig.basemap(
+        region=region,
+        projection="M17c",
+        frame=[
+            "af",
+            "xaf+lLongitude",
+            "yaf+lLatitude",
+            f"+t{title}".replace(" ", r"\040"),
+        ],
+    )
+    nz_map_data = plotting.NZMapData.load()
+    fig.plot(data=nz_map_data.water_df, fill="white")
+    return fig
+
+
 def show_slip(
     fig: pygmt.Figure,
     region: tuple[float, float, float, float],
@@ -94,22 +144,17 @@ def show_slip(
     >>> show_slip(fig, region, srf_data, annotations=True, projection="M6i", title="Slip Distribution")
     >>> fig.show()  # Displays the slip map with optional annotations
     """
-    subtitle = utils.format_description(
-        srf_data.points["slip"], units="cm", compact=True
-    )
-    title_args = [f"+t{title}+s{subtitle}".replace(" ", r"\040")] if title else []
+    # subtitle = utils.format_description(
+    #     srf_data.points["slip"], units="cm", compact=True
+    # )
     # Compute slip limits
-    fig.basemap(
-        region=region,
-        projection=projection,
-        frame=plotting.DEFAULT_PLT_KWARGS["frame_args"] + title_args,
-    )
-    fig.coast(
-        shorelines=["1/0.1p,black", "2/0.1p,black"],
-        resolution="f",
-        land="#666666",
-        water="skyblue",
-    )
+    plot_base_map(title, PlotRegion(*region), fig)
+    # fig.coast(
+    #     shorelines=["1/0.1p,black", "2/0.1p,black"],
+    #     resolution="f",
+    #     land="#666666",
+    #     water="skyblue",
+    # )
 
     slip_quantile = srf_data.points["slip"].quantile(0.98)
     slip_cb_max = max(int(np.round(slip_quantile, -1)), 10)
@@ -118,7 +163,7 @@ def show_slip(
         srf_data.points["slip"], compact=True, units="cm"
     )
     dx = srf_data.header.iloc[0]["len"] / srf_data.header.iloc[0]["nstk"]
-    subtitle = f"Slip: {slip_stats}, dx = {dx:.2f} km, {len(srf_data.header)} planes"
+    # subtitle = f"Slip: {slip_stats}, dx = {dx:.2f} km, {len(srf_data.header)} planes"
     for (_, segment), segment_points in zip(
         srf_data.header.iterrows(), srf_data.segments
     ):
@@ -129,7 +174,7 @@ def show_slip(
         cur_grid = plotting.create_grid(
             segment_points,
             "slip",
-            grid_spacing="5e/5e",
+            grid_spacing="50e/50e",
             region=(
                 segment_points["lon"].min(),
                 segment_points["lon"].max(),
@@ -156,7 +201,7 @@ def show_slip(
         time_grid = plotting.create_grid(
             segment_points,
             "tinit",
-            grid_spacing="5e/5e",
+            grid_spacing="50e/50e",
             region=(
                 segment_points["lon"].min(),
                 segment_points["lon"].max(),
@@ -165,7 +210,7 @@ def show_slip(
             ),
             set_water_to_nan=False,
         )
-        fig.grdcontour(levels=1, grid=time_grid, pen="0.1p")
+        fig.grdcontour(levels=10, grid=time_grid, pen="0.1p")
 
         # Plot bounds of the current segment.
         corners = segment_points.iloc[[0, nstk - 1, -1, (ndip - 1) * nstk]]
@@ -217,7 +262,7 @@ def show_slip(
         y=hypocentre["lat"],
         style="a0.4c",
         pen="1p,black",
-        fill="white",
+        fill="yellow",
     )
 
     # If we are supplied a JSON realisation, we can add labels for jump points.
