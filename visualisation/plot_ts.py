@@ -315,7 +315,7 @@ def waveform_coordinates(nztm_corners: np.ndarray, nx: int, ny: int) -> np.ndarr
 def render_single_frame(
     frame_index: int,
     dt: float,
-    ground_motion_magnitude: np.ndarray,
+    xyts_file: XYTSFile,
     max_motion: float,
     cmap: str,
     source_config: SourceConfig,
@@ -422,6 +422,7 @@ def render_single_frame(
     )
 
     # Add the actual data for this frame
+    ground_motion_magnitude = xyts_file.get_tslice(frame_index)
     current_data = ground_motion_magnitude[frame_index, :, :]
     pcm = ax.pcolormesh(
         xr,
@@ -540,7 +541,6 @@ def animate_low_frequency_mpl_nztm(
     source_config = SourceConfig.read_from_realisation(realisation_ffp)
     xyts_file = XYTSFile(xyts_ffp)
 
-    ground_motion_magnitude = np.linalg.norm(xyts_file.data, axis=1)
 
     nztm_corners = xyts_nztm_corners(xyts_file)
     map_extent_nztm = map_extents(nztm_corners, padding)
@@ -564,7 +564,7 @@ def animate_low_frequency_mpl_nztm(
         render_frame = functools.partial(
             render_single_frame,
             dt=xyts_file.dt,
-            ground_motion_magnitude=ground_motion_magnitude,
+            xyts_file=xyts_file,
             max_motion=max_motion,
             cmap=cmap,
             source_config=source_config,
