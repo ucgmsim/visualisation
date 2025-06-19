@@ -422,8 +422,7 @@ def render_single_frame(
     )
 
     # Add the actual data for this frame
-    ground_motion_magnitude = xyts_file.tslice_get(frame_index)
-    current_data = ground_motion_magnitude[frame_index, :, :]
+    current_data = xyts_file.tslice_get(frame_index)
     pcm = ax.pcolormesh(
         xr,
         yr,
