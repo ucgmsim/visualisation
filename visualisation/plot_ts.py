@@ -473,10 +473,36 @@ def animate_low_frequency_mpl_nztm(
         fig.suptitle(title, fontsize=16)
 
     plt.tight_layout(rect=[0.05, 0.05, 0.95, 0.95])
+    # Add time text
+    time_text = ax.text(
+        0.98,
+        0.02,
+        f"Time: {0.0:.2f} s",
+        transform=ax.transAxes,
+        fontsize=12,
+        color="black",
+        fontweight="bold",
+        ha="right",
+        va="bottom",
+        bbox={"boxstyle": "round", "facecolor": "white", "alpha": 0.8},
+    )
+
+    if title:
+        fig.suptitle(title, fontsize=16)
+
+    plt.tight_layout(rect=[0.05, 0.05, 0.95, 0.95])
+    cbar = fig.colorbar(
+        pcm, ax=ax, orientation="vertical", pad=0.02, aspect=30, shrink=0.8
+    )
+    cbar.set_label("Ground Motion (cm/s)")
 
     def update(frame_index):
+        # Remove the old pcolormesh
+        pcm.remove()
+
+        # Get current data and create new pcolormesh
         current_data = tslice_get(xyts_file, frame_index, downsample)
-        pcm = ax.pcolormesh(
+        new_pcm = ax.pcolormesh(
             xr,
             yr,
             current_data,
@@ -487,24 +513,13 @@ def animate_low_frequency_mpl_nztm(
             zorder=3,
             rasterized=True,
         )
-        current_time = frame_index * xyts_file.dt
-        time_text = ax.text(
-            0.98,
-            0.02,
-            f"Time: {current_time:.2f} s",
-            transform=ax.transAxes,
-            fontsize=12,
-            color="black",
-            fontweight="bold",
-            ha="right",
-            va="bottom",
-            bbox={"boxstyle": "round", "facecolor": "white", "alpha": 0.8},
-        )
-        cbar = fig.colorbar(
-            pcm, ax=ax, orientation="vertical", pad=0.02, aspect=30, shrink=0.8
-        )
-        cbar.set_label("Ground Motion (cm/s)")
 
+        # Update the global pcm reference for next iteration
+        nonlocal pcm
+        pcm = new_pcm
+
+        current_time = frame_index * xyts_file.dt
+        time_text.set_text(f"Time: {current_time:.2f} s")
 
     anim = FuncAnimation(
         fig,
