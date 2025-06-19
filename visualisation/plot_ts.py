@@ -510,19 +510,17 @@ def animate_low_frequency_mpl_nztm(
         pcm.set_array(current_data.ravel())
         current_time = frame_index * xyts_file.dt
         time_text.set_text(f"Time: {current_time:.2f} s")
-        return [pcm, time_text]
 
     anim = FuncAnimation(
         fig,
         update,
         frames=tqdm.tqdm(range(frame_start, frame_start + frame_count), desc="Rendering frames", unit="frame"),
-        blit=True,
+        blit=False,
     )
 
     writer = FFMpegWriter(fps=fps)
     anim.save(output_mp4, writer=writer, dpi=dpi)
     plt.close(fig)
-
 
 def non_zero_data_points(
     x: np.ndarray, y: np.ndarray, z: np.ndarray
