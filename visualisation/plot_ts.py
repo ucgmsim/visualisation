@@ -312,10 +312,12 @@ def waveform_coordinates(nztm_corners: np.ndarray, nx: int, ny: int) -> np.ndarr
     return coords_nztm[::-1, :, :]  # Reverse order to (x, y) for NZTM
 
 def tslice_get(xyts_file: XYTSFile, index: int) -> np.ndarray:
-    y = xyts_file.data[index, 0, :, :] * xyts_file.cosR - xyts_file.data[index, 1, :, :] * xyts_file.sinR
-    x = xyts_file.data[index, 0, :, :] * xyts_file.sinR + xyts_file.data[index, 1, :, :] * xyts_file.cosR
-    z = xyts_file.data[index, 2, :, :] * -1
-    return np.sqrt(np.square(x) + np.square(y) + np.square(z))
+    frame_data = xyts_file.data[index]  # shape: (3, ny, nx)
+    accum = np.zeros(frame_data.shape[1:], dtype=np.float32)
+    for i in range(3):
+        np.add(accum, xyts_file.data[t, i] ** 2, out=accum)
+    np.sqrt(accum, out=accum)
+    return accum
 
 
 def render_single_frame(
