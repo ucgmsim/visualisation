@@ -523,6 +523,8 @@ def animate_low_frequency_mpl_nztm(
 
     def update(frame_index):
         # Remove the old pcolormesh
+        nonlocal pcm
+
         pcm.remove()
 
         # Get current data and create new pcolormesh
@@ -540,7 +542,6 @@ def animate_low_frequency_mpl_nztm(
         )
 
         # Update the global pcm reference for next iteration
-        nonlocal pcm
         pcm = new_pcm
 
         current_time = frame_index * xyts_file.dt
