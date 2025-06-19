@@ -489,7 +489,7 @@ def animate_low_frequency_mpl_nztm(
 
     if title:
         fig.suptitle(title, fontsize=16)
-    initial_data = np.zeros((xr.shape[0], xr.shape[1]))
+    initial_data = tslice_get(xyts_file, frame_start, downsample)  # Use real data
     pcm = ax.pcolormesh(
         xr,
         yr,
@@ -500,11 +500,14 @@ def animate_low_frequency_mpl_nztm(
         shading=shading,
         zorder=3,
         rasterized=True,
+        transform=NZTM_CRS,  # Ensure CRS is specified
     )
+
+    # Create time text only once
     time_text = ax.text(
         0.98,
         0.02,
-        f"Time: {0.0:.2f} s",
+        f"Time: {frame_start * xyts_file.dt:.2f} s",
         transform=ax.transAxes,
         fontsize=12,
         color="black",
@@ -514,10 +517,7 @@ def animate_low_frequency_mpl_nztm(
         bbox={"boxstyle": "round", "facecolor": "white", "alpha": 0.8},
     )
 
-
-    cbar = fig.colorbar(
-        pcm, ax=ax, orientation="vertical", pad=0.02, aspect=30, shrink=0.8
-    )
+    cbar = fig.colorbar(pcm, ax=ax, orientation="vertical", pad=0.02, aspect=30, shrink=0.8)
     cbar.set_label("Ground Motion (cm/s)")
     plt.tight_layout(rect=[0.05, 0.05, 0.95, 0.95])
 
@@ -529,7 +529,7 @@ def animate_low_frequency_mpl_nztm(
 
         # Get current data and create new pcolormesh
         current_data = tslice_get(xyts_file, frame_index, downsample)
-        new_pcm = ax.pcolormesh(
+        pcm = ax.pcolormesh(
             xr,
             yr,
             current_data,
@@ -539,6 +539,7 @@ def animate_low_frequency_mpl_nztm(
             shading=shading,
             zorder=3,
             rasterized=True,
+            transform=NZTM_CRS,  # Ensure CRS is specified
         )
 
         # Update the global pcm reference for next iteration
