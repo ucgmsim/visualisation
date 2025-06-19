@@ -468,48 +468,43 @@ def animate_low_frequency_mpl_nztm(
         crs=NZTM_CRS,
     )
 
-    # Initial pcolormesh with correctly shaped (potentially downsampled) data
-    initial_data = np.zeros((xr.shape[0], xr.shape[1]))
-    pcm = ax.pcolormesh(
-        xr,
-        yr,
-        initial_data,
-        cmap=cmap,
-        vmin=0,
-        vmax=max_motion,
-        shading=shading,
-        zorder=3,
-        rasterized=True,
-    )
-
-    # Add time text
-    time_text = ax.text(
-        0.98,
-        0.02,
-        f"Time: {0.0:.2f} s",
-        transform=ax.transAxes,
-        fontsize=12,
-        color="black",
-        fontweight="bold",
-        ha="right",
-        va="bottom",
-        bbox={"boxstyle": "round", "facecolor": "white", "alpha": 0.8},
-    )
 
     if title:
         fig.suptitle(title, fontsize=16)
 
     plt.tight_layout(rect=[0.05, 0.05, 0.95, 0.95])
-    cbar = fig.colorbar(
-        pcm, ax=ax, orientation="vertical", pad=0.02, aspect=30, shrink=0.8
-    )
-    cbar.set_label("Ground Motion (cm/s)")
 
     def update(frame_index):
         current_data = tslice_get(xyts_file, frame_index, downsample)
-        pcm.set_array(current_data.ravel())
+        pcm = ax.pcolormesh(
+            xr,
+            yr,
+            current_data,
+            cmap=cmap,
+            vmin=0,
+            vmax=max_motion,
+            shading=shading,
+            zorder=3,
+            rasterized=True,
+        )
         current_time = frame_index * xyts_file.dt
-        time_text.set_text(f"Time: {current_time:.2f} s")
+        time_text = ax.text(
+            0.98,
+            0.02,
+            f"Time: {current_time:.2f} s",
+            transform=ax.transAxes,
+            fontsize=12,
+            color="black",
+            fontweight="bold",
+            ha="right",
+            va="bottom",
+            bbox={"boxstyle": "round", "facecolor": "white", "alpha": 0.8},
+        )
+        cbar = fig.colorbar(
+            pcm, ax=ax, orientation="vertical", pad=0.02, aspect=30, shrink=0.8
+        )
+        cbar.set_label("Ground Motion (cm/s)")
+
 
     anim = FuncAnimation(
         fig,
