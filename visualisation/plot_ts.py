@@ -334,7 +334,7 @@ def animate_low_frequency_mpl_nztm(
     cmap: Annotated[str, typer.Option()] = "hot",
     scale: Annotated[str, typer.Option()] = "10m",
     shading: Annotated[str, typer.Option()] = "gouraud",
-    frame_start: Annotate[int | None, typer.Option()] = 0,
+    frame_start: Annotated[int | None, typer.Option()] = 0,
     frame_count: Annotated[int | None, typer.Option()] = None,
     width: Annotated[float, typer.Option()] = 30.0,
     height: Annotated[float, typer.Option()] = 30.0,
