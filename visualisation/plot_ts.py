@@ -334,6 +334,7 @@ def animate_low_frequency_mpl_nztm(
     cmap: Annotated[str, typer.Option()] = "hot",
     scale: Annotated[str, typer.Option()] = "10m",
     shading: Annotated[str, typer.Option()] = "gouraud",
+    frame_start: Annotate[int | None, typer.Option()] = 0,
     frame_count: Annotated[int | None, typer.Option()] = None,
     width: Annotated[float, typer.Option()] = 30.0,
     height: Annotated[float, typer.Option()] = 30.0,
@@ -365,6 +366,8 @@ def animate_low_frequency_mpl_nztm(
         The scale for cartopy features, by default "10m".
     shading : str, optional
         The shading method for `plt.pcolormesh`, by default "gouraud".
+    frame_start : int, optional
+        Set the start frame for the animation.
     frame_count : int | None, optional
         The number of frames to display in the animation, by default None (uses all frames).
     width : float, optional
@@ -512,7 +515,7 @@ def animate_low_frequency_mpl_nztm(
     anim = FuncAnimation(
         fig,
         update,
-        frames=tqdm.tqdm(range(frame_count), desc="Rendering frames", unit="frame"),
+        frames=tqdm.tqdm(range(frame_start, frame_start + frame_count), desc="Rendering frames", unit="frame"),
         blit=True,
     )
 
