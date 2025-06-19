@@ -489,12 +489,37 @@ def animate_low_frequency_mpl_nztm(
 
     if title:
         fig.suptitle(title, fontsize=16)
+    initial_data = np.zeros((xr.shape[0], xr.shape[1]))
+    pcm = ax.pcolormesh(
+        xr,
+        yr,
+        initial_data,
+        cmap=cmap,
+        vmin=0,
+        vmax=max_motion,
+        shading=shading,
+        zorder=3,
+        rasterized=True,
+    )
+    time_text = ax.text(
+        0.98,
+        0.02,
+        f"Time: {0.0:.2f} s",
+        transform=ax.transAxes,
+        fontsize=12,
+        color="black",
+        fontweight="bold",
+        ha="right",
+        va="bottom",
+        bbox={"boxstyle": "round", "facecolor": "white", "alpha": 0.8},
+    )
 
-    plt.tight_layout(rect=[0.05, 0.05, 0.95, 0.95])
+
     cbar = fig.colorbar(
         pcm, ax=ax, orientation="vertical", pad=0.02, aspect=30, shrink=0.8
     )
     cbar.set_label("Ground Motion (cm/s)")
+    plt.tight_layout(rect=[0.05, 0.05, 0.95, 0.95])
 
     def update(frame_index):
         # Remove the old pcolormesh
