@@ -1,2114 +1,2112 @@
 {
-    "metadata": {
-        "name": "Rupture 41955",
-        "version": "1",
-        "defaults_version": "24.2.2.2",
-        "tag": "nshm"
-    },
-    "srf": {
-        "genslip_dt": 0.05,
-        "genslip_version": "5.4.2",
-        "resolution": 0.2
-    },
-    "seeds": {
-        "nshm_to_realisation_seed": 581481681,
-        "rupture_propagation_seed": 445552289,
-        "genslip_seed": 1276544259,
-        "srfgen_seed": 78866208,
-        "hf_seed": 1667890206
-    },
-    "sources": {
-        "source_geometries": {
-            "Alpine: Caswell": {
-                "type": "fault",
-                "corners": [
-                    {
-                        "latitude": -45.03929999999999,
-                        "longitude": 166.9821,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -45.033799999999985,
-                        "longitude": 167.017,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -45.05558678713925,
-                        "longitude": 167.0527701185883,
-                        "depth": 21120.0
-                    },
-                    {
-                        "latitude": -45.06109725496857,
-                        "longitude": 167.01785888676508,
-                        "depth": 21120.0
-                    },
-                    {
-                        "latitude": -45.033799999999985,
-                        "longitude": 167.017,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -45.0193,
-                        "longitude": 167.0462,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -45.04108888856127,
-                        "longitude": 167.08196016709607,
-                        "depth": 21120.0
-                    },
-                    {
-                        "latitude": -45.055597949175315,
-                        "longitude": 167.0527565884981,
-                        "depth": 21120.0
-                    },
-                    {
-                        "latitude": -45.0193,
-                        "longitude": 167.0462,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -45.00787399999999,
-                        "longitude": 167.061757,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -45.0296675937717,
-                        "longitude": 167.0975052139356,
-                        "depth": 21120.0
-                    },
-                    {
-                        "latitude": -45.04109853206335,
-                        "longitude": 167.08194847999198,
-                        "depth": 21120.0
-                    },
-                    {
-                        "latitude": -45.00787399999999,
-                        "longitude": 167.061757,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.991599999999984,
-                        "longitude": 167.08390000000003,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -45.0133918164058,
-                        "longitude": 167.11964146514907,
-                        "depth": 21120.0
-                    },
-                    {
-                        "latitude": -45.029672843589445,
-                        "longitude": 167.0974988517732,
-                        "depth": 21120.0
-                    },
-                    {
-                        "latitude": -44.991599999999984,
-                        "longitude": 167.08390000000003,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.9678,
-                        "longitude": 167.1094,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.98959104434532,
-                        "longitude": 167.1451290061536,
-                        "depth": 21120.0
-                    },
-                    {
-                        "latitude": -45.013399286053215,
-                        "longitude": 167.11963241621956,
-                        "depth": 21120.0
-                    },
-                    {
-                        "latitude": -44.9678,
-                        "longitude": 167.1094,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.95727000000001,
-                        "longitude": 167.122232,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.97906569534958,
-                        "longitude": 167.15794954101088,
-                        "depth": 21120.0
-                    },
-                    {
-                        "latitude": -44.98959979695033,
-                        "longitude": 167.14511840801444,
-                        "depth": 21120.0
-                    },
-                    {
-                        "latitude": -44.95727000000001,
-                        "longitude": 167.122232,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.907,
-                        "longitude": 167.1834,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.928780507522276,
-                        "longitude": 167.21910807239797,
-                        "depth": 21120.0
-                    },
-                    {
-                        "latitude": -44.97907005274854,
-                        "longitude": 167.1579442648862,
-                        "depth": 21120.0
-                    }
-                ]
-            },
-            "Alpine: Caswell - South George": {
-                "type": "fault",
-                "corners": [
-                    {
-                        "latitude": -44.907,
-                        "longitude": 167.1834,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.9013,
-                        "longitude": 167.196,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.917701775139456,
-                        "longitude": 167.22523972425634,
-                        "depth": 16720.0
-                    },
-                    {
-                        "latitude": -44.92340497442194,
-                        "longitude": 167.2126385362857,
-                        "depth": 16720.0
-                    },
-                    {
-                        "latitude": -44.9013,
-                        "longitude": 167.196,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.8894,
-                        "longitude": 167.2131,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.90580071656492,
-                        "longitude": 167.24233557347455,
-                        "depth": 16720.0
-                    },
-                    {
-                        "latitude": -44.9177051594629,
-                        "longitude": 167.2252359650082,
-                        "depth": 16720.0
-                    },
-                    {
-                        "latitude": -44.8894,
-                        "longitude": 167.2131,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.858750999999984,
-                        "longitude": 167.245946,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.87514769172596,
-                        "longitude": 167.27517186245464,
-                        "depth": 16720.0
-                    },
-                    {
-                        "latitude": -44.90580541159094,
-                        "longitude": 167.2423303597519,
-                        "depth": 16720.0
-                    },
-                    {
-                        "latitude": -44.858750999999984,
-                        "longitude": 167.245946,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.841999999999985,
-                        "longitude": 167.2622,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.85840154713503,
-                        "longitude": 167.29141266563943,
-                        "depth": 16720.0
-                    },
-                    {
-                        "latitude": -44.87515689738365,
-                        "longitude": 167.27516164756864,
-                        "depth": 16720.0
-                    },
-                    {
-                        "latitude": -44.841999999999985,
-                        "longitude": 167.2622,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.80893600000002,
-                        "longitude": 167.306731,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.82533053458444,
-                        "longitude": 167.33593655291367,
-                        "depth": 16720.0
-                    },
-                    {
-                        "latitude": -44.85840613777684,
-                        "longitude": 167.2914075720566,
-                        "depth": 16720.0
-                    },
-                    {
-                        "latitude": -44.80893600000002,
-                        "longitude": 167.306731,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.80449999999999,
-                        "longitude": 167.3127,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.82090523481168,
-                        "longitude": 167.34189169719193,
-                        "depth": 16720.0
-                    },
-                    {
-                        "latitude": -44.825342789129564,
-                        "longitude": 167.33592296883705,
-                        "depth": 16720.0
-                    },
-                    {
-                        "latitude": -44.80449999999999,
-                        "longitude": 167.3127,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.7837,
-                        "longitude": 167.3421,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.80009924683678,
-                        "longitude": 167.3712890378392,
-                        "depth": 16720.0
-                    },
-                    {
-                        "latitude": -44.82090687617494,
-                        "longitude": 167.3418898769383,
-                        "depth": 16720.0
-                    },
-                    {
-                        "latitude": -44.7837,
-                        "longitude": 167.3421,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.76439999999998,
-                        "longitude": 167.3753,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.780798791509504,
-                        "longitude": 167.4044811624456,
-                        "depth": 16720.0
-                    },
-                    {
-                        "latitude": -44.80010730354788,
-                        "longitude": 167.37128010913295,
-                        "depth": 16720.0
-                    }
-                ]
-            },
-            "Alpine: George landward": {
-                "type": "fault",
-                "corners": [
-                    {
-                        "latitude": -44.76449999999998,
-                        "longitude": 167.375,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.76659999999998,
-                        "longitude": 167.397,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.788678685982504,
-                        "longitude": 167.42396593393295,
-                        "depth": 18480.0
-                    },
-                    {
-                        "latitude": -44.786583443116065,
-                        "longitude": 167.4019560938977,
-                        "depth": 18480.0
-                    },
-                    {
-                        "latitude": -44.76659999999998,
-                        "longitude": 167.397,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.729624,
-                        "longitude": 167.45951800000003,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.751693430985426,
-                        "longitude": 167.4864850417713,
-                        "depth": 18480.0
-                    },
-                    {
-                        "latitude": -44.788683858708396,
-                        "longitude": 167.42395758421029,
-                        "depth": 18480.0
-                    },
-                    {
-                        "latitude": -44.729624,
-                        "longitude": 167.45951800000003,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.7262,
-                        "longitude": 167.4653,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.74828374309793,
-                        "longitude": 167.49224269023472,
-                        "depth": 18480.0
-                    },
-                    {
-                        "latitude": -44.751709076426714,
-                        "longitude": 167.4864598174379,
-                        "depth": 18480.0
-                    },
-                    {
-                        "latitude": -44.7262,
-                        "longitude": 167.4653,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.72220000000002,
-                        "longitude": 167.47140000000002,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.74428377391504,
-                        "longitude": 167.498341112182,
-                        "depth": 18480.0
-                    },
-                    {
-                        "latitude": -44.74828518854,
-                        "longitude": 167.49224035822286,
-                        "depth": 18480.0
-                    },
-                    {
-                        "latitude": -44.72220000000002,
-                        "longitude": 167.47140000000002,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.71099999999999,
-                        "longitude": 167.49150000000003,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.73308068696625,
-                        "longitude": 167.51844197081064,
-                        "depth": 18480.0
-                    },
-                    {
-                        "latitude": -44.7442853071429,
-                        "longitude": 167.49833863872524,
-                        "depth": 18480.0
-                    },
-                    {
-                        "latitude": -44.71099999999999,
-                        "longitude": 167.49150000000003,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.70060000000001,
-                        "longitude": 167.5056,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.72268240236129,
-                        "longitude": 167.5325351383391,
-                        "depth": 18480.0
-                    },
-                    {
-                        "latitude": -44.733085695125645,
-                        "longitude": 167.5184338945341,
-                        "depth": 18480.0
-                    },
-                    {
-                        "latitude": -44.70060000000001,
-                        "longitude": 167.5056,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.6948,
-                        "longitude": 167.5154,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.71688371073695,
-                        "longitude": 167.5423308637864,
-                        "depth": 18480.0
-                    },
-                    {
-                        "latitude": -44.722685969451,
-                        "longitude": 167.53252938657712,
-                        "depth": 18480.0
-                    },
-                    {
-                        "latitude": -44.6948,
-                        "longitude": 167.5154,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.6823,
-                        "longitude": 167.5385,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.704380858376915,
-                        "longitude": 167.56543089818007,
-                        "depth": 18480.0
-                    },
-                    {
-                        "latitude": -44.71688615825321,
-                        "longitude": 167.54232691745148,
-                        "depth": 18480.0
-                    }
-                ]
-            },
-            "Alpine: George to Jacksons": {
-                "type": "fault",
-                "corners": [
-                    {
-                        "latitude": -44.6823,
-                        "longitude": 167.5385,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.646199999999986,
-                        "longitude": 167.6062,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.67015873515139,
-                        "longitude": 167.63523265476118,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.7062754569655,
-                        "longitude": 167.56751966486493,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.646199999999986,
-                        "longitude": 167.6062,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.6338,
-                        "longitude": 167.6287,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.657771293871455,
-                        "longitude": 167.65770740504425,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.67017685594013,
-                        "longitude": 167.6352032778583,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.6338,
-                        "longitude": 167.6287,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.62988,
-                        "longitude": 167.636395,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.653855423595786,
-                        "longitude": 167.66539419364904,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.65777731843212,
-                        "longitude": 167.65769763454816,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.62988,
-                        "longitude": 167.636395,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.5791,
-                        "longitude": 167.735901,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.60305296090446,
-                        "longitude": 167.76491690102887,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.653857475847225,
-                        "longitude": 167.66539086493634,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.5791,
-                        "longitude": 167.735901,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.57650000000001,
-                        "longitude": 167.7439,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.60047755833138,
-                        "longitude": 167.77287524474673,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.603079495632024,
-                        "longitude": 167.7648739516753,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.57650000000001,
-                        "longitude": 167.7439,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.57350000000001,
-                        "longitude": 167.7496,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.59747825012197,
-                        "longitude": 167.7785729526417,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.60047965467035,
-                        "longitude": 167.77287184769844,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.57350000000001,
-                        "longitude": 167.7496,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.570799999999984,
-                        "longitude": 167.761,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.594777029448764,
-                        "longitude": 167.78997422039666,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.59747976945655,
-                        "longitude": 167.77857049066944,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.570799999999984,
-                        "longitude": 167.761,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.54499999999999,
-                        "longitude": 167.8115,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.56896756447461,
-                        "longitude": 167.8404795388418,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.594779994156916,
-                        "longitude": 167.78996941686603,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.54499999999999,
-                        "longitude": 167.8115,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.52900100000001,
-                        "longitude": 167.83472,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.552976206426436,
-                        "longitude": 167.86368052924476,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.568981003954335,
-                        "longitude": 167.84045778460882,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.52900100000001,
-                        "longitude": 167.83472,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.5235,
-                        "longitude": 167.8427,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.547479479826116,
-                        "longitude": 167.87165132892957,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.552982471630784,
-                        "longitude": 167.8636703871497,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.5235,
-                        "longitude": 167.8427,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.505500000000005,
-                        "longitude": 167.8878,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.529470641421156,
-                        "longitude": 167.91675917475553,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.54748163201451,
-                        "longitude": 167.8716478446069,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.505500000000005,
-                        "longitude": 167.8878,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.479508999999986,
-                        "longitude": 167.934756,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.5034799282989,
-                        "longitude": 167.9637044063124,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.52948251583542,
-                        "longitude": 167.91673996560675,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.479508999999986,
-                        "longitude": 167.934756,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.4694,
-                        "longitude": 167.953,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.49337894001099,
-                        "longitude": 167.98193144777957,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.50349244006477,
-                        "longitude": 167.96368417589682,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.4694,
-                        "longitude": 167.953,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.461800000000004,
-                        "longitude": 167.9631,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.48578126667092,
-                        "longitude": 167.99202448207166,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.493383797402664,
-                        "longitude": 167.98192359225325,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.461800000000004,
-                        "longitude": 167.9631,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.4514,
-                        "longitude": 167.9907,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.47537728852717,
-                        "longitude": 168.01962725460902,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.48578399784796,
-                        "longitude": 167.9920200652508,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.4514,
-                        "longitude": 167.9907,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.42718099999999,
-                        "longitude": 168.031587,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.45115541547206,
-                        "longitude": 168.06050913885608,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.47538452821963,
-                        "longitude": 168.01961555137166,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.42718099999999,
-                        "longitude": 168.031587,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.42159999999999,
-                        "longitude": 168.041,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.445582996130895,
-                        "longitude": 168.0699060302023,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.451166323199885,
-                        "longitude": 168.0604915166635,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.42159999999999,
-                        "longitude": 168.041,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.369158,
-                        "longitude": 168.122615,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.393123247588704,
-                        "longitude": 168.15152818277346,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.4455855055294,
-                        "longitude": 168.06990197482494,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.369158,
-                        "longitude": 168.122615,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.366400000000006,
-                        "longitude": 168.1269,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.39038601952308,
-                        "longitude": 168.1557785484766,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.39314508197866,
-                        "longitude": 168.15149296201795,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.366400000000006,
-                        "longitude": 168.1269,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.3451,
-                        "longitude": 168.1683,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.36907699993643,
-                        "longitude": 168.19718480125704,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.390387164218595,
-                        "longitude": 168.15577670020733,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.3451,
-                        "longitude": 168.1683,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.31559899999999,
-                        "longitude": 168.218683,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.33957451333361,
-                        "longitude": 168.247558338506,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.36908794720315,
-                        "longitude": 168.19716714034516,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.31559899999999,
-                        "longitude": 168.218683,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.31089999999999,
-                        "longitude": 168.2267,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.33488692162986,
-                        "longitude": 168.2555550593142,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.33958789896548,
-                        "longitude": 168.2475367574264,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.31089999999999,
-                        "longitude": 168.2267,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.3015,
-                        "longitude": 168.2389,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.32548599904429,
-                        "longitude": 168.26775257804627,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.334889049715336,
-                        "longitude": 168.25555162668675,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.3015,
-                        "longitude": 168.2389,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.2791,
-                        "longitude": 168.2763,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.30308005041995,
-                        "longitude": 168.30515312203534,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.32548928256047,
-                        "longitude": 168.26774728285355,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.2791,
-                        "longitude": 168.2763,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.2632,
-                        "longitude": 168.3071,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.28718242928858,
-                        "longitude": 168.33594308079734,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.303089982759744,
-                        "longitude": 168.30513711594227,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.2632,
-                        "longitude": 168.3071,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.259478,
-                        "longitude": 168.311391,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.283467472364606,
-                        "longitude": 168.34022113637727,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.287190551816884,
-                        "longitude": 168.33592999367357,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.259478,
-                        "longitude": 168.311391,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.25010000000002,
-                        "longitude": 168.3222,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.27408791456034,
-                        "longitude": 168.35102862278677,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.283468633481185,
-                        "longitude": 168.3402192650555,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.25010000000002,
-                        "longitude": 168.3222,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.223,
-                        "longitude": 168.37860000000003,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.24697704720973,
-                        "longitude": 168.40743571876587,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.274090838977145,
-                        "longitude": 168.35102391079698,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.223,
-                        "longitude": 168.37860000000003,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.207899999999995,
-                        "longitude": 168.4006,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.23188640951254,
-                        "longitude": 168.42941440014937,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.24699186729233,
-                        "longitude": 168.40741186478817,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.207899999999995,
-                        "longitude": 168.4006,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.205823,
-                        "longitude": 168.406197,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.229813917073166,
-                        "longitude": 168.43500340892365,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.231892273785526,
-                        "longitude": 168.4294049595146,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.205823,
-                        "longitude": 168.406197,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.1749,
-                        "longitude": 168.4894,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.19887219228881,
-                        "longitude": 168.51822553281627,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.22981537380886,
-                        "longitude": 168.43500106336847,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.1749,
-                        "longitude": 168.4894,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.160352,
-                        "longitude": 168.508469,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.18434109699728,
-                        "longitude": 168.53726123206224,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.198893848578294,
-                        "longitude": 168.51819071593113,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.160352,
-                        "longitude": 168.508469,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.1446,
-                        "longitude": 168.5291,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.168589057711806,
-                        "longitude": 168.55788566006603,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.18434619717152,
-                        "longitude": 168.53725302792446,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.1446,
-                        "longitude": 168.5291,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.10948100000002,
-                        "longitude": 168.606207,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.13345676988242,
-                        "longitude": 168.63500065695433,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.1685945731652,
-                        "longitude": 168.55787679049052,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.10948100000002,
-                        "longitude": 168.606207,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.06270000000001,
-                        "longitude": 168.7086,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.08667095392312,
-                        "longitude": 168.73738353112222,
-                        "depth": 20000.0
-                    },
-                    {
-                        "latitude": -44.13347692220415,
-                        "longitude": 168.63496829201247,
-                        "depth": 20000.0
-                    }
-                ]
-            },
-            "Alpine: Jacksons to Kaniere": {
-                "type": "fault",
-                "corners": [
-                    {
-                        "latitude": -44.06270000000001,
-                        "longitude": 168.7086,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.01118500000001,
-                        "longitude": 168.829529,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.120328654475614,
-                        "longitude": 168.93876714982704,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -44.17195387322495,
-                        "longitude": 168.817694190501,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -44.01118500000001,
-                        "longitude": 168.829529,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.959543,
-                        "longitude": 168.950249,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.06869601912106,
-                        "longitude": 169.05940013278175,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -44.12044806030776,
-                        "longitude": 168.93853739563286,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.959543,
-                        "longitude": 168.950249,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.907774,
-                        "longitude": 169.070758,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.016936151833654,
-                        "longitude": 169.17982188536152,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -44.06881501352993,
-                        "longitude": 169.0591713716283,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.907774,
-                        "longitude": 169.070758,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.90189999999998,
-                        "longitude": 169.0844,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -44.01116830808922,
-                        "longitude": 169.1932521001504,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -44.01705473267347,
-                        "longitude": 169.17959411993365,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.90189999999998,
-                        "longitude": 169.0844,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.85370000000002,
-                        "longitude": 169.189187,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.96288603333997,
-                        "longitude": 169.29813042628612,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -44.01118170590113,
-                        "longitude": 169.19322633241276,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.85370000000002,
-                        "longitude": 169.189187,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.799224999999986,
-                        "longitude": 169.307162,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.90840639958226,
-                        "longitude": 169.41603845408682,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.96298912487507,
-                        "longitude": 169.2979325538467,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.799224999999986,
-                        "longitude": 169.307162,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.7761,
-                        "longitude": 169.3571,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.885351710840894,
-                        "longitude": 169.46580945267027,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.90852227959555,
-                        "longitude": 169.41581628016363,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.7761,
-                        "longitude": 169.3571,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.745359,
-                        "longitude": 169.42556,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.85459723291182,
-                        "longitude": 169.53425262251884,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.88540066797034,
-                        "longitude": 169.46571554108957,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.745359,
-                        "longitude": 169.42556,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.69190699999999,
-                        "longitude": 169.544216,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.80110396838776,
-                        "longitude": 169.6529129415436,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.85466423817237,
-                        "longitude": 169.5341241885757,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.69190699999999,
-                        "longitude": 169.544216,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.63833300000001,
-                        "longitude": 169.66266,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.74753790802955,
-                        "longitude": 169.77126646081751,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.80121998923069,
-                        "longitude": 169.65269090357532,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.63833300000001,
-                        "longitude": 169.66266,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.582975,
-                        "longitude": 169.779421,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.692188873083865,
-                        "longitude": 169.8879312127621,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.74765351024293,
-                        "longitude": 169.7710454236728,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.582975,
-                        "longitude": 169.779421,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.52745699999999,
-                        "longitude": 169.895929,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.63667834082061,
-                        "longitude": 170.00434515550722,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.692302743680266,
-                        "longitude": 169.887713685371,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.52745699999999,
-                        "longitude": 169.895929,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.47182099999999,
-                        "longitude": 170.012222,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.58104955092926,
-                        "longitude": 170.12054400438657,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.63679175174468,
-                        "longitude": 170.00412870794975,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.47182099999999,
-                        "longitude": 170.012222,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.45369999999999,
-                        "longitude": 170.05,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.5630070630312,
-                        "longitude": 170.15814614015179,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.58116253594573,
-                        "longitude": 170.12032857060177,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.45369999999999,
-                        "longitude": 170.05,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.41402599999999,
-                        "longitude": 170.126367,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.52329989138118,
-                        "longitude": 170.2345178493065,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.563043694250545,
-                        "longitude": 170.15807624351928,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.41402599999999,
-                        "longitude": 170.126367,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.355135999999995,
-                        "longitude": 170.239359,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.46438073543654,
-                        "longitude": 170.34747809423757,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.52337403115425,
-                        "longitude": 170.23437654739868,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.355135999999995,
-                        "longitude": 170.239359,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.296135,
-                        "longitude": 170.352133,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.40538620798386,
-                        "longitude": 170.46015203324566,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.464490280747086,
-                        "longitude": 170.347269618601,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.296135,
-                        "longitude": 170.352133,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.237023999999984,
-                        "longitude": 170.464687,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -43.34628147017174,
-                        "longitude": 170.57260587300587,
-                        "depth": 17840.0
-                    },
-                    {
-                        "latitude": -43.40549531813729,
-                        "longitude": 170.45994458966058,
-                        "depth": 17840.0
-                    }
-                ]
-            },
-            "Alpine: Nancy": {
-                "type": "fault",
-                "corners": [
-                    {
-                        "latitude": -45.1185,
-                        "longitude": 166.8776,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -45.08850000000001,
-                        "longitude": 166.9151,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -45.110111689644995,
-                        "longitude": 166.95296486109015,
-                        "depth": 21760.0
-                    },
-                    {
-                        "latitude": -45.14012444431374,
-                        "longitude": 166.91546807128128,
-                        "depth": 21760.0
-                    },
-                    {
-                        "latitude": -45.08850000000001,
-                        "longitude": 166.9151,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -45.07871399999999,
-                        "longitude": 166.929569,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -45.100334343600224,
-                        "longitude": 166.96741836345717,
-                        "depth": 21760.0
-                    },
-                    {
-                        "latitude": -45.110125202424165,
-                        "longitude": 166.9529494819062,
-                        "depth": 21760.0
-                    },
-                    {
-                        "latitude": -45.07871399999999,
-                        "longitude": 166.929569,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -45.0701,
-                        "longitude": 166.9423,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -45.09172121917006,
-                        "longitude": 166.980143394678,
-                        "depth": 21760.0
-                    },
-                    {
-                        "latitude": -45.10033949348644,
-                        "longitude": 166.96741250140641,
-                        "depth": 21760.0
-                    },
-                    {
-                        "latitude": -45.0701,
-                        "longitude": 166.9423,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -45.03929999999999,
-                        "longitude": 166.9821,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -45.060912263390485,
-                        "longitude": 167.01993548171828,
-                        "depth": 21760.0
-                    },
-                    {
-                        "latitude": -45.09172574918796,
-                        "longitude": 166.98013823888067,
-                        "depth": 21760.0
-                    }
-                ]
-            },
-            "Alpine: Resolution - Charles": {
-                "type": "fault",
-                "corners": [
-                    {
-                        "latitude": -45.0969,
-                        "longitude": 166.8607,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -45.062057,
-                        "longitude": 166.901175,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -45.08106915369449,
-                        "longitude": 166.93954289875123,
-                        "depth": 20960.0
-                    },
-                    {
-                        "latitude": -45.11592630483517,
-                        "longitude": 166.89907519262732,
-                        "depth": 20960.0
-                    },
-                    {
-                        "latitude": -45.062057,
-                        "longitude": 166.901175,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -45.0272,
-                        "longitude": 166.9416,
-                        "depth": 0.0
-                    },
-                    {
-                        "latitude": -45.046212901146646,
-                        "longitude": 166.97994590887626,
-                        "depth": 20960.0
-                    },
-                    {
-                        "latitude": -45.08108402363976,
-                        "longitude": 166.93952821993798,
-                        "depth": 20960.0
-                    }
-                ]
-            }
-        }
-    },
-    "rupture_propagation": {
-        "rupture_causality_tree": {
-            "Alpine: Caswell": "Alpine: Caswell - South George",
-            "Alpine: George landward": "Alpine: Caswell - South George",
-            "Alpine: Nancy": "Alpine: Caswell",
-            "Alpine: Resolution - Charles": "Alpine: Nancy",
-            "Alpine: George to Jacksons": "Alpine: George landward",
-            "Alpine: Jacksons to Kaniere": "Alpine: George to Jacksons",
-            "Alpine: Caswell - South George": null
-        },
-        "jump_points": {
-            "Alpine: Caswell": {
-                "from_point": {
-                    "s": 1.561780793352498e-08,
-                    "d": 0.0027439030803822007
-                },
-                "to_point": {
-                    "s": 0.9999998843253431,
-                    "d": 0.0021783403896672225
-                }
-            },
-            "Alpine: George landward": {
-                "from_point": {
-                    "s": 0.9846816046800234,
-                    "d": 0.5726531052485611
-                },
-                "to_point": {
-                    "s": 1.7094630189513419e-06,
-                    "d": 0.517813412218521
-                }
-            },
-            "Alpine: Nancy": {
-                "from_point": {
-                    "s": 2.2602772139907766e-06,
-                    "d": 0.5135179737358814
-                },
-                "to_point": {
-                    "s": 0.9949563089939765,
-                    "d": 0.49843717829009754
-                }
-            },
-            "Alpine: Resolution - Charles": {
-                "from_point": {
-                    "s": 0.07662849760051817,
-                    "d": 1.065129071285882e-05
-                },
-                "to_point": {
-                    "s": 2.3913029840950075e-07,
-                    "d": 0.02104166250060198
-                }
-            },
-            "Alpine: George to Jacksons": {
-                "from_point": {
-                    "s": 0.9999741067889785,
-                    "d": 0.5192417582610649
-                },
-                "to_point": {
-                    "s": 5.256059787553265e-05,
-                    "d": 0.4797667567909677
-                }
-            },
-            "Alpine: Jacksons to Kaniere": {
-                "from_point": {
-                    "s": 0.9999996677484545,
-                    "d": 7.117672126704614e-06
-                },
-                "to_point": {
-                    "s": 1.2445390314236272e-26,
-                    "d": 1.142491190627246e-05
-                }
-            }
-        },
-        "rakes": {
-            "Alpine: Caswell": 180.0,
-            "Alpine: Caswell - South George": 180.0,
-            "Alpine: George landward": 180.0,
-            "Alpine: George to Jacksons": 180.0,
-            "Alpine: Jacksons to Kaniere": 160.0,
-            "Alpine: Nancy": 180.0,
-            "Alpine: Resolution - Charles": 180.0
-        },
-        "magnitudes": {
-            "Alpine: Caswell": 7.075268533910645,
-            "Alpine: Caswell - South George": 7.006250455312539,
-            "Alpine: George landward": 6.949016182128432,
-            "Alpine: George to Jacksons": 7.539732815372826,
-            "Alpine: Jacksons to Kaniere": 7.686555462026519,
-            "Alpine: Nancy": 6.907697516773393,
-            "Alpine: Resolution - Charles": 6.843603413660329
-        },
-        "hypocentre": {
-            "s": 0.2920050189518198,
-            "d": 0.3760386477506699
-        }
-    },
-    "velocity_model_1d": {
-        "model": [
-            {
-                "thickness": 0.05,
-                "Vp": 1.8,
-                "Vs": 0.38,
-                "rho": 1.81,
-                "Qp": 38.0,
-                "Qs": 19.0
-            },
-            {
-                "thickness": 0.05,
-                "Vp": 1.8,
-                "Vs": 0.48,
-                "rho": 1.81,
-                "Qp": 48.0,
-                "Qs": 24.0
-            },
-            {
-                "thickness": 0.05,
-                "Vp": 1.8,
-                "Vs": 0.58,
-                "rho": 1.81,
-                "Qp": 58.0,
-                "Qs": 29.0
-            },
-            {
-                "thickness": 0.05,
-                "Vp": 1.8,
-                "Vs": 0.68,
-                "rho": 1.81,
-                "Qp": 68.0,
-                "Qs": 34.0
-            },
-            {
-                "thickness": 0.1,
-                "Vp": 1.8,
-                "Vs": 0.75,
-                "rho": 1.81,
-                "Qp": 75.0,
-                "Qs": 37.5
-            },
-            {
-                "thickness": 0.1,
-                "Vp": 1.8,
-                "Vs": 0.83,
-                "rho": 1.81,
-                "Qp": 83.0,
-                "Qs": 41.5
-            },
-            {
-                "thickness": 0.2,
-                "Vp": 1.9,
-                "Vs": 0.9,
-                "rho": 1.86,
-                "Qp": 90.0,
-                "Qs": 45.0
-            },
-            {
-                "thickness": 0.2,
-                "Vp": 2.03,
-                "Vs": 1.0,
-                "rho": 1.92,
-                "Qp": 100.0,
-                "Qs": 50.0
-            },
-            {
-                "thickness": 0.2,
-                "Vp": 2.14,
-                "Vs": 1.05,
-                "rho": 1.97,
-                "Qp": 105.0,
-                "Qs": 52.5
-            },
-            {
-                "thickness": 0.2,
-                "Vp": 2.2,
-                "Vs": 1.1,
-                "rho": 1.99,
-                "Qp": 110.0,
-                "Qs": 55.0
-            },
-            {
-                "thickness": 0.2,
-                "Vp": 2.4,
-                "Vs": 1.15,
-                "rho": 2.06,
-                "Qp": 115.0,
-                "Qs": 57.5
-            },
-            {
-                "thickness": 0.2,
-                "Vp": 2.7,
-                "Vs": 1.2,
-                "rho": 2.15,
-                "Qp": 120.0,
-                "Qs": 60.0
-            },
-            {
-                "thickness": 0.2,
-                "Vp": 3.0,
-                "Vs": 1.43,
-                "rho": 2.22,
-                "Qp": 143.0,
-                "Qs": 71.5
-            },
-            {
-                "thickness": 0.2,
-                "Vp": 3.27,
-                "Vs": 1.64,
-                "rho": 2.28,
-                "Qp": 164.0,
-                "Qs": 82.0
-            },
-            {
-                "thickness": 0.2,
-                "Vp": 3.53,
-                "Vs": 1.86,
-                "rho": 2.32,
-                "Qp": 186.0,
-                "Qs": 93.0
-            },
-            {
-                "thickness": 0.2,
-                "Vp": 3.8,
-                "Vs": 2.07,
-                "rho": 2.36,
-                "Qp": 207.0,
-                "Qs": 103.5
-            },
-            {
-                "thickness": 0.2,
-                "Vp": 4.07,
-                "Vs": 2.28,
-                "rho": 2.4,
-                "Qp": 228.0,
-                "Qs": 114.0
-            },
-            {
-                "thickness": 0.2,
-                "Vp": 4.33,
-                "Vs": 2.49,
-                "rho": 2.44,
-                "Qp": 249.0,
-                "Qs": 124.5
-            },
-            {
-                "thickness": 0.2,
-                "Vp": 4.6,
-                "Vs": 2.7,
-                "rho": 2.48,
-                "Qp": 270.0,
-                "Qs": 135.0
-            },
-            {
-                "thickness": 0.2,
-                "Vp": 4.71,
-                "Vs": 2.77,
-                "rho": 2.49,
-                "Qp": 277.0,
-                "Qs": 138.5
-            },
-            {
-                "thickness": 0.2,
-                "Vp": 4.82,
-                "Vs": 2.84,
-                "rho": 2.51,
-                "Qp": 284.0,
-                "Qs": 142.0
-            },
-            {
-                "thickness": 0.2,
-                "Vp": 4.93,
-                "Vs": 2.91,
-                "rho": 2.52,
-                "Qp": 291.0,
-                "Qs": 145.5
-            },
-            {
-                "thickness": 0.2,
-                "Vp": 5.04,
-                "Vs": 2.98,
-                "rho": 2.54,
-                "Qp": 298.0,
-                "Qs": 149.0
-            },
-            {
-                "thickness": 0.2,
-                "Vp": 5.15,
-                "Vs": 3.05,
-                "rho": 2.56,
-                "Qp": 305.0,
-                "Qs": 152.5
-            },
-            {
-                "thickness": 0.2,
-                "Vp": 5.26,
-                "Vs": 3.12,
-                "rho": 2.58,
-                "Qp": 312.0,
-                "Qs": 156.0
-            },
-            {
-                "thickness": 0.2,
-                "Vp": 5.37,
-                "Vs": 3.19,
-                "rho": 2.6,
-                "Qp": 319.0,
-                "Qs": 159.5
-            },
-            {
-                "thickness": 0.2,
-                "Vp": 5.48,
-                "Vs": 3.26,
-                "rho": 2.61,
-                "Qp": 326.0,
-                "Qs": 163.0
-            },
-            {
-                "thickness": 0.2,
-                "Vp": 5.59,
-                "Vs": 3.33,
-                "rho": 2.63,
-                "Qp": 333.0,
-                "Qs": 166.5
-            },
-            {
-                "thickness": 0.2,
-                "Vp": 5.7,
-                "Vs": 3.4,
-                "rho": 2.66,
-                "Qp": 340.0,
-                "Qs": 170.0
-            },
-            {
-                "thickness": 3.0,
-                "Vp": 6.0,
-                "Vs": 3.6,
-                "rho": 2.72,
-                "Qp": 360.0,
-                "Qs": 180.0
-            },
-            {
-                "thickness": 4.0,
-                "Vp": 6.0,
-                "Vs": 3.6,
-                "rho": 2.72,
-                "Qp": 360.0,
-                "Qs": 180.0
-            },
-            {
-                "thickness": 15.0,
-                "Vp": 6.5,
-                "Vs": 3.7,
-                "rho": 2.83,
-                "Qp": 370.0,
-                "Qs": 185.0
-            },
-            {
-                "thickness": 12.0,
-                "Vp": 7.5,
-                "Vs": 4.3,
-                "rho": 3.12,
-                "Qp": 430.0,
-                "Qs": 215.0
-            },
-            {
-                "thickness": 999.0,
-                "Vp": 8.1,
-                "Vs": 4.6,
-                "rho": 3.33,
-                "Qp": 460.0,
-                "Qs": 230.0
-            }
+  "metadata": {
+    "name": "Rupture 41955",
+    "version": "1",
+    "defaults_version": "24.2.2.2",
+    "tag": "nshm"
+  },
+  "srf": {
+    "genslip_dt": 0.05,
+    "genslip_version": "5.4.2",
+    "resolution": 0.2
+  },
+  "seeds": {
+    "nshm_to_realisation_seed": 581481681,
+    "rupture_propagation_seed": 445552289,
+    "genslip_seed": 1276544259,
+    "srfgen_seed": 78866208,
+    "hf_seed": 1667890206
+  },
+  "sources": {
+    "source_geometries": {
+      "Alpine: Caswell": {
+        "type": "fault",
+        "corners": [
+          {
+            "latitude": -45.03929999999999,
+            "longitude": 166.9821,
+            "depth": 0.0
+          },
+          {
+            "latitude": -45.033799999999985,
+            "longitude": 167.017,
+            "depth": 0.0
+          },
+          {
+            "latitude": -45.05558678713925,
+            "longitude": 167.0527701185883,
+            "depth": 21120.0
+          },
+          {
+            "latitude": -45.06109725496857,
+            "longitude": 167.01785888676508,
+            "depth": 21120.0
+          },
+          {
+            "latitude": -45.033799999999985,
+            "longitude": 167.017,
+            "depth": 0.0
+          },
+          {
+            "latitude": -45.0193,
+            "longitude": 167.0462,
+            "depth": 0.0
+          },
+          {
+            "latitude": -45.04108888856127,
+            "longitude": 167.08196016709607,
+            "depth": 21120.0
+          },
+          {
+            "latitude": -45.055597949175315,
+            "longitude": 167.0527565884981,
+            "depth": 21120.0
+          },
+          {
+            "latitude": -45.0193,
+            "longitude": 167.0462,
+            "depth": 0.0
+          },
+          {
+            "latitude": -45.00787399999999,
+            "longitude": 167.061757,
+            "depth": 0.0
+          },
+          {
+            "latitude": -45.0296675937717,
+            "longitude": 167.0975052139356,
+            "depth": 21120.0
+          },
+          {
+            "latitude": -45.04109853206335,
+            "longitude": 167.08194847999198,
+            "depth": 21120.0
+          },
+          {
+            "latitude": -45.00787399999999,
+            "longitude": 167.061757,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.991599999999984,
+            "longitude": 167.08390000000003,
+            "depth": 0.0
+          },
+          {
+            "latitude": -45.0133918164058,
+            "longitude": 167.11964146514907,
+            "depth": 21120.0
+          },
+          {
+            "latitude": -45.029672843589445,
+            "longitude": 167.0974988517732,
+            "depth": 21120.0
+          },
+          {
+            "latitude": -44.991599999999984,
+            "longitude": 167.08390000000003,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.9678,
+            "longitude": 167.1094,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.98959104434532,
+            "longitude": 167.1451290061536,
+            "depth": 21120.0
+          },
+          {
+            "latitude": -45.013399286053215,
+            "longitude": 167.11963241621956,
+            "depth": 21120.0
+          },
+          {
+            "latitude": -44.9678,
+            "longitude": 167.1094,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.95727000000001,
+            "longitude": 167.122232,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.97906569534958,
+            "longitude": 167.15794954101088,
+            "depth": 21120.0
+          },
+          {
+            "latitude": -44.98959979695033,
+            "longitude": 167.14511840801444,
+            "depth": 21120.0
+          },
+          {
+            "latitude": -44.95727000000001,
+            "longitude": 167.122232,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.907,
+            "longitude": 167.1834,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.928780507522276,
+            "longitude": 167.21910807239797,
+            "depth": 21120.0
+          },
+          {
+            "latitude": -44.97907005274854,
+            "longitude": 167.1579442648862,
+            "depth": 21120.0
+          }
         ]
-    },
-    "velocity_model": {
-        "min_vs": 0.5,
-        "version": "2.06",
-        "topo_type": "SQUASHED_TAPERED",
-        "dt": 0.01,
-        "ds_multiplier": 1.2,
-        "resolution": 0.2,
-        "vs30": 500.0,
-        "s_wave_velocity": 3500.0,
-        "pgv_interpolants": [
-            [
-                3.5,
-                1.0
-            ],
-            [
-                8.0,
-                1.0
-            ]
+      },
+      "Alpine: Caswell - South George": {
+        "type": "fault",
+        "corners": [
+          {
+            "latitude": -44.907,
+            "longitude": 167.1834,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.9013,
+            "longitude": 167.196,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.917701775139456,
+            "longitude": 167.22523972425634,
+            "depth": 16720.0
+          },
+          {
+            "latitude": -44.92340497442194,
+            "longitude": 167.2126385362857,
+            "depth": 16720.0
+          },
+          {
+            "latitude": -44.9013,
+            "longitude": 167.196,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.8894,
+            "longitude": 167.2131,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.90580071656492,
+            "longitude": 167.24233557347455,
+            "depth": 16720.0
+          },
+          {
+            "latitude": -44.9177051594629,
+            "longitude": 167.2252359650082,
+            "depth": 16720.0
+          },
+          {
+            "latitude": -44.8894,
+            "longitude": 167.2131,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.858750999999984,
+            "longitude": 167.245946,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.87514769172596,
+            "longitude": 167.27517186245464,
+            "depth": 16720.0
+          },
+          {
+            "latitude": -44.90580541159094,
+            "longitude": 167.2423303597519,
+            "depth": 16720.0
+          },
+          {
+            "latitude": -44.858750999999984,
+            "longitude": 167.245946,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.841999999999985,
+            "longitude": 167.2622,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.85840154713503,
+            "longitude": 167.29141266563943,
+            "depth": 16720.0
+          },
+          {
+            "latitude": -44.87515689738365,
+            "longitude": 167.27516164756864,
+            "depth": 16720.0
+          },
+          {
+            "latitude": -44.841999999999985,
+            "longitude": 167.2622,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.80893600000002,
+            "longitude": 167.306731,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.82533053458444,
+            "longitude": 167.33593655291367,
+            "depth": 16720.0
+          },
+          {
+            "latitude": -44.85840613777684,
+            "longitude": 167.2914075720566,
+            "depth": 16720.0
+          },
+          {
+            "latitude": -44.80893600000002,
+            "longitude": 167.306731,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.80449999999999,
+            "longitude": 167.3127,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.82090523481168,
+            "longitude": 167.34189169719193,
+            "depth": 16720.0
+          },
+          {
+            "latitude": -44.825342789129564,
+            "longitude": 167.33592296883705,
+            "depth": 16720.0
+          },
+          {
+            "latitude": -44.80449999999999,
+            "longitude": 167.3127,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.7837,
+            "longitude": 167.3421,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.80009924683678,
+            "longitude": 167.3712890378392,
+            "depth": 16720.0
+          },
+          {
+            "latitude": -44.82090687617494,
+            "longitude": 167.3418898769383,
+            "depth": 16720.0
+          },
+          {
+            "latitude": -44.7837,
+            "longitude": 167.3421,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.76439999999998,
+            "longitude": 167.3753,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.780798791509504,
+            "longitude": 167.4044811624456,
+            "depth": 16720.0
+          },
+          {
+            "latitude": -44.80010730354788,
+            "longitude": 167.37128010913295,
+            "depth": 16720.0
+          }
         ]
-    },
-    "domain": {
-        "resolution": 0.2,
-        "domain": [
-            {
-                "latitude": -45.721425525413245,
-                "longitude": 165.94967778722216
-            },
-            {
-                "latitude": -47.4950738778736,
-                "longitude": 168.64927641538526
-            },
-            {
-                "latitude": -40.04390798508443,
-                "longitude": 177.1594121448478
-            },
-            {
-                "latitude": -38.468257472656234,
-                "longitude": 174.53514866352106
-            }
-        ],
-        "depth": 57.0,
-        "duration": 326.3542379193343,
-        "dt": 0.01
+      },
+      "Alpine: George landward": {
+        "type": "fault",
+        "corners": [
+          {
+            "latitude": -44.76449999999998,
+            "longitude": 167.375,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.76659999999998,
+            "longitude": 167.397,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.788678685982504,
+            "longitude": 167.42396593393295,
+            "depth": 18480.0
+          },
+          {
+            "latitude": -44.786583443116065,
+            "longitude": 167.4019560938977,
+            "depth": 18480.0
+          },
+          {
+            "latitude": -44.76659999999998,
+            "longitude": 167.397,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.729624,
+            "longitude": 167.45951800000003,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.751693430985426,
+            "longitude": 167.4864850417713,
+            "depth": 18480.0
+          },
+          {
+            "latitude": -44.788683858708396,
+            "longitude": 167.42395758421029,
+            "depth": 18480.0
+          },
+          {
+            "latitude": -44.729624,
+            "longitude": 167.45951800000003,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.7262,
+            "longitude": 167.4653,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.74828374309793,
+            "longitude": 167.49224269023472,
+            "depth": 18480.0
+          },
+          {
+            "latitude": -44.751709076426714,
+            "longitude": 167.4864598174379,
+            "depth": 18480.0
+          },
+          {
+            "latitude": -44.7262,
+            "longitude": 167.4653,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.72220000000002,
+            "longitude": 167.47140000000002,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.74428377391504,
+            "longitude": 167.498341112182,
+            "depth": 18480.0
+          },
+          {
+            "latitude": -44.74828518854,
+            "longitude": 167.49224035822286,
+            "depth": 18480.0
+          },
+          {
+            "latitude": -44.72220000000002,
+            "longitude": 167.47140000000002,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.71099999999999,
+            "longitude": 167.49150000000003,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.73308068696625,
+            "longitude": 167.51844197081064,
+            "depth": 18480.0
+          },
+          {
+            "latitude": -44.7442853071429,
+            "longitude": 167.49833863872524,
+            "depth": 18480.0
+          },
+          {
+            "latitude": -44.71099999999999,
+            "longitude": 167.49150000000003,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.70060000000001,
+            "longitude": 167.5056,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.72268240236129,
+            "longitude": 167.5325351383391,
+            "depth": 18480.0
+          },
+          {
+            "latitude": -44.733085695125645,
+            "longitude": 167.5184338945341,
+            "depth": 18480.0
+          },
+          {
+            "latitude": -44.70060000000001,
+            "longitude": 167.5056,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.6948,
+            "longitude": 167.5154,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.71688371073695,
+            "longitude": 167.5423308637864,
+            "depth": 18480.0
+          },
+          {
+            "latitude": -44.722685969451,
+            "longitude": 167.53252938657712,
+            "depth": 18480.0
+          },
+          {
+            "latitude": -44.6948,
+            "longitude": 167.5154,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.6823,
+            "longitude": 167.5385,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.704380858376915,
+            "longitude": 167.56543089818007,
+            "depth": 18480.0
+          },
+          {
+            "latitude": -44.71688615825321,
+            "longitude": 167.54232691745148,
+            "depth": 18480.0
+          }
+        ]
+      },
+      "Alpine: George to Jacksons": {
+        "type": "fault",
+        "corners": [
+          {
+            "latitude": -44.6823,
+            "longitude": 167.5385,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.646199999999986,
+            "longitude": 167.6062,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.67015873515139,
+            "longitude": 167.63523265476118,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.7062754569655,
+            "longitude": 167.56751966486493,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.646199999999986,
+            "longitude": 167.6062,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.6338,
+            "longitude": 167.6287,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.657771293871455,
+            "longitude": 167.65770740504425,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.67017685594013,
+            "longitude": 167.6352032778583,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.6338,
+            "longitude": 167.6287,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.62988,
+            "longitude": 167.636395,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.653855423595786,
+            "longitude": 167.66539419364904,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.65777731843212,
+            "longitude": 167.65769763454816,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.62988,
+            "longitude": 167.636395,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.5791,
+            "longitude": 167.735901,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.60305296090446,
+            "longitude": 167.76491690102887,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.653857475847225,
+            "longitude": 167.66539086493634,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.5791,
+            "longitude": 167.735901,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.57650000000001,
+            "longitude": 167.7439,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.60047755833138,
+            "longitude": 167.77287524474673,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.603079495632024,
+            "longitude": 167.7648739516753,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.57650000000001,
+            "longitude": 167.7439,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.57350000000001,
+            "longitude": 167.7496,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.59747825012197,
+            "longitude": 167.7785729526417,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.60047965467035,
+            "longitude": 167.77287184769844,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.57350000000001,
+            "longitude": 167.7496,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.570799999999984,
+            "longitude": 167.761,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.594777029448764,
+            "longitude": 167.78997422039666,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.59747976945655,
+            "longitude": 167.77857049066944,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.570799999999984,
+            "longitude": 167.761,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.54499999999999,
+            "longitude": 167.8115,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.56896756447461,
+            "longitude": 167.8404795388418,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.594779994156916,
+            "longitude": 167.78996941686603,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.54499999999999,
+            "longitude": 167.8115,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.52900100000001,
+            "longitude": 167.83472,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.552976206426436,
+            "longitude": 167.86368052924476,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.568981003954335,
+            "longitude": 167.84045778460882,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.52900100000001,
+            "longitude": 167.83472,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.5235,
+            "longitude": 167.8427,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.547479479826116,
+            "longitude": 167.87165132892957,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.552982471630784,
+            "longitude": 167.8636703871497,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.5235,
+            "longitude": 167.8427,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.505500000000005,
+            "longitude": 167.8878,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.529470641421156,
+            "longitude": 167.91675917475553,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.54748163201451,
+            "longitude": 167.8716478446069,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.505500000000005,
+            "longitude": 167.8878,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.479508999999986,
+            "longitude": 167.934756,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.5034799282989,
+            "longitude": 167.9637044063124,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.52948251583542,
+            "longitude": 167.91673996560675,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.479508999999986,
+            "longitude": 167.934756,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.4694,
+            "longitude": 167.953,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.49337894001099,
+            "longitude": 167.98193144777957,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.50349244006477,
+            "longitude": 167.96368417589682,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.4694,
+            "longitude": 167.953,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.461800000000004,
+            "longitude": 167.9631,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.48578126667092,
+            "longitude": 167.99202448207166,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.493383797402664,
+            "longitude": 167.98192359225325,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.461800000000004,
+            "longitude": 167.9631,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.4514,
+            "longitude": 167.9907,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.47537728852717,
+            "longitude": 168.01962725460902,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.48578399784796,
+            "longitude": 167.9920200652508,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.4514,
+            "longitude": 167.9907,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.42718099999999,
+            "longitude": 168.031587,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.45115541547206,
+            "longitude": 168.06050913885608,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.47538452821963,
+            "longitude": 168.01961555137166,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.42718099999999,
+            "longitude": 168.031587,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.42159999999999,
+            "longitude": 168.041,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.445582996130895,
+            "longitude": 168.0699060302023,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.451166323199885,
+            "longitude": 168.0604915166635,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.42159999999999,
+            "longitude": 168.041,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.369158,
+            "longitude": 168.122615,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.393123247588704,
+            "longitude": 168.15152818277346,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.4455855055294,
+            "longitude": 168.06990197482494,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.369158,
+            "longitude": 168.122615,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.366400000000006,
+            "longitude": 168.1269,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.39038601952308,
+            "longitude": 168.1557785484766,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.39314508197866,
+            "longitude": 168.15149296201795,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.366400000000006,
+            "longitude": 168.1269,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.3451,
+            "longitude": 168.1683,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.36907699993643,
+            "longitude": 168.19718480125704,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.390387164218595,
+            "longitude": 168.15577670020733,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.3451,
+            "longitude": 168.1683,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.31559899999999,
+            "longitude": 168.218683,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.33957451333361,
+            "longitude": 168.247558338506,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.36908794720315,
+            "longitude": 168.19716714034516,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.31559899999999,
+            "longitude": 168.218683,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.31089999999999,
+            "longitude": 168.2267,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.33488692162986,
+            "longitude": 168.2555550593142,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.33958789896548,
+            "longitude": 168.2475367574264,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.31089999999999,
+            "longitude": 168.2267,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.3015,
+            "longitude": 168.2389,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.32548599904429,
+            "longitude": 168.26775257804627,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.334889049715336,
+            "longitude": 168.25555162668675,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.3015,
+            "longitude": 168.2389,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.2791,
+            "longitude": 168.2763,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.30308005041995,
+            "longitude": 168.30515312203534,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.32548928256047,
+            "longitude": 168.26774728285355,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.2791,
+            "longitude": 168.2763,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.2632,
+            "longitude": 168.3071,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.28718242928858,
+            "longitude": 168.33594308079734,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.303089982759744,
+            "longitude": 168.30513711594227,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.2632,
+            "longitude": 168.3071,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.259478,
+            "longitude": 168.311391,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.283467472364606,
+            "longitude": 168.34022113637727,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.287190551816884,
+            "longitude": 168.33592999367357,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.259478,
+            "longitude": 168.311391,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.25010000000002,
+            "longitude": 168.3222,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.27408791456034,
+            "longitude": 168.35102862278677,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.283468633481185,
+            "longitude": 168.3402192650555,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.25010000000002,
+            "longitude": 168.3222,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.223,
+            "longitude": 168.37860000000003,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.24697704720973,
+            "longitude": 168.40743571876587,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.274090838977145,
+            "longitude": 168.35102391079698,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.223,
+            "longitude": 168.37860000000003,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.207899999999995,
+            "longitude": 168.4006,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.23188640951254,
+            "longitude": 168.42941440014937,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.24699186729233,
+            "longitude": 168.40741186478817,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.207899999999995,
+            "longitude": 168.4006,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.205823,
+            "longitude": 168.406197,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.229813917073166,
+            "longitude": 168.43500340892365,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.231892273785526,
+            "longitude": 168.4294049595146,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.205823,
+            "longitude": 168.406197,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.1749,
+            "longitude": 168.4894,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.19887219228881,
+            "longitude": 168.51822553281627,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.22981537380886,
+            "longitude": 168.43500106336847,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.1749,
+            "longitude": 168.4894,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.160352,
+            "longitude": 168.508469,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.18434109699728,
+            "longitude": 168.53726123206224,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.198893848578294,
+            "longitude": 168.51819071593113,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.160352,
+            "longitude": 168.508469,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.1446,
+            "longitude": 168.5291,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.168589057711806,
+            "longitude": 168.55788566006603,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.18434619717152,
+            "longitude": 168.53725302792446,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.1446,
+            "longitude": 168.5291,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.10948100000002,
+            "longitude": 168.606207,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.13345676988242,
+            "longitude": 168.63500065695433,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.1685945731652,
+            "longitude": 168.55787679049052,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.10948100000002,
+            "longitude": 168.606207,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.06270000000001,
+            "longitude": 168.7086,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.08667095392312,
+            "longitude": 168.73738353112222,
+            "depth": 20000.0
+          },
+          {
+            "latitude": -44.13347692220415,
+            "longitude": 168.63496829201247,
+            "depth": 20000.0
+          }
+        ]
+      },
+      "Alpine: Jacksons to Kaniere": {
+        "type": "fault",
+        "corners": [
+          {
+            "latitude": -44.06270000000001,
+            "longitude": 168.7086,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.01118500000001,
+            "longitude": 168.829529,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.120328654475614,
+            "longitude": 168.93876714982704,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -44.17195387322495,
+            "longitude": 168.817694190501,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -44.01118500000001,
+            "longitude": 168.829529,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.959543,
+            "longitude": 168.950249,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.06869601912106,
+            "longitude": 169.05940013278175,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -44.12044806030776,
+            "longitude": 168.93853739563286,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.959543,
+            "longitude": 168.950249,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.907774,
+            "longitude": 169.070758,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.016936151833654,
+            "longitude": 169.17982188536152,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -44.06881501352993,
+            "longitude": 169.0591713716283,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.907774,
+            "longitude": 169.070758,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.90189999999998,
+            "longitude": 169.0844,
+            "depth": 0.0
+          },
+          {
+            "latitude": -44.01116830808922,
+            "longitude": 169.1932521001504,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -44.01705473267347,
+            "longitude": 169.17959411993365,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.90189999999998,
+            "longitude": 169.0844,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.85370000000002,
+            "longitude": 169.189187,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.96288603333997,
+            "longitude": 169.29813042628612,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -44.01118170590113,
+            "longitude": 169.19322633241276,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.85370000000002,
+            "longitude": 169.189187,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.799224999999986,
+            "longitude": 169.307162,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.90840639958226,
+            "longitude": 169.41603845408682,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.96298912487507,
+            "longitude": 169.2979325538467,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.799224999999986,
+            "longitude": 169.307162,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.7761,
+            "longitude": 169.3571,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.885351710840894,
+            "longitude": 169.46580945267027,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.90852227959555,
+            "longitude": 169.41581628016363,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.7761,
+            "longitude": 169.3571,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.745359,
+            "longitude": 169.42556,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.85459723291182,
+            "longitude": 169.53425262251884,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.88540066797034,
+            "longitude": 169.46571554108957,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.745359,
+            "longitude": 169.42556,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.69190699999999,
+            "longitude": 169.544216,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.80110396838776,
+            "longitude": 169.6529129415436,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.85466423817237,
+            "longitude": 169.5341241885757,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.69190699999999,
+            "longitude": 169.544216,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.63833300000001,
+            "longitude": 169.66266,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.74753790802955,
+            "longitude": 169.77126646081751,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.80121998923069,
+            "longitude": 169.65269090357532,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.63833300000001,
+            "longitude": 169.66266,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.582975,
+            "longitude": 169.779421,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.692188873083865,
+            "longitude": 169.8879312127621,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.74765351024293,
+            "longitude": 169.7710454236728,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.582975,
+            "longitude": 169.779421,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.52745699999999,
+            "longitude": 169.895929,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.63667834082061,
+            "longitude": 170.00434515550722,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.692302743680266,
+            "longitude": 169.887713685371,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.52745699999999,
+            "longitude": 169.895929,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.47182099999999,
+            "longitude": 170.012222,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.58104955092926,
+            "longitude": 170.12054400438657,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.63679175174468,
+            "longitude": 170.00412870794975,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.47182099999999,
+            "longitude": 170.012222,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.45369999999999,
+            "longitude": 170.05,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.5630070630312,
+            "longitude": 170.15814614015179,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.58116253594573,
+            "longitude": 170.12032857060177,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.45369999999999,
+            "longitude": 170.05,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.41402599999999,
+            "longitude": 170.126367,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.52329989138118,
+            "longitude": 170.2345178493065,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.563043694250545,
+            "longitude": 170.15807624351928,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.41402599999999,
+            "longitude": 170.126367,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.355135999999995,
+            "longitude": 170.239359,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.46438073543654,
+            "longitude": 170.34747809423757,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.52337403115425,
+            "longitude": 170.23437654739868,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.355135999999995,
+            "longitude": 170.239359,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.296135,
+            "longitude": 170.352133,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.40538620798386,
+            "longitude": 170.46015203324566,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.464490280747086,
+            "longitude": 170.347269618601,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.296135,
+            "longitude": 170.352133,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.237023999999984,
+            "longitude": 170.464687,
+            "depth": 0.0
+          },
+          {
+            "latitude": -43.34628147017174,
+            "longitude": 170.57260587300587,
+            "depth": 17840.0
+          },
+          {
+            "latitude": -43.40549531813729,
+            "longitude": 170.45994458966058,
+            "depth": 17840.0
+          }
+        ]
+      },
+      "Alpine: Nancy": {
+        "type": "fault",
+        "corners": [
+          {
+            "latitude": -45.1185,
+            "longitude": 166.8776,
+            "depth": 0.0
+          },
+          {
+            "latitude": -45.08850000000001,
+            "longitude": 166.9151,
+            "depth": 0.0
+          },
+          {
+            "latitude": -45.110111689644995,
+            "longitude": 166.95296486109015,
+            "depth": 21760.0
+          },
+          {
+            "latitude": -45.14012444431374,
+            "longitude": 166.91546807128128,
+            "depth": 21760.0
+          },
+          {
+            "latitude": -45.08850000000001,
+            "longitude": 166.9151,
+            "depth": 0.0
+          },
+          {
+            "latitude": -45.07871399999999,
+            "longitude": 166.929569,
+            "depth": 0.0
+          },
+          {
+            "latitude": -45.100334343600224,
+            "longitude": 166.96741836345717,
+            "depth": 21760.0
+          },
+          {
+            "latitude": -45.110125202424165,
+            "longitude": 166.9529494819062,
+            "depth": 21760.0
+          },
+          {
+            "latitude": -45.07871399999999,
+            "longitude": 166.929569,
+            "depth": 0.0
+          },
+          {
+            "latitude": -45.0701,
+            "longitude": 166.9423,
+            "depth": 0.0
+          },
+          {
+            "latitude": -45.09172121917006,
+            "longitude": 166.980143394678,
+            "depth": 21760.0
+          },
+          {
+            "latitude": -45.10033949348644,
+            "longitude": 166.96741250140641,
+            "depth": 21760.0
+          },
+          {
+            "latitude": -45.0701,
+            "longitude": 166.9423,
+            "depth": 0.0
+          },
+          {
+            "latitude": -45.03929999999999,
+            "longitude": 166.9821,
+            "depth": 0.0
+          },
+          {
+            "latitude": -45.060912263390485,
+            "longitude": 167.01993548171828,
+            "depth": 21760.0
+          },
+          {
+            "latitude": -45.09172574918796,
+            "longitude": 166.98013823888067,
+            "depth": 21760.0
+          }
+        ]
+      },
+      "Alpine: Resolution - Charles": {
+        "type": "fault",
+        "corners": [
+          {
+            "latitude": -45.0969,
+            "longitude": 166.8607,
+            "depth": 0.0
+          },
+          {
+            "latitude": -45.062057,
+            "longitude": 166.901175,
+            "depth": 0.0
+          },
+          {
+            "latitude": -45.08106915369449,
+            "longitude": 166.93954289875123,
+            "depth": 20960.0
+          },
+          {
+            "latitude": -45.11592630483517,
+            "longitude": 166.89907519262732,
+            "depth": 20960.0
+          },
+          {
+            "latitude": -45.062057,
+            "longitude": 166.901175,
+            "depth": 0.0
+          },
+          {
+            "latitude": -45.0272,
+            "longitude": 166.9416,
+            "depth": 0.0
+          },
+          {
+            "latitude": -45.046212901146646,
+            "longitude": 166.97994590887626,
+            "depth": 20960.0
+          },
+          {
+            "latitude": -45.08108402363976,
+            "longitude": 166.93952821993798,
+            "depth": 20960.0
+          }
+        ]
+      }
     }
+  },
+  "rupture_propagation": {
+    "rupture_causality_tree": {
+      "Alpine: Caswell": "Alpine: Caswell - South George",
+      "Alpine: George landward": "Alpine: Caswell - South George",
+      "Alpine: Nancy": "Alpine: Caswell",
+      "Alpine: Resolution - Charles": "Alpine: Nancy",
+      "Alpine: George to Jacksons": "Alpine: George landward",
+      "Alpine: Jacksons to Kaniere": "Alpine: George to Jacksons",
+      "Alpine: Caswell - South George": null
+    },
+    "jump_points": {
+      "Alpine: Caswell": {
+        "from_point": {
+          "s": 1.561780793352498e-8,
+          "d": 0.0027439030803822007
+        },
+        "to_point": {
+          "s": 0.9999998843253431,
+          "d": 0.0021783403896672225
+        }
+      },
+      "Alpine: George landward": {
+        "from_point": {
+          "s": 0.9846816046800234,
+          "d": 0.5726531052485611
+        },
+        "to_point": {
+          "s": 1.7094630189513419e-6,
+          "d": 0.517813412218521
+        }
+      },
+      "Alpine: Nancy": {
+        "from_point": {
+          "s": 2.2602772139907766e-6,
+          "d": 0.5135179737358814
+        },
+        "to_point": {
+          "s": 0.9949563089939765,
+          "d": 0.49843717829009754
+        }
+      },
+      "Alpine: Resolution - Charles": {
+        "from_point": {
+          "s": 0.07662849760051817,
+          "d": 1.065129071285882e-5
+        },
+        "to_point": {
+          "s": 2.3913029840950075e-7,
+          "d": 0.02104166250060198
+        }
+      },
+      "Alpine: George to Jacksons": {
+        "from_point": {
+          "s": 0.9999741067889785,
+          "d": 0.5192417582610649
+        },
+        "to_point": {
+          "s": 5.256059787553265e-5,
+          "d": 0.4797667567909677
+        }
+      },
+      "Alpine: Jacksons to Kaniere": {
+        "from_point": {
+          "s": 0.9999996677484545,
+          "d": 7.117672126704614e-6
+        },
+        "to_point": {
+          "s": 1.2445390314236272e-26,
+          "d": 1.142491190627246e-5
+        }
+      }
+    },
+    "hypocentre": {
+      "s": 0.2920050189518198,
+      "d": 0.3760386477506699
+    }
+  },
+  "rakes": {
+    "rakes": {
+      "Alpine: Caswell": 180.0,
+      "Alpine: Caswell - South George": 180.0,
+      "Alpine: George landward": 180.0,
+      "Alpine: George to Jacksons": 180.0,
+      "Alpine: Jacksons to Kaniere": 160.0,
+      "Alpine: Nancy": 180.0,
+      "Alpine: Resolution - Charles": 180.0
+    }
+  },
+  "magnitudes": {
+    "magnitudes": {
+      "Alpine: Caswell": 7.075268533910645,
+      "Alpine: Caswell - South George": 7.006250455312539,
+      "Alpine: George landward": 6.949016182128432,
+      "Alpine: George to Jacksons": 7.539732815372826,
+      "Alpine: Jacksons to Kaniere": 7.686555462026519,
+      "Alpine: Nancy": 6.907697516773393,
+      "Alpine: Resolution - Charles": 6.843603413660329
+    }
+  },
+  "velocity_model_1d": {
+    "model": [
+      {
+        "thickness": 0.05,
+        "Vp": 1.8,
+        "Vs": 0.38,
+        "rho": 1.81,
+        "Qp": 38.0,
+        "Qs": 19.0
+      },
+      {
+        "thickness": 0.05,
+        "Vp": 1.8,
+        "Vs": 0.48,
+        "rho": 1.81,
+        "Qp": 48.0,
+        "Qs": 24.0
+      },
+      {
+        "thickness": 0.05,
+        "Vp": 1.8,
+        "Vs": 0.58,
+        "rho": 1.81,
+        "Qp": 58.0,
+        "Qs": 29.0
+      },
+      {
+        "thickness": 0.05,
+        "Vp": 1.8,
+        "Vs": 0.68,
+        "rho": 1.81,
+        "Qp": 68.0,
+        "Qs": 34.0
+      },
+      {
+        "thickness": 0.1,
+        "Vp": 1.8,
+        "Vs": 0.75,
+        "rho": 1.81,
+        "Qp": 75.0,
+        "Qs": 37.5
+      },
+      {
+        "thickness": 0.1,
+        "Vp": 1.8,
+        "Vs": 0.83,
+        "rho": 1.81,
+        "Qp": 83.0,
+        "Qs": 41.5
+      },
+      {
+        "thickness": 0.2,
+        "Vp": 1.9,
+        "Vs": 0.9,
+        "rho": 1.86,
+        "Qp": 90.0,
+        "Qs": 45.0
+      },
+      {
+        "thickness": 0.2,
+        "Vp": 2.03,
+        "Vs": 1.0,
+        "rho": 1.92,
+        "Qp": 100.0,
+        "Qs": 50.0
+      },
+      {
+        "thickness": 0.2,
+        "Vp": 2.14,
+        "Vs": 1.05,
+        "rho": 1.97,
+        "Qp": 105.0,
+        "Qs": 52.5
+      },
+      {
+        "thickness": 0.2,
+        "Vp": 2.2,
+        "Vs": 1.1,
+        "rho": 1.99,
+        "Qp": 110.0,
+        "Qs": 55.0
+      },
+      {
+        "thickness": 0.2,
+        "Vp": 2.4,
+        "Vs": 1.15,
+        "rho": 2.06,
+        "Qp": 115.0,
+        "Qs": 57.5
+      },
+      {
+        "thickness": 0.2,
+        "Vp": 2.7,
+        "Vs": 1.2,
+        "rho": 2.15,
+        "Qp": 120.0,
+        "Qs": 60.0
+      },
+      {
+        "thickness": 0.2,
+        "Vp": 3.0,
+        "Vs": 1.43,
+        "rho": 2.22,
+        "Qp": 143.0,
+        "Qs": 71.5
+      },
+      {
+        "thickness": 0.2,
+        "Vp": 3.27,
+        "Vs": 1.64,
+        "rho": 2.28,
+        "Qp": 164.0,
+        "Qs": 82.0
+      },
+      {
+        "thickness": 0.2,
+        "Vp": 3.53,
+        "Vs": 1.86,
+        "rho": 2.32,
+        "Qp": 186.0,
+        "Qs": 93.0
+      },
+      {
+        "thickness": 0.2,
+        "Vp": 3.8,
+        "Vs": 2.07,
+        "rho": 2.36,
+        "Qp": 207.0,
+        "Qs": 103.5
+      },
+      {
+        "thickness": 0.2,
+        "Vp": 4.07,
+        "Vs": 2.28,
+        "rho": 2.4,
+        "Qp": 228.0,
+        "Qs": 114.0
+      },
+      {
+        "thickness": 0.2,
+        "Vp": 4.33,
+        "Vs": 2.49,
+        "rho": 2.44,
+        "Qp": 249.0,
+        "Qs": 124.5
+      },
+      {
+        "thickness": 0.2,
+        "Vp": 4.6,
+        "Vs": 2.7,
+        "rho": 2.48,
+        "Qp": 270.0,
+        "Qs": 135.0
+      },
+      {
+        "thickness": 0.2,
+        "Vp": 4.71,
+        "Vs": 2.77,
+        "rho": 2.49,
+        "Qp": 277.0,
+        "Qs": 138.5
+      },
+      {
+        "thickness": 0.2,
+        "Vp": 4.82,
+        "Vs": 2.84,
+        "rho": 2.51,
+        "Qp": 284.0,
+        "Qs": 142.0
+      },
+      {
+        "thickness": 0.2,
+        "Vp": 4.93,
+        "Vs": 2.91,
+        "rho": 2.52,
+        "Qp": 291.0,
+        "Qs": 145.5
+      },
+      {
+        "thickness": 0.2,
+        "Vp": 5.04,
+        "Vs": 2.98,
+        "rho": 2.54,
+        "Qp": 298.0,
+        "Qs": 149.0
+      },
+      {
+        "thickness": 0.2,
+        "Vp": 5.15,
+        "Vs": 3.05,
+        "rho": 2.56,
+        "Qp": 305.0,
+        "Qs": 152.5
+      },
+      {
+        "thickness": 0.2,
+        "Vp": 5.26,
+        "Vs": 3.12,
+        "rho": 2.58,
+        "Qp": 312.0,
+        "Qs": 156.0
+      },
+      {
+        "thickness": 0.2,
+        "Vp": 5.37,
+        "Vs": 3.19,
+        "rho": 2.6,
+        "Qp": 319.0,
+        "Qs": 159.5
+      },
+      {
+        "thickness": 0.2,
+        "Vp": 5.48,
+        "Vs": 3.26,
+        "rho": 2.61,
+        "Qp": 326.0,
+        "Qs": 163.0
+      },
+      {
+        "thickness": 0.2,
+        "Vp": 5.59,
+        "Vs": 3.33,
+        "rho": 2.63,
+        "Qp": 333.0,
+        "Qs": 166.5
+      },
+      {
+        "thickness": 0.2,
+        "Vp": 5.7,
+        "Vs": 3.4,
+        "rho": 2.66,
+        "Qp": 340.0,
+        "Qs": 170.0
+      },
+      {
+        "thickness": 3.0,
+        "Vp": 6.0,
+        "Vs": 3.6,
+        "rho": 2.72,
+        "Qp": 360.0,
+        "Qs": 180.0
+      },
+      {
+        "thickness": 4.0,
+        "Vp": 6.0,
+        "Vs": 3.6,
+        "rho": 2.72,
+        "Qp": 360.0,
+        "Qs": 180.0
+      },
+      {
+        "thickness": 15.0,
+        "Vp": 6.5,
+        "Vs": 3.7,
+        "rho": 2.83,
+        "Qp": 370.0,
+        "Qs": 185.0
+      },
+      {
+        "thickness": 12.0,
+        "Vp": 7.5,
+        "Vs": 4.3,
+        "rho": 3.12,
+        "Qp": 430.0,
+        "Qs": 215.0
+      },
+      {
+        "thickness": 999.0,
+        "Vp": 8.1,
+        "Vs": 4.6,
+        "rho": 3.33,
+        "Qp": 460.0,
+        "Qs": 230.0
+      }
+    ]
+  },
+  "velocity_model": {
+    "min_vs": 0.5,
+    "version": "2.06",
+    "topo_type": "SQUASHED_TAPERED",
+    "dt": 0.01,
+    "ds_multiplier": 1.2,
+    "resolution": 0.2,
+    "vs30": 500.0,
+    "s_wave_velocity": 3500.0,
+    "pgv_interpolants": [
+      [3.5, 1.0],
+      [8.0, 1.0]
+    ]
+  },
+  "domain": {
+    "resolution": 0.2,
+    "domain": [
+      {
+        "latitude": -45.721425525413245,
+        "longitude": 165.94967778722216
+      },
+      {
+        "latitude": -47.4950738778736,
+        "longitude": 168.64927641538526
+      },
+      {
+        "latitude": -40.04390798508443,
+        "longitude": 177.1594121448478
+      },
+      {
+        "latitude": -38.468257472656234,
+        "longitude": 174.53514866352106
+      }
+    ],
+    "depth": 57.0,
+    "duration": 326.3542379193343,
+    "dt": 0.01
+  }
 }
