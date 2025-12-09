@@ -326,7 +326,3 @@ def compare_sim_per_basin(
         fig.savefig(save, dpi=dpi)
     else:
         plt.show()
-
-
-if __name__ == "__main__":
-    app()
