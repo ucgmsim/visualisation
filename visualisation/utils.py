@@ -1,13 +1,25 @@
 """Utility functions common to many plotting scripts."""
 
-from typing import Optional
+from typing import Any, Literal, Optional, TypedDict, Unpack
 
 import numpy as np
+import numpy.typing as npt
+import oq_wrapper as oqw
 import pygmt
 import scipy as sp
 import shapely
+from matplotlib import pyplot as plt
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 
 from qcore import coordinates
+from source_modelling import moment
+from workflow.realisations import (
+    Magnitudes,
+    Rakes,
+    RupturePropagationConfig,
+    SourceConfig,
+)
 
 
 def format_description(
@@ -316,3 +328,137 @@ def grid_scale_for_region(region: tuple[float, float, float, float]) -> int:
     lon_km = (max_lon - min_lon) * 111 * np.cos(np.radians((min_lat + max_lat) / 2))
     maximum_extent = max(lat_km, lon_km)
     return int(round(max(5, 2.5 * maximum_extent)))
+
+
+class SubplotsKwargs(TypedDict, total=False):
+    sharex: bool | Literal["none", "all", "row", "col"]
+    sharey: bool | Literal["none", "all", "row", "col"]
+    subplot_kw: dict[str, Any] | None
+    gridspec_kw: dict[str, Any] | None
+    figsize: tuple[float, float]
+    constrained_layout: bool | dict[str, Any]
+    layout: Literal["constrained", "compressed", "tight"] | None
+
+
+def balanced_subplot_grid(
+    n_subplots: int,
+    aspect: float,
+    subplot_size: tuple[float, float] | None = None,
+    squeeze: bool = False,
+    clear: bool = False,
+    **kwargs: Unpack[SubplotsKwargs],
+) -> tuple[Figure, npt.NDArray[Axes]]:
+    # This has more columns than rows, i.e. wide
+    height = np.sqrt(n_subplots / aspect)
+    rows = int(np.ceil(height))
+    columns = int(np.ceil(height * aspect))
+    # Ensures there are no blank rows.
+    rows -= max(0, (rows * columns - n_subplots) // columns)
+
+    if subplot_size:
+        width, height = subplot_size
+        kwargs["figsize"] = (width * columns, height * rows)
+
+    fig, axes = plt.subplots(rows, columns, **kwargs)
+    if n_subplots == 1:
+        axes = np.atleast_2d([axes])
+    if squeeze:
+        axes = axes.squeeze()
+    if clear:
+        for ax in axes.flatten()[n_subplots:]:
+            ax.remove()
+
+    return fig, axes
+
+
+class RuptureContext(TypedDict):
+    mag: float
+    rake: float
+    dip: float
+    hypo_depth: float
+    ztor: float
+    zbot: float
+
+
+class SiteProperties(TypedDict):
+    vs30: float
+    z1pt0: float
+    z2pt5: float
+
+
+def circmean(
+    samples: npt.NDArray[np.floating], weights: npt.NDArray[np.floating]
+) -> float:
+    x = np.cos(samples)
+    y = np.sin(samples)
+    z = weights * np.array([x, y])
+    mean_resultant_vector = np.mean(z, axis=1)
+    argument = np.arctan2(mean_resultant_vector[1], mean_resultant_vector[0])
+    return float(argument)
+
+
+def compute_rupture_context(
+    source_config: SourceConfig,
+    magnitudes_config: Magnitudes,
+    rakes_config: Rakes,
+    rupture_propagation: RupturePropagationConfig,
+) -> RuptureContext:
+    moments = []
+    dips = []
+    rakes = []
+
+    for name, source in source_config.source_geometries.items():
+        dips.append(source.dip)
+        moments.append(moment.magnitude_to_moment(magnitudes_config[name]))
+        rakes.append(rakes_config[name])
+
+    ztor = (
+        min(
+            source_config.source_geometries.values(), key=lambda source: source.top_m
+        ).top_m
+        / 1000
+    )
+    zbot = (
+        max(
+            source_config.source_geometries.values(), key=lambda source: source.bottom_m
+        ).bottom_m
+        / 1000
+    )
+    avg_rake = np.degrees(circmean(np.radians(rakes), np.array(moments)))
+    avg_dip = float(np.average(dips, weights=moments))
+    avg_moment = float(np.mean(moments))
+    total_moment = avg_moment * len(moments)
+    magnitude = moment.moment_to_magnitude(total_moment)
+    initial_source = source_config.source_geometries[rupture_propagation.initial_fault]
+    hypocentre = initial_source.fault_coordinates_to_wgs_depth_coordinates(
+        rupture_propagation.hypocentre
+    )
+    hypo_depth = float(hypocentre[2])
+    hypo_depth /= 1000.0
+    return RuptureContext(
+        mag=magnitude,
+        rake=avg_rake,
+        dip=avg_dip,
+        hypo_depth=hypo_depth,
+        ztor=ztor,
+        zbot=zbot,
+    )
+
+
+def compute_site_properties(
+    site_vs30: npt.NDArray[np.floating] | np.floating,
+) -> SiteProperties:
+    # Calculate geometric mean of site vs30 using the exponential-log form:
+    # exp(1/n sum vs30)
+    # This is as opposed to straight-forward calculation
+    # product(vs30) ^ (1/n)
+    # Which is numerically unstable for a large number of stations due to
+    # floating-point arithmetic overflow and inprecision at large values
+    # obtained by multiplication.
+    if isinstance(site_vs30, np.ndarray):
+        vs30 = np.exp(1 / len(site_vs30) * np.sum(np.log(site_vs30)))
+    else:
+        vs30 = site_vs30
+    z1pt0 = oqw.estimations.chiou_young_14_calc_z1p0(vs30)
+    z2pt5 = oqw.estimations.campbell_bozorgina_14_calc_z2p5(vs30)
+    return SiteProperties(vs30=vs30, z1pt0=z1pt0, z2pt5=z2pt5)

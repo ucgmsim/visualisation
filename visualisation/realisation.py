@@ -211,7 +211,6 @@ def plot_realisation(
     title: str | None = None,
     subtitle: str | None = None,
     width: float = 10,
-    show_geonet_stations: bool = False,
     show_geometry: bool = True,
     show_pgv_targets: bool = False,
     pgv_targets: list[float] | None = None,
@@ -233,8 +232,6 @@ def plot_realisation(
         Subtitle of the plot.
     width : float
         Width of the plot in cm.
-    show_geonet_stations : bool
-        Show GeoNet stations on the plot.
     show_geometry : bool
         Show source geometry on the plot.
     show_pgv_targets : bool
@@ -263,20 +260,21 @@ def plot_realisation(
     >>> fig.show()
     """
     show_pgv_targets = show_pgv_targets or bool(pgv_targets)
-    rupture_propagation = RupturePropagationConfig.read_from_realisation(
-        realisation_ffp
-    )
     domain_parameters = DomainParameters.read_from_realisation(realisation_ffp)
-
-    velocity_model_parameters = VelocityModelParameters.read_from_realisation(
-        realisation_ffp
-    )
 
     source_config = SourceConfig.read_from_realisation(realisation_ffp)
 
     rrup_bounding_polygons: list[shapely.Polygon] = []
 
     if show_pgv_targets:
+        rupture_propagation = RupturePropagationConfig.read_from_realisation(
+            realisation_ffp
+        )
+
+        velocity_model_parameters = VelocityModelParameters.read_from_realisation(
+            realisation_ffp
+        )
+
         fault_pgv_targets = pgv_targets or [
             generate_velocity_model_parameters.pgv_target(
                 rupture_propagation, velocity_model_parameters
@@ -449,7 +447,6 @@ def plot_realisation_to_file(
         title=title,
         subtitle=subtitle,
         width=width,
-        show_geonet_stations=show_geonet_stations,
         show_geometry=show_geometry,
         show_pgv_targets=show_pgv_targets,
         pgv_targets=pgv_targets,
