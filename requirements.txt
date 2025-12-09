@@ -19,3 +19,4 @@ pytest-xdist
 typer
 tqdm
 rpy2
+xarray[io]
