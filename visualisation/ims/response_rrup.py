@@ -228,7 +228,7 @@ def compare_sim_to_nshm_subplots(
             ax,
             simulation_ds.rrup.values,
             simulation_ds.pSA.sel(period=period, component=component).values,
-            label="Simulated Stations",
+            label="Simulated stations",
             color="tab:gray",
         )
     # Plot NSHM
