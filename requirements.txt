@@ -18,3 +18,4 @@ pytest-cov
 pytest-xdist
 typer
 tqdm
+rpy2
