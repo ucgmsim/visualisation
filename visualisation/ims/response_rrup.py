@@ -155,6 +155,8 @@ def compare_sim_to_nshm_subplots(
     ymin: float | None = None,
     ymax: float | None = None,
     basin_vs_no_basin: bool = False,
+    all_in_one: bool = False,
+    span: float = 1 / 3,
 ):
     """
     Create subplots: first shows all stations, then one subplot per basin.
@@ -208,6 +210,7 @@ def compare_sim_to_nshm_subplots(
             basin_ds.pSA.sel(period=period, component=component).values,
             label="Basin stations",
             color="darkred",
+            span=span,
         )
         plot_simulation_fit(
             ax,
@@ -215,6 +218,7 @@ def compare_sim_to_nshm_subplots(
             non_basin_ds.pSA.sel(period=period, component=component).values,
             label="Non-basin stations",
             color="purple",
+            span=span,
         )
     else:
         ax.scatter(
@@ -230,6 +234,7 @@ def compare_sim_to_nshm_subplots(
             simulation_ds.pSA.sel(period=period, component=component).values,
             label="Simulated stations",
             color="tab:gray",
+            span=span,
         )
     # Plot NSHM
     ax.legend()
@@ -237,8 +242,19 @@ def compare_sim_to_nshm_subplots(
     ax.set_yscale("log")
     ax.set_xscale("log")
 
-    # --- Per-basin subplots ---
-    if plot_basins:
+    if plot_basins and all_in_one:
+        for basin in plot_basins:
+            subds = simulation_ds.sel(
+                station=[
+                    s
+                    for s, b in zip(
+                        simulation_ds.station.values, simulation_ds.basin.values
+                    )
+                    if b == basin
+                ]
+            )
+
+    elif plot_basins:
         for i, basin in enumerate(plot_basins):
             row, col = np.unravel_index(i + 1, axes.shape)
             ax = axes[row, col]
@@ -304,6 +320,8 @@ def compare_sim_per_basin(
     ymax: float | None = 10,
     component: str = "rotd50",
     compare_basin: bool = False,
+    all_in_one: bool = False,
+    span: float = 1 / 3,
 ) -> None:
     """
     Compare simulation dataset results to NSHM with subplots per basin.
@@ -320,6 +338,7 @@ def compare_sim_per_basin(
         ymin=ymin,
         ymax=ymax,
         basin_vs_no_basin=compare_basin,
+        span=span,
     )
 
     if save:
