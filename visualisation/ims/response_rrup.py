@@ -309,7 +309,7 @@ def compare_sim_per_basin(
     Compare simulation dataset results to NSHM with subplots per basin.
     First subplot is all stations.
     """
-    simulation_ds = xr.open_dataset(simulation_dataset_path)
+    simulation_ds = xr.open_dataset(simulation_dataset_path, engine="h5netcdf")
 
     fig = compare_sim_to_nshm_subplots(
         realisation_ffp,
