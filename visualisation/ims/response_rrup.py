@@ -369,10 +369,10 @@ def plot_combined_basin_plot(
     period: float,
     basins: list[str],
     component: str = "rotd50",
-    xmin: Union[float, None] = None,
-    xmax: Union[float, None] = None,
-    ymin: Union[float, None] = None,
-    ymax: Union[float, None] = None,
+    xmin: float | None = None,
+    xmax: float | None = None,
+    ymin: float | None = None,
+    ymax: float | None = None,
     span: float = 1 / 3,
 ):
     """
