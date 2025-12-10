@@ -270,7 +270,7 @@ def plot_basin_vs_no_basin(
 
     # 3. Apply final styling
     _apply_style_and_limits(
-        fig, all_axes, period, max_rrup, xmin, xmax, ymin, ymax, False, ax
+        fig, all_axes, period, max_rrup, ymin, ymax, False, ax, xmin=xmin, xmax=xmax
     )
 
     return fig
@@ -348,7 +348,16 @@ def plot_separate_basin_subplots(
 
     # 3. Apply final styling (is_multi_plot=True)
     _apply_style_and_limits(
-        fig, all_axes, period, max_rrup, xmin, xmax, ymin, ymax, True, ax_all_stations
+        fig,
+        all_axes,
+        period,
+        max_rrup,
+        ymin,
+        ymax,
+        True,
+        ax_all_stations,
+        xmin=xmin,
+        xmax=xmax,
     )
 
     return fig
@@ -446,7 +455,7 @@ def plot_combined_basin_plot(
 
     # 4. Apply final styling (is_multi_plot=False)
     _apply_style_and_limits(
-        fig, all_axes, period, max_rrup, xmin, xmax, ymin, ymax, False, ax
+        fig, all_axes, period, max_rrup, ymin, ymax, False, ax, xmin=xmin, xmax=xmax
     )
 
     return fig
