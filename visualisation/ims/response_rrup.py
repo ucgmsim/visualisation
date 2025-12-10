@@ -172,19 +172,24 @@ def compare_sim_to_nshm_subplots(
     # Determine basins to plot
     plot_basins = basins or []
 
-    fig, axes = utils.balanced_subplot_grid(
-        1 + len(plot_basins),
-        1.0,
-        subplot_size=(8, 6),
-        clear=False,
-        sharex=True,
-        sharey=True,
-        constrained_layout=True,
-    )
+    if all_in_one:
+        fig, ax = plt.subplots(constrained_layout=True)
+    else:
+        fig, axes = utils.balanced_subplot_grid(
+            1 + len(plot_basins),
+            1.0,
+            subplot_size=(8, 6),
+            clear=False,
+            sharex=True,
+            sharey=True,
+            constrained_layout=True,
+        )
+        ax = axes[0, 0]
+
     max_rrup = min(500, simulation_ds.rrup.max().item())
     nshm_rrup = np.geomspace(1e-3, max_rrup, num=100)
     # --- First subplot: all stations ---
-    ax = axes[0, 0]
+
     ax.grid(True, which="both", axis="both", lw=0.3)
     plot_nshm_fit(
         ax,
