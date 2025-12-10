@@ -369,18 +369,20 @@ def plot_combined_basin_plot(
     period: float,
     basins: list[str],
     component: str = "rotd50",
-    xmin: float | None = None,
-    xmax: float | None = None,
-    ymin: float | None = None,
-    ymax: float | None = None,
+    xmin: Union[float, None] = None,
+    xmax: Union[float, None] = None,
+    ymin: Union[float, None] = None,
+    ymax: Union[float, None] = None,
     span: float = 1 / 3,
 ):
     """
     Creates a single plot showing all stations and then overlays each basin.
+    Uses a colormap to assign distinct colors to each basin plot.
     """
     if not basins:
         # Fall back to plotting only all stations if no basins are specified
         print("Warning: No basins specified. Plotting all stations only.")
+        # Proceed with the rest of the function for the 'All Stations' plot
 
     max_rrup, nshm_rrup = _get_plotting_params(simulation_ds)
 
@@ -409,18 +411,26 @@ def plot_combined_basin_plot(
         span=span,
     )
 
-    # 3. Overlay Individual Basins
-    # We use a color cycle to differentiate the basin scatters
-    prop_cycle = plt.rcParams["axes.prop_cycle"]
-    colors = prop_cycle.by_key()["color"]
+    # --- FIX: Generate distinct colors using a Colormap ---
+    # Choose a colormap, e.g., 'viridis'. Other good choices: 'plasma', 'cividis'.
+    # N is the number of basins we need colors for.
+    N = len(basins)
+    cmap = cm.get_cmap("viridis")
 
+    # Generate N colors by sampling the colormap evenly
+    # We sample from a range (0.1 to 0.9) to avoid the very darkest/lightest ends of the map
+    basin_colors = [cmap(i) for i in np.linspace(0.1, 0.9, N)]
+    # --- END FIX ---
+
+    # 3. Overlay Individual Basins (Scatter Plots)
     for i, basin in enumerate(basins):
         subds = _get_basin_stations(simulation_ds, basin)
 
         if len(subds.station) == 0:
             continue
 
-        color = colors[i % len(colors)]
+        # Use the distinct color generated from the colormap
+        color = basin_colors[i]
 
         basin_pSA = subds.pSA.sel(period=period, component=component).values
         ax.scatter(
@@ -432,13 +442,16 @@ def plot_combined_basin_plot(
             label=f"{human_readable_basin_name(basin)} Stations",
         )
 
+    # 4. Overlay Individual Basins (Fit Lines)
+    # This loop is separate to ensure the fit lines are drawn *on top* of all scatter points
     for i, basin in enumerate(basins):
         subds = _get_basin_stations(simulation_ds, basin)
 
         if len(subds.station) == 0:
             continue
 
-        color = colors[i % len(colors)]
+        # Use the distinct color generated from the colormap (same as the scatter plot)
+        color = basin_colors[i]
 
         basin_pSA = subds.pSA.sel(period=period, component=component).values
 
@@ -452,8 +465,9 @@ def plot_combined_basin_plot(
         )
 
     ax.legend()
+    #
 
-    # 4. Apply final styling (is_multi_plot=False)
+    # 5. Apply final styling (is_multi_plot=False)
     _apply_style_and_limits(
         fig, all_axes, period, max_rrup, ymin, ymax, False, ax, xmin=xmin, xmax=xmax
     )
