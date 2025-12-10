@@ -253,7 +253,23 @@ def compare_sim_to_nshm_subplots(
                     if b == basin
                 ]
             )
-
+            if len(subds.station) == 0:
+                continue
+            ax.scatter(
+                subds.rrup,
+                subds.pSA.sel(period=period, component=component).values,
+                alpha=0.7,
+                s=10,
+                label=f"{basin}",
+            )
+            plot_nshm_fit(
+                ax,
+                realisation_ffp,
+                subds,
+                period,
+                nshm_rrup,
+                color="tab:blue",
+            )
     elif plot_basins:
         for i, basin in enumerate(plot_basins):
             row, col = np.unravel_index(i + 1, axes.shape)
