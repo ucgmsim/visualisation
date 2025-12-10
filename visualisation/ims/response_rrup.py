@@ -411,6 +411,17 @@ def plot_combined_basin_plot(
             color=color,
             label=f"{human_readable_basin_name(basin)} Stations",
         )
+
+    for i, basin in enumerate(basins):
+        subds = _get_basin_stations(simulation_ds, basin)
+
+        if len(subds.station) == 0:
+            continue
+
+        color = colors[i % len(colors)]
+
+        basin_pSA = subds.pSA.sel(period=period, component=component).values
+
         plot_simulation_fit(
             ax, subds.rrup.values, basin_pSA, label=None, color=color, span=span
         )
