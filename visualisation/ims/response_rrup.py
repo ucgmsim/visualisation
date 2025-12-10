@@ -131,7 +131,7 @@ def plot_simulation_fit(
     ax: Axes,
     rrup: np.ndarray,
     psa: np.ndarray,
-    label: str,
+    label: str | None,
     color: str,
     span: float = 1 / 3,
 ) -> None:
@@ -412,7 +412,7 @@ def plot_combined_basin_plot(
             label=f"{human_readable_basin_name(basin)} Stations",
         )
         plot_simulation_fit(
-            ax, subds.rrup, basin_pSA, label=None, color=color, span=span
+            ax, subds.rrup.values, basin_pSA, label=None, color=color, span=span
         )
 
     ax.legend()
