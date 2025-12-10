@@ -163,6 +163,8 @@ def _apply_style_and_limits(
     axes: np.ndarray,
     period: float,
     max_rrup: float,
+    xmin: float | None,
+    xmax: float | None,
     ymin: float | None,
     ymax: float | None,
     is_multi_plot: bool,
@@ -179,6 +181,9 @@ def _apply_style_and_limits(
     if ymin is not None or ymax is not None:
         for ax in axes.flatten():
             ax.set_ylim(bottom=ymin, top=ymax)
+    if xmin is not None or xmax is not None:
+        for ax in axes.flatten():
+            ax.set_xlim(bottom=xmin, top=xmax)
 
     ax_main.set_xlim(left=1e-1, right=max_rrup)
 
@@ -217,6 +222,8 @@ def plot_basin_vs_no_basin(
     simulation_ds: xr.Dataset,
     period: float,
     component: str = "rotd50",
+    xmin: float | None = None,
+    xmax: float | None = None,
     ymin: float | None = None,
     ymax: float | None = None,
     span: float = 1 / 3,
@@ -264,7 +271,9 @@ def plot_basin_vs_no_basin(
     ax.legend()
 
     # 3. Apply final styling
-    _apply_style_and_limits(fig, all_axes, period, max_rrup, ymin, ymax, False, ax)
+    _apply_style_and_limits(
+        fig, all_axes, period, max_rrup, xmin, xmax, ymin, ymax, False, ax
+    )
 
     return fig
 
@@ -275,6 +284,8 @@ def plot_separate_basin_subplots(
     period: float,
     basins: list[str],
     component: str = "rotd50",
+    xmin: float | None = None,
+    xmax: float | None = None,
     ymin: float | None = None,
     ymax: float | None = None,
     span: float = 1 / 3,
@@ -339,7 +350,7 @@ def plot_separate_basin_subplots(
 
     # 3. Apply final styling (is_multi_plot=True)
     _apply_style_and_limits(
-        fig, all_axes, period, max_rrup, ymin, ymax, True, ax_all_stations
+        fig, all_axes, period, max_rrup, xmin, xmax, ymin, ymax, True, ax_all_stations
     )
 
     return fig
@@ -351,6 +362,8 @@ def plot_combined_basin_plot(
     period: float,
     basins: list[str],
     component: str = "rotd50",
+    xmin: float | None = None,
+    xmax: float | None = None,
     ymin: float | None = None,
     ymax: float | None = None,
     span: float = 1 / 3,
@@ -434,7 +447,9 @@ def plot_combined_basin_plot(
     ax.legend()
 
     # 4. Apply final styling (is_multi_plot=False)
-    _apply_style_and_limits(fig, all_axes, period, max_rrup, ymin, ymax, False, ax)
+    _apply_style_and_limits(
+        fig, all_axes, period, max_rrup, xmin, xmax, ymin, ymax, False, ax
+    )
 
     return fig
 
@@ -459,6 +474,8 @@ def plot_basin_split(
     dpi: Annotated[int, typer.Option(help="DPI for saving the figure.")] = 300,
     ymin: Annotated[float | None, typer.Option(help="Minimum y-axis limit.")] = 1e-5,
     ymax: Annotated[float | None, typer.Option(help="Maximum y-axis limit.")] = 10,
+    xmin: Annotated[float | None, typer.Option(help="Minimum x-axis limit.")] = None,
+    xmax: Annotated[float | None, typer.Option(help="Maximum x-axis limit.")] = None,
     component: Annotated[
         str, typer.Option(help="PSA component to plot (e.g., rotd50).")
     ] = "rotd50",
@@ -479,6 +496,8 @@ def plot_basin_split(
         component=component,
         ymin=ymin,
         ymax=ymax,
+        xmin=xmin,
+        xmax=xmax,
         span=span,
     )
 
@@ -517,6 +536,8 @@ def plot_basins_separate(
     dpi: Annotated[int, typer.Option(help="DPI for saving the figure.")] = 300,
     ymin: Annotated[float | None, typer.Option(help="Minimum y-axis limit.")] = 1e-5,
     ymax: Annotated[float | None, typer.Option(help="Maximum y-axis limit.")] = 10,
+    xmin: Annotated[float | None, typer.Option(help="Minimum x-axis limit.")] = None,
+    xmax: Annotated[float | None, typer.Option(help="Maximum x-axis limit.")] = None,
     component: Annotated[
         str, typer.Option(help="PSA component to plot (e.g., rotd50).")
     ] = "rotd50",
@@ -547,6 +568,8 @@ def plot_basins_separate(
         component=component,
         ymin=ymin,
         ymax=ymax,
+        xmin=xmin,
+        xmax=xmax,
         span=span,
     )
 
@@ -585,6 +608,8 @@ def plot_basins_combined(
     dpi: Annotated[int, typer.Option(help="DPI for saving the figure.")] = 300,
     ymin: Annotated[float | None, typer.Option(help="Minimum y-axis limit.")] = 1e-5,
     ymax: Annotated[float | None, typer.Option(help="Maximum y-axis limit.")] = 10,
+    xmin: Annotated[float | None, typer.Option(help="Minimum x-axis limit.")] = None,
+    xmax: Annotated[float | None, typer.Option(help="Maximum x-axis limit.")] = None,
     component: Annotated[
         str, typer.Option(help="PSA component to plot (e.g., rotd50).")
     ] = "rotd50",
@@ -611,6 +636,8 @@ def plot_basins_combined(
         period,
         basins=basins_list,
         component=component,
+        xmin=xmin,
+        xmax=xmax,
         ymin=ymin,
         ymax=ymax,
         span=span,
