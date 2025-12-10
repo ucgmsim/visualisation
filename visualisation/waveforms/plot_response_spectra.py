@@ -16,13 +16,14 @@ app = typer.Typer()
 
 
 def plot_spectra(
+    fig: Figure,
+    ax: Axes,
     dataset: xr.Dataset,
-    station: str,
+    stations: list[str],
     component: str,
     ymax: float | None = None,
     ymin: float | None = None,
-    **kwargs,
-) -> tuple[Figure, list[Axes]]:
+) -> None:
     """Plot a spectra from a simulation.
 
     Parameters
@@ -38,25 +39,28 @@ def plot_spectra(
     ymin : float or None
         Min limit for y-axis.
     """
-    spectra = dataset.pSA.sel(station=station, component=component).values
-    periods = dataset.period.values
-    fig, ax = plt.subplots(**kwargs)
-    ax.plot(periods, spectra)
-    ax.grid()
     ax.set_ylabel(f"pSA [{component}, g]")
-    if ymin is not None or ymax is not None:
-        ax.set_ylim(bottom=ymin, top=ymax)
     ax.set_xlabel("Period [s]")
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.grid(visible=True, which="both", axis="both", lw=0.3)
-    return fig, ax
+    if ymin is not None or ymax is not None:
+        ax.set_ylim(bottom=ymin, top=ymax)
+
+    for station in stations:
+        spectra = dataset.pSA.sel(station=station, component=component).values
+        periods = dataset.period.values
+
+        ax.plot(periods, spectra, label=station)
+
+    if len(stations) > 1:
+        ax.legend()
 
 
 @cli.from_docstring(app)
 def plot_spectra_cli(
     dataset_path: Annotated[Path, typer.Argument()],
-    station: Annotated[str, typer.Argument()],
+    stations: Annotated[list[str], typer.Argument()],
     title: str | None = None,
     save: Path | None = None,
     dpi: int = 300,
@@ -79,13 +83,15 @@ def plot_spectra_cli(
     """
     dset = xr.open_dataset(dataset_path, engine="h5netcdf")
     cm = 1 / 2.54
-    fig, _ = plot_spectra(
+    fig, ax = plt.subplots(figsize=(width * cm, height * cm))
+    plot_spectra(
+        fig,
+        ax,
         dset,
-        station,
+        stations,
         component,
         ymin=ymin,
         ymax=ymax,
-        figsize=(width * cm, height * cm),
     )
 
     if title:
