@@ -163,12 +163,12 @@ def _apply_style_and_limits(
     axes: np.ndarray,
     period: float,
     max_rrup: float,
-    xmin: float | None,
-    xmax: float | None,
     ymin: float | None,
     ymax: float | None,
     is_multi_plot: bool,
     ax_main: plt.Axes,
+    xmin: float | None = 1e-1,
+    xmax: float | None = None,
 ):
     """Apply final styling, labels, and limits to all axes."""
     if is_multi_plot:
@@ -181,11 +181,9 @@ def _apply_style_and_limits(
     if ymin is not None or ymax is not None:
         for ax in axes.flatten():
             ax.set_ylim(bottom=ymin, top=ymax)
-    if xmin is not None or xmax is not None:
-        for ax in axes.flatten():
-            ax.set_xlim(bottom=xmin, top=xmax)
-
-    ax_main.set_xlim(left=1e-1, right=max_rrup)
+    xmax = xmax or max_rrup
+    for ax in axes.flatten():
+        ax.set_xlim(left=xmin, right=xmax)
 
 
 def _plot_nshm_fit_and_settings(
