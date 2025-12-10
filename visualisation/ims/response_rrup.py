@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from typing import NamedTuple
 
@@ -143,6 +144,13 @@ def plot_simulation_fit(
     ax.plot(rrup_out, np.exp(fit), c=color, label=label)
 
 
+def human_readable_basin_name(basin_name: str) -> str:
+    # NE_Otago -> NE Otago
+    basin_name_no_underscore = basin_name.replace("_", " ")
+    # Greate(r)(W)ellington -> Greate(r) (W)ellington
+    return re.sub(r"([a-z])([A-Z])", r"\1 \2", basin_name_no_underscore)
+
+
 # ------------------------
 # Compare per-basin subplots
 # ------------------------
@@ -260,7 +268,7 @@ def compare_sim_to_nshm_subplots(
                 subds.pSA.sel(period=period, component=component).values,
                 alpha=0.7,
                 s=10,
-                label=f"{basin}",
+                label=f"{human_readable_basin(basin)}",
             )
             plot_nshm_fit(
                 ax,
@@ -302,7 +310,7 @@ def compare_sim_to_nshm_subplots(
                 s=10,
             )
 
-            ax.set_title(f"Basin: {basin}")
+            ax.set_title(f"Basin: {human_readable_name(basin)}")
             ax.set_yscale("log")
             ax.set_xscale("log")
 
