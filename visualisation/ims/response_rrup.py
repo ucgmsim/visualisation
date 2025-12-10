@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import NamedTuple
+from typing import Annotated, NamedTuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -151,215 +151,451 @@ def human_readable_basin_name(basin_name: str) -> str:
     return re.sub(r"([a-z])([A-Z])", r"\1 \2", basin_name_no_underscore)
 
 
-# ------------------------
-# Compare per-basin subplots
-# ------------------------
-def compare_sim_to_nshm_subplots(
-    realisation_ffp: Path,
-    simulation_ds: xr.Dataset,
-    period: float,
-    basins: list[str] | None = None,
-    component: str = "rotd50",
-    ymin: float | None = None,
-    ymax: float | None = None,
-    basin_vs_no_basin: bool = False,
-    all_in_one: bool = False,
-    span: float = 1 / 3,
-):
-    """
-    Create subplots: first shows all stations, then one subplot per basin.
-    """
-    # Determine basins to plot
-    plot_basins = basins or []
-
-    if all_in_one:
-        fig, ax = plt.subplots(constrained_layout=True)
-    else:
-        fig, axes = utils.balanced_subplot_grid(
-            1 + len(plot_basins),
-            1.0,
-            subplot_size=(8, 6),
-            clear=False,
-            sharex=True,
-            sharey=True,
-            constrained_layout=True,
-        )
-        ax = axes[0, 0]
-
+def _get_plotting_params(simulation_ds: xr.Dataset):
+    """Calculate common plotting parameters."""
     max_rrup = min(500, simulation_ds.rrup.max().item())
     nshm_rrup = np.geomspace(1e-3, max_rrup, num=100)
-    # --- First subplot: all stations ---
+    return max_rrup, nshm_rrup
 
-    ax.grid(True, which="both", axis="both", lw=0.3)
-    plot_nshm_fit(
-        ax,
-        realisation_ffp,
-        simulation_ds,
-        period,
-        nshm_rrup,
-        color="tab:blue",
-        label="NSHM logic tree prediction",
-    )
-    if basin_vs_no_basin:
-        basin_ds = simulation_ds.where(simulation_ds.basin != "")
-        non_basin_ds = simulation_ds.where(simulation_ds.basin == "")
-        ax.scatter(
-            basin_ds.rrup,
-            basin_ds.pSA.sel(period=period, component=component).values,
-            c="tab:red",
-            alpha=0.3,
-            s=5,
-        )
-        ax.scatter(
-            non_basin_ds.rrup,
-            non_basin_ds.pSA.sel(period=period, component=component).values,
-            c="tab:purple",
-            alpha=0.3,
-            s=5,
-        )
-        plot_simulation_fit(
-            ax,
-            basin_ds.rrup.values,
-            basin_ds.pSA.sel(period=period, component=component).values,
-            label="Basin stations",
-            color="darkred",
-            span=span,
-        )
-        plot_simulation_fit(
-            ax,
-            non_basin_ds.rrup.values,
-            non_basin_ds.pSA.sel(period=period, component=component).values,
-            label="Non-basin stations",
-            color="purple",
-            span=span,
-        )
-    else:
-        ax.scatter(
-            simulation_ds.rrup,
-            simulation_ds.pSA.sel(period=period, component=component).values,
-            c="k",
-            alpha=0.3,
-            s=10,
-        )
-        plot_simulation_fit(
-            ax,
-            simulation_ds.rrup.values,
-            simulation_ds.pSA.sel(period=period, component=component).values,
-            label="Simulated stations",
-            color="tab:gray",
-            span=span,
-        )
-    # Plot NSHM
-    ax.legend()
 
-    ax.set_yscale("log")
-    ax.set_xscale("log")
-
-    if plot_basins and all_in_one:
-        for basin in plot_basins:
-            subds = simulation_ds.sel(
-                station=[
-                    s
-                    for s, b in zip(
-                        simulation_ds.station.values, simulation_ds.basin.values
-                    )
-                    if b == basin
-                ]
-            )
-            if len(subds.station) == 0:
-                continue
-            ax.scatter(
-                subds.rrup,
-                subds.pSA.sel(period=period, component=component).values,
-                alpha=0.7,
-                s=10,
-                label=f"{human_readable_basin_name(basin)}",
-            )
-            # No NSHM fit because of the overall fit plot
-    elif plot_basins:
-        for i, basin in enumerate(plot_basins):
-            row, col = np.unravel_index(i + 1, axes.shape)
-            ax = axes[row, col]
-            subds = simulation_ds.sel(
-                station=[
-                    s
-                    for s, b in zip(
-                        simulation_ds.station.values, simulation_ds.basin.values
-                    )
-                    if b == basin
-                ]
-            )
-            if len(subds.station) == 0:
-                continue
-            ax.grid(True, which="both", axis="both", lw=0.3)
-            plot_nshm_fit(
-                ax,
-                realisation_ffp,
-                subds,
-                period,
-                nshm_rrup,
-                color="tab:blue",
-            )
-            ax.scatter(
-                subds.rrup,
-                subds.pSA.sel(period=period, component=component).values,
-                c="red",
-                alpha=0.7,
-                s=10,
-            )
-
-            ax.set_title(f"Basin: {human_readable_basin_name(basin)}")
-            ax.set_yscale("log")
-            ax.set_xscale("log")
-
-    # --- Axis labels ---
-    if plot_basins:
+def _apply_style_and_limits(
+    fig,
+    axes: np.ndarray,
+    period: float,
+    max_rrup: float,
+    ymin: float | None,
+    ymax: float | None,
+    is_multi_plot: bool,
+    ax_main: plt.Axes,
+):
+    """Apply final styling, labels, and limits to all axes."""
+    if is_multi_plot:
         fig.supxlabel("Source to site distance, $R_{rup}$ [km]")
         fig.supylabel(f"pSA({period:.2f} s) [g]")
     else:
-        ax.set_xlabel("Source to site distance, $R_{rup}$ [km]")
-        ax.set_ylabel(f"pSA({period:.2f} s) [g]")
+        ax_main.set_xlabel("Source to site distance, $R_{rup}$ [km]")
+        ax_main.set_ylabel(f"pSA({period:.2f} s) [g]")
 
     if ymin is not None or ymax is not None:
         for ax in axes.flatten():
             ax.set_ylim(bottom=ymin, top=ymax)
-    ax.set_xlim(left=1e-1, right=max_rrup)
+
+    ax_main.set_xlim(left=1e-1, right=max_rrup)
+
+
+def _plot_nshm_fit_and_settings(
+    ax: plt.Axes,
+    realisation_ffp: Path,
+    data_ds: xr.Dataset,
+    period: float,
+    nshm_rrup: np.ndarray,
+    label: str | None = "NSHM logic tree prediction",
+):
+    """Plots the common NSHM fit and initial axis settings (log scale, grid)."""
+    ax.grid(True, which="both", axis="both", lw=0.3)
+    plot_nshm_fit(
+        ax,
+        realisation_ffp,
+        data_ds,
+        period,
+        nshm_rrup,
+        color="tab:blue",
+        label=label,
+    )
+    ax.set_yscale("log")
+    ax.set_xscale("log")
+
+
+def _get_basin_stations(simulation_ds: xr.Dataset, basin: str):
+    """Filter the dataset for stations belonging to a specific basin."""
+    # Uses xarray's .where() for cleaner filtering
+    return simulation_ds.where(simulation_ds.basin == basin, drop=True)
+
+
+def plot_basin_vs_no_basin(
+    realisation_ffp: Path,
+    simulation_ds: xr.Dataset,
+    period: float,
+    component: str = "rotd50",
+    ymin: float | None = None,
+    ymax: float | None = None,
+    span: float = 1 / 3,
+):
+    """
+    Creates a single plot comparing simulation data for basin stations
+    vs. non-basin stations against the NSHM prediction.
+    """
+    max_rrup, nshm_rrup = _get_plotting_params(simulation_ds)
+
+    fig, ax = plt.subplots(constrained_layout=True)
+    all_axes = np.array([ax])  # For style helper consistency
+
+    # 1. Plot NSHM fit and set axis scales/grid
+    _plot_nshm_fit_and_settings(ax, realisation_ffp, simulation_ds, period, nshm_rrup)
+
+    # 2. Split and plot simulation data
+    basin_ds = simulation_ds.where(simulation_ds.basin != "", drop=True)
+    non_basin_ds = simulation_ds.where(simulation_ds.basin == "", drop=True)
+
+    # Basin stations
+    basin_pSA = basin_ds.pSA.sel(period=period, component=component).values
+    ax.scatter(basin_ds.rrup, basin_pSA, c="tab:red", alpha=0.3, s=5)
+    plot_simulation_fit(
+        ax,
+        basin_ds.rrup.values,
+        basin_pSA,
+        label="Basin stations",
+        color="darkred",
+        span=span,
+    )
+
+    # Non-Basin stations
+    non_basin_pSA = non_basin_ds.pSA.sel(period=period, component=component).values
+    ax.scatter(non_basin_ds.rrup, non_basin_pSA, c="tab:purple", alpha=0.3, s=5)
+    plot_simulation_fit(
+        ax,
+        non_basin_ds.rrup.values,
+        non_basin_pSA,
+        label="Non-basin stations",
+        color="purple",
+        span=span,
+    )
+
+    ax.legend()
+
+    # 3. Apply final styling
+    _apply_style_and_limits(fig, all_axes, period, max_rrup, ymin, ymax, False, ax)
+
     return fig
 
 
-# ------------------------
-# CLI
-# ------------------------
-@app.command()
-def compare_sim_per_basin(
+def plot_separate_basin_subplots(
     realisation_ffp: Path,
-    simulation_dataset_path: Path,
+    simulation_ds: xr.Dataset,
     period: float,
-    basins: list[str] | None = None,
-    save: Path | None = None,
-    dpi: int = 300,
-    ymin: float | None = 1e-5,
-    ymax: float | None = 10,
+    basins: list[str],
     component: str = "rotd50",
-    compare_basin: bool = False,
-    all_in_one: bool = False,
+    ymin: float | None = None,
+    ymax: float | None = None,
     span: float = 1 / 3,
+):
+    """
+    Creates a grid of subplots: one for all stations, and one for each basin.
+    """
+    if not basins:
+        raise ValueError("Basins list cannot be empty for separate basin plotting.")
+
+    max_rrup, nshm_rrup = _get_plotting_params(simulation_ds)
+
+    # Setup figure with 1 + N_basins plots
+    num_plots = 1 + len(basins)
+    # utils.balanced_subplot_grid is assumed to return a 2D array of axes
+    fig, axes_2d = utils.balanced_subplot_grid(
+        num_plots,
+        1.0,
+        subplot_size=(8, 6),
+        clear=False,
+        sharex=True,
+        sharey=True,
+        constrained_layout=True,
+    )
+    all_axes = axes_2d.flatten()
+    ax_all_stations = all_axes[0]
+
+    # --- A. Plot All Stations (Primary Plot) ---
+    _plot_nshm_fit_and_settings(
+        ax_all_stations, realisation_ffp, simulation_ds, period, nshm_rrup
+    )
+
+    # Plot all simulation stations together
+    all_pSA = simulation_ds.pSA.sel(period=period, component=component).values
+    ax_all_stations.scatter(simulation_ds.rrup, all_pSA, c="k", alpha=0.3, s=10)
+    plot_simulation_fit(
+        ax_all_stations,
+        simulation_ds.rrup.values,
+        all_pSA,
+        label="Simulated stations",
+        color="tab:gray",
+        span=span,
+    )
+    ax_all_stations.set_title("All Stations (Combined)")
+    ax_all_stations.legend()
+
+    # --- B. Plot Individual Basins ---
+    for i, basin in enumerate(basins):
+        ax_basin = all_axes[i + 1]
+        subds = _get_basin_stations(simulation_ds, basin)
+
+        if len(subds.station) == 0:
+            ax_basin.set_title(f"Basin: {human_readable_basin_name(basin)} (No data)")
+            continue
+
+        _plot_nshm_fit_and_settings(
+            ax_basin, realisation_ffp, subds, period, nshm_rrup, label=None
+        )  # No legend for NSHM here
+
+        basin_pSA = subds.pSA.sel(period=period, component=component).values
+        ax_basin.scatter(subds.rrup, basin_pSA, c="red", alpha=0.7, s=10)
+        ax_basin.set_title(f"Basin: {human_readable_basin_name(basin)}")
+
+    # 3. Apply final styling (is_multi_plot=True)
+    _apply_style_and_limits(
+        fig, all_axes, period, max_rrup, ymin, ymax, True, ax_all_stations
+    )
+
+    return fig
+
+
+def plot_combined_basin_plot(
+    realisation_ffp: Path,
+    simulation_ds: xr.Dataset,
+    period: float,
+    basins: list[str],
+    component: str = "rotd50",
+    ymin: float | None = None,
+    ymax: float | None = None,
+    span: float = 1 / 3,
+):
+    """
+    Creates a single plot showing all stations and then overlays each basin.
+    """
+    if not basins:
+        # Fall back to plotting only all stations if no basins are specified
+        print("Warning: No basins specified. Plotting all stations only.")
+
+    max_rrup, nshm_rrup = _get_plotting_params(simulation_ds)
+
+    fig, ax = plt.subplots(constrained_layout=True)
+    all_axes = np.array([ax])  # For style helper consistency
+
+    # 1. Plot NSHM fit and set axis scales/grid
+    _plot_nshm_fit_and_settings(ax, realisation_ffp, simulation_ds, period, nshm_rrup)
+
+    # 2. Plot All Stations (Base Layer)
+    all_pSA = simulation_ds.pSA.sel(period=period, component=component).values
+    ax.scatter(
+        simulation_ds.rrup,
+        all_pSA,
+        c="k",
+        alpha=0.1,
+        s=10,
+        label="All Simulated Stations",
+    )
+    plot_simulation_fit(
+        ax,
+        simulation_ds.rrup.values,
+        all_pSA,
+        label="Overall Fit",
+        color="tab:gray",
+        span=span,
+    )
+
+    # 3. Overlay Individual Basins
+    # We use a color cycle to differentiate the basin scatters
+    prop_cycle = plt.rcParams["axes.prop_cycle"]
+    colors = prop_cycle.by_key()["color"]
+
+    for i, basin in enumerate(basins):
+        subds = _get_basin_stations(simulation_ds, basin)
+
+        if len(subds.station) == 0:
+            continue
+
+        color = colors[i % len(colors)]
+
+        basin_pSA = subds.pSA.sel(period=period, component=component).values
+        ax.scatter(
+            subds.rrup,
+            basin_pSA,
+            alpha=0.7,
+            s=10,
+            color=color,
+            label=f"{human_readable_basin_name(basin)} Stations",
+        )
+
+    ax.legend()
+    ax.set_title("Combined View: All Stations & Individual Basins")
+
+    # 4. Apply final styling (is_multi_plot=False)
+    _apply_style_and_limits(fig, all_axes, period, max_rrup, ymin, ymax, False, ax)
+
+    return fig
+
+
+@app.command()
+def plot_basin_split(
+    # Arguments
+    realisation_ffp: Annotated[
+        Path, typer.Argument(help="Path to the NSHM fit data file.")
+    ],
+    simulation_dataset_path: Annotated[
+        Path, typer.Argument(help="Path to the simulation xarray dataset (H5NetCDF).")
+    ],
+    period: Annotated[
+        float, typer.Argument(help="Spectral acceleration period (T) in seconds.")
+    ],
+    # Options
+    save: Annotated[
+        Path | None,
+        typer.Option("--save", "-s", help="Output path to save the figure."),
+    ] = None,
+    dpi: Annotated[int, typer.Option(help="DPI for saving the figure.")] = 300,
+    ymin: Annotated[float | None, typer.Option(help="Minimum y-axis limit.")] = 1e-5,
+    ymax: Annotated[float | None, typer.Option(help="Maximum y-axis limit.")] = 10,
+    component: Annotated[
+        str, typer.Option(help="PSA component to plot (e.g., rotd50).")
+    ] = "rotd50",
+    span: Annotated[
+        float, typer.Option(help="Smoothing span for the simulation fit line.")
+    ] = 1 / 3,
 ) -> None:
     """
-    Compare simulation dataset results to NSHM with subplots per basin.
-    First subplot is all stations.
+    Creates a single plot comparing simulated pSA for Basin stations against
+    Non-Basin stations, along with the NSHM prediction.
     """
     simulation_ds = xr.open_dataset(simulation_dataset_path, engine="h5netcdf")
 
-    fig = compare_sim_to_nshm_subplots(
+    fig = plot_basin_vs_no_basin(
         realisation_ffp,
         simulation_ds,
         period,
-        basins=basins,
         component=component,
         ymin=ymin,
         ymax=ymax,
-        basin_vs_no_basin=compare_basin,
+        span=span,
+    )
+
+    if save:
+        fig.savefig(save, dpi=dpi)
+    else:
+        plt.show()
+
+
+# ----------------------------------------------------
+# 2. Command: All Stations + Separate Basin Subplots
+# ----------------------------------------------------
+@app.command()
+def plot_basins_separate(
+    # Arguments
+    realisation_ffp: Annotated[
+        Path, typer.Argument(help="Path to the NSHM fit data file.")
+    ],
+    simulation_dataset_path: Annotated[
+        Path, typer.Argument(help="Path to the simulation xarray dataset (H5NetCDF).")
+    ],
+    period: Annotated[
+        float, typer.Argument(help="Spectral acceleration period (T) in seconds.")
+    ],
+    # Options
+    basins: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--basin", "-b", help="List of basins to plot in separate subplots."
+        ),
+    ] = None,
+    save: Annotated[
+        Path | None,
+        typer.Option("--save", "-s", help="Output path to save the figure."),
+    ] = None,
+    dpi: Annotated[int, typer.Option(help="DPI for saving the figure.")] = 300,
+    ymin: Annotated[float | None, typer.Option(help="Minimum y-axis limit.")] = 1e-5,
+    ymax: Annotated[float | None, typer.Option(help="Maximum y-axis limit.")] = 10,
+    component: Annotated[
+        str, typer.Option(help="PSA component to plot (e.g., rotd50).")
+    ] = "rotd50",
+    span: Annotated[
+        float, typer.Option(help="Smoothing span for the overall simulation fit line.")
+    ] = 1 / 3,
+) -> None:
+    """
+    Creates a grid of plots: one showing all stations, and one separate subplot
+    for each specified basin, comparing to NSHM.
+    """
+    # Note: basins will be list[str] or None. Check for empty list after parsing.
+    basins_list = basins or []
+    if not basins_list:
+        typer.echo(
+            "Error: At least one basin must be specified using --basin for this command.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    simulation_ds = xr.open_dataset(simulation_dataset_path, engine="h5netcdf")
+
+    fig = plot_separate_basin_subplots(
+        realisation_ffp,
+        simulation_ds,
+        period,
+        basins=basins_list,
+        component=component,
+        ymin=ymin,
+        ymax=ymax,
+        span=span,
+    )
+
+    if save:
+        fig.savefig(save, dpi=dpi)
+    else:
+        plt.show()
+
+
+# ----------------------------------------------------
+# 3. Command: All Stations + Basins in Combined Plot
+# ----------------------------------------------------
+@app.command()
+def plot_basins_combined(
+    # Arguments
+    realisation_ffp: Annotated[
+        Path, typer.Argument(help="Path to the NSHM fit data file.")
+    ],
+    simulation_dataset_path: Annotated[
+        Path, typer.Argument(help="Path to the simulation xarray dataset (H5NetCDF).")
+    ],
+    period: Annotated[
+        float, typer.Argument(help="Spectral acceleration period (T) in seconds.")
+    ],
+    # Options
+    basins: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--basin", "-b", help="List of basins to overlay on the main plot."
+        ),
+    ] = None,
+    save: Annotated[
+        Path | None,
+        typer.Option("--save", "-s", help="Output path to save the figure."),
+    ] = None,
+    dpi: Annotated[int, typer.Option(help="DPI for saving the figure.")] = 300,
+    ymin: Annotated[float | None, typer.Option(help="Minimum y-axis limit.")] = 1e-5,
+    ymax: Annotated[float | None, typer.Option(help="Maximum y-axis limit.")] = 10,
+    component: Annotated[
+        str, typer.Option(help="PSA component to plot (e.g., rotd50).")
+    ] = "rotd50",
+    span: Annotated[
+        float, typer.Option(help="Smoothing span for the overall simulation fit line.")
+    ] = 1 / 3,
+) -> None:
+    """
+    Creates a single plot showing all simulation stations (as background),
+    overlaid with scatters for each specified basin, and the NSHM prediction.
+    """
+    basins_list = basins or []
+    if not basins_list:
+        typer.echo(
+            "Warning: No basins specified. Plotting all stations (combined) only.",
+            err=True,
+        )
+
+    simulation_ds = xr.open_dataset(simulation_dataset_path, engine="h5netcdf")
+
+    fig = plot_combined_basin_plot(
+        realisation_ffp,
+        simulation_ds,
+        period,
+        basins=basins_list,
+        component=component,
+        ymin=ymin,
+        ymax=ymax,
         span=span,
     )
 
