@@ -268,7 +268,7 @@ def compare_sim_to_nshm_subplots(
                 subds.pSA.sel(period=period, component=component).values,
                 alpha=0.7,
                 s=10,
-                label=f"{human_readable_basin(basin)}",
+                label=f"{human_readable_basin_name(basin)}",
             )
             plot_nshm_fit(
                 ax,
@@ -310,7 +310,7 @@ def compare_sim_to_nshm_subplots(
                 s=10,
             )
 
-            ax.set_title(f"Basin: {human_readable_name(basin)}")
+            ax.set_title(f"Basin: {human_readable_basin_name(basin)}")
             ax.set_yscale("log")
             ax.set_xscale("log")
 
