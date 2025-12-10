@@ -294,7 +294,7 @@ def plot_separate_basin_subplots(
         num_plots,
         1.0,
         subplot_size=(8, 6),
-        clear=False,
+        clear=True,
         sharex=True,
         sharey=True,
         constrained_layout=True,
