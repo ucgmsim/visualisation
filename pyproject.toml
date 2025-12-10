@@ -25,7 +25,8 @@ plot-1d-velocity-model = "visualisation.plot_1d_velocity_model:app"
 plot-rupture-path = "visualisation.plot_rupture_path:app"
 plot-stoch = "visualisation.sources.plot_stoch:app"
 plot-ts = "visualisation.plot_ts:app"
-response-rrup = "visualisation.ims.response_rrup:app"
+plot-response-rrup = "visualisation.ims.response_rrup:app"
+plot-response-spectra = "visualisation.waveforms.plot_response_spectra:app"
 
 [tool.setuptools.package-dir]
 visualisation = "visualisation"
