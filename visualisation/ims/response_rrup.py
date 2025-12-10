@@ -423,7 +423,12 @@ def plot_combined_basin_plot(
         basin_pSA = subds.pSA.sel(period=period, component=component).values
 
         plot_simulation_fit(
-            ax, subds.rrup.values, basin_pSA, label=None, color=color, span=span
+            ax,
+            subds.rrup.values,
+            basin_pSA,
+            label=None,
+            color=color,
+            span=1,  # for each basin only show smooth line
         )
 
     ax.legend()
