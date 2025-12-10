@@ -318,7 +318,6 @@ def plot_separate_basin_subplots(
         color="tab:gray",
         span=span,
     )
-    ax_all_stations.set_title("All Stations (Combined)")
     ax_all_stations.legend()
 
     # --- B. Plot Individual Basins ---
@@ -412,9 +411,11 @@ def plot_combined_basin_plot(
             color=color,
             label=f"{human_readable_basin_name(basin)} Stations",
         )
+        plot_simulation_fit(
+            ax, subds.rrup, basin_pSA, label=None, color=color, span=span
+        )
 
     ax.legend()
-    ax.set_title("Combined View: All Stations & Individual Basins")
 
     # 4. Apply final styling (is_multi_plot=False)
     _apply_style_and_limits(fig, all_axes, period, max_rrup, ymin, ymax, False, ax)
