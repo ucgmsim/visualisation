@@ -9,6 +9,7 @@ import oq_wrapper as oqw
 import pandas as pd
 import typer
 import xarray as xr
+from matplotlib import colormaps as cm
 from matplotlib.axes import Axes
 from rpy2.robjects import default_converter, globalenv, numpy2ri, r
 from rpy2.robjects.conversion import localconverter
