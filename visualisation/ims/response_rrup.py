@@ -405,13 +405,13 @@ def plot_combined_basin_plot(
         c="k",
         alpha=0.1,
         s=10,
-        label="All Simulated Stations",
+        label="Simulation",
     )
     plot_simulation_fit(
         ax,
         simulation_ds.rrup.values,
         all_pSA,
-        label="Overall Fit",
+        label="Simulation fit",
         color="tab:gray",
         span=span,
     )
@@ -438,7 +438,7 @@ def plot_combined_basin_plot(
             alpha=0.7,
             s=10,
             color=colour,
-            label=f"{human_readable_basin_name(basin)} Stations",
+            label=f"{human_readable_basin_name(basin)}",
         )
 
         plot_simulation_fit(
@@ -446,9 +446,9 @@ def plot_combined_basin_plot(
             subds.rrup.values,
             basin_pSA,
             label=None,
-            color='red',
+            color="red",
             span=1,  # for each basin only show smooth line
-            show_bands=False
+            show_bands=False,
         )
 
     ax.legend()
