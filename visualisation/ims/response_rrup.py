@@ -411,7 +411,7 @@ def plot_combined_basin_plot(
         ax,
         simulation_ds.rrup.values,
         all_pSA,
-        label="Simulation fit",
+        label=None,
         color="tab:gray",
         span=span,
     )
