@@ -11,6 +11,7 @@ import pandas as pd
 import typer
 import xarray as xr
 from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 from rpy2.robjects import default_converter, globalenv, numpy2ri, r
 from rpy2.robjects.conversion import localconverter
 
@@ -48,7 +49,7 @@ def nshm2022_logic_tree_prediction(
     return psa_results
 
 
-class LowessFit(NamedTuple):
+class ConfidenceInterval(NamedTuple):
     mean: npt.NDArray[np.floating]
     std_low: npt.NDArray[np.floating]
     std_high: npt.NDArray[np.floating]
@@ -59,7 +60,7 @@ def fit_loess_r(
     x: npt.NDArray[np.floating],
     x_out: npt.NDArray[np.floating],
     **kwargs,
-) -> LowessFit:
+) -> ConfidenceInterval:
     """
     Fit LOESS using R and return fitted values and prediction intervals.
     """
@@ -93,7 +94,7 @@ def fit_loess_r(
     std_low = fit_vals - residual_se
     std_high = fit_vals + residual_se
 
-    return LowessFit(fit_vals, std_low, std_high)
+    return ConfidenceInterval(fit_vals, std_low, std_high)
 
 
 def plot_nshm_fit(
@@ -104,7 +105,7 @@ def plot_nshm_fit(
     rrup: npt.NDArray[np.floating],
     color: str | None = None,
     label: str | None = None,
-) -> None:
+) -> ConfidenceInterval:
     source_config = SourceConfig.read_from_realisation(realisation_ffp)
     magnitudes = Magnitudes.read_from_realisation(realisation_ffp)
     rupture_prop = RupturePropagationConfig.read_from_realisation(realisation_ffp)
@@ -121,11 +122,12 @@ def plot_nshm_fit(
     )
     mean = logic_tree_results[f"pSA_{period_str}_mean"]
     std = logic_tree_results[f"pSA_{period_str}_std_Total"]
-
-    ax.fill_between(
-        rrup, np.exp(mean - std), np.exp(mean + std), alpha=0.3, color=color
-    )
-    ax.plot(rrup, np.exp(mean), c=color, label=label)
+    fit = np.exp(mean)
+    ci_low = np.exp(mean - std)
+    ci_high = np.exp(mean + std)
+    ax.fill_between(rrup, ci_low, ci_high, alpha=0.3, color=color)
+    ax.plot(rrup, fit, c=color, label=label)
+    return ConfidenceInterval(mean, ci_low, ci_high)
 
 
 def plot_simulation_fit(
@@ -136,7 +138,7 @@ def plot_simulation_fit(
     color: str,
     span: float = 1 / 3,
     show_bands: bool = True,
-) -> None:
+) -> ConfidenceInterval:
     """Plot LOESS fit for a subset of simulation data."""
     rrup_out = np.linspace(rrup.min(), rrup.max(), num=100)
     fit, ci_low, ci_high = fit_loess_r(
@@ -147,6 +149,7 @@ def plot_simulation_fit(
             rrup_out, np.exp(ci_low), np.exp(ci_high), alpha=0.3, color=color
         )
     ax.plot(rrup_out, np.exp(fit), c=color, label=label)
+    return ConfidenceInterval(fit, ci_low, ci_high)
 
 
 def human_readable_basin_name(basin_name: str) -> str:
@@ -164,7 +167,7 @@ def _get_plotting_params(simulation_ds: xr.Dataset):
 
 
 def _apply_style_and_limits(
-    fig,
+    fig: Figure,
     axes: np.ndarray,
     period: float,
     max_rrup: float,
@@ -191,25 +194,8 @@ def _apply_style_and_limits(
         ax.set_xlim(left=xmin, right=xmax)
 
 
-def _plot_nshm_fit_and_settings(
-    ax: plt.Axes,
-    realisation_ffp: Path,
-    data_ds: xr.Dataset,
-    period: float,
-    nshm_rrup: np.ndarray,
-    label: str | None = "NSHM logic tree prediction",
-):
-    """Plots the common NSHM fit and initial axis settings (log scale, grid)."""
+def _plot_settings(ax: Axes) -> None:
     ax.grid(True, which="both", axis="both", lw=0.3)
-    plot_nshm_fit(
-        ax,
-        realisation_ffp,
-        data_ds,
-        period,
-        nshm_rrup,
-        color="tab:blue",
-        label=label,
-    )
     ax.set_yscale("log")
     ax.set_xscale("log")
 
@@ -239,9 +225,16 @@ def plot_basin_vs_no_basin(
 
     fig, ax = plt.subplots(constrained_layout=True)
     all_axes = np.array([ax])  # For style helper consistency
-
+    _plot_settings(ax)
     # 1. Plot NSHM fit and set axis scales/grid
-    _plot_nshm_fit_and_settings(ax, realisation_ffp, simulation_ds, period, nshm_rrup)
+    plot_nshm_fit(
+        ax,
+        realisation_ffp,
+        simulation_ds,
+        period,
+        nshm_rrup,
+        color="tab:blue",
+    )
 
     # 2. Split and plot simulation data
     basin_ds = simulation_ds.where(simulation_ds.basin != "", drop=True)
@@ -250,6 +243,7 @@ def plot_basin_vs_no_basin(
     # Basin stations
     basin_pSA = basin_ds.pSA.sel(period=period, component=component).values
     ax.scatter(basin_ds.rrup, basin_pSA, c="tab:red", alpha=0.3, s=5)
+
     plot_simulation_fit(
         ax,
         basin_ds.rrup.values,
@@ -315,11 +309,9 @@ def plot_separate_basin_subplots(
     )
     all_axes = axes_2d.flatten()
     ax_all_stations = all_axes[0]
-
+    _plot_settings(ax_all_stations)
     # --- A. Plot All Stations (Primary Plot) ---
-    _plot_nshm_fit_and_settings(
-        ax_all_stations, realisation_ffp, simulation_ds, period, nshm_rrup
-    )
+    plot_nshm_fit(ax_all_stations, realisation_ffp, simulation_ds, period, nshm_rrup)
 
     # Plot all simulation stations together
     all_pSA = simulation_ds.pSA.sel(period=period, component=component).values
@@ -335,15 +327,15 @@ def plot_separate_basin_subplots(
     ax_all_stations.legend()
 
     # --- B. Plot Individual Basins ---
-    for i, basin in enumerate(basins):
-        ax_basin = all_axes[i + 1]
+    for ax_basin, basin in zip(all_axes[1:], basins):
+        _plot_settings(ax_basin)
         subds = _get_basin_stations(simulation_ds, basin)
 
         if len(subds.station) == 0:
             ax_basin.set_title(f"Basin: {human_readable_basin_name(basin)} (No data)")
             continue
 
-        _plot_nshm_fit_and_settings(
+        plot_nshm_fit(
             ax_basin, realisation_ffp, subds, period, nshm_rrup, label=None
         )  # No legend for NSHM here
 
@@ -395,7 +387,10 @@ def plot_combined_basin_plot(
     all_axes = np.array([ax])  # For style helper consistency
 
     # 1. Plot NSHM fit and set axis scales/grid
-    _plot_nshm_fit_and_settings(ax, realisation_ffp, simulation_ds, period, nshm_rrup)
+    _plot_settings(ax)
+    fit, ci_low, ci_high = plot_nshm_fit(
+        ax, realisation_ffp, simulation_ds, period, nshm_rrup
+    )
 
     # 2. Plot All Stations (Base Layer)
     all_pSA = simulation_ds.pSA.sel(period=period, component=component).values
@@ -416,13 +411,11 @@ def plot_combined_basin_plot(
         span=span,
     )
 
-    # --- FIX: Generate distinct colors using a Colormap ---
-    # Choose a colormap, e.g., 'viridis'. Other good choices: 'plasma', 'cividis'.
-    # N is the number of basins we need colors for.
-
-    # --- END FIX ---
     basin_colours = mpl.color_sequences["Dark2"]
     # 3. Overlay Individual Basins (Scatter Plots)
+    log_fit = np.log(fit)
+    log_nshm_rrup = np.log(nshm_rrup)
+
     for basin, colour in zip(basins, basin_colours):
         subds = _get_basin_stations(simulation_ds, basin)
 
@@ -432,6 +425,20 @@ def plot_combined_basin_plot(
         # Use the distinct color generated from the colormap
 
         basin_pSA = subds.pSA.sel(period=period, component=component).values
+
+        basin_misfit = np.log(basin_pSA) - np.interp(
+            basin_pSA.rrup.values, log_nshm_rrup, log_fit
+        )
+        mean_misfit = np.mean(basin_misfit)
+
+        log_basin_rrup_min = np.log(subds.rrup.min().item())
+        log_basin_rrup_max = np.log(subds.rrup.max().item())
+        log_basin_misfit_rrup = np.linspace(
+            log_basin_rrup_min, log_basin_rrup_max, num=100
+        )
+        nshm_subline = (
+            np.interp(log_basin_misfit_rrup, log_nshm_rrup, log_fit) + mean_misfit
+        )
         ax.scatter(
             subds.rrup,
             basin_pSA,
@@ -440,19 +447,9 @@ def plot_combined_basin_plot(
             color=colour,
             label=f"{human_readable_basin_name(basin)}",
         )
-
-        plot_simulation_fit(
-            ax,
-            subds.rrup.values,
-            basin_pSA,
-            label=None,
-            color="red",
-            span=1,  # for each basin only show smooth line
-            show_bands=False,
-        )
+        ax.plot(np.exp(log_basin_misfit_rrup), np.exp(nshm_subline), color=colour)
 
     ax.legend()
-    #
 
     # 5. Apply final styling (is_multi_plot=False)
     _apply_style_and_limits(
