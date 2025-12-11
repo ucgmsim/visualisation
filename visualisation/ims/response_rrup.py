@@ -2,6 +2,7 @@ import re
 from pathlib import Path
 from typing import Annotated, NamedTuple
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
@@ -9,7 +10,6 @@ import oq_wrapper as oqw
 import pandas as pd
 import typer
 import xarray as xr
-from matplotlib import colormaps as cm
 from matplotlib.axes import Axes
 from rpy2.robjects import default_converter, globalenv, numpy2ri, r
 from rpy2.robjects.conversion import localconverter
@@ -415,23 +415,17 @@ def plot_combined_basin_plot(
     # --- FIX: Generate distinct colors using a Colormap ---
     # Choose a colormap, e.g., 'viridis'. Other good choices: 'plasma', 'cividis'.
     # N is the number of basins we need colors for.
-    N = len(basins)
-    cmap = cm.get_cmap("viridis")
 
-    # Generate N colors by sampling the colormap evenly
-    # We sample from a range (0.1 to 0.9) to avoid the very darkest/lightest ends of the map
-    basin_colors = [cmap(i) for i in np.linspace(0.1, 0.9, N)]
     # --- END FIX ---
-
+    basin_colours = mpl.color_sequences["Dark2"]
     # 3. Overlay Individual Basins (Scatter Plots)
-    for i, basin in enumerate(basins):
+    for basin, colour in zip(basins, basin_colours):
         subds = _get_basin_stations(simulation_ds, basin)
 
         if len(subds.station) == 0:
             continue
 
         # Use the distinct color generated from the colormap
-        color = basin_colors[i]
 
         basin_pSA = subds.pSA.sel(period=period, component=component).values
         ax.scatter(
@@ -439,29 +433,16 @@ def plot_combined_basin_plot(
             basin_pSA,
             alpha=0.7,
             s=10,
-            color=color,
+            color=colour,
             label=f"{human_readable_basin_name(basin)} Stations",
         )
-
-    # 4. Overlay Individual Basins (Fit Lines)
-    # This loop is separate to ensure the fit lines are drawn *on top* of all scatter points
-    for i, basin in enumerate(basins):
-        subds = _get_basin_stations(simulation_ds, basin)
-
-        if len(subds.station) == 0:
-            continue
-
-        # Use the distinct color generated from the colormap (same as the scatter plot)
-        color = basin_colors[i]
-
-        basin_pSA = subds.pSA.sel(period=period, component=component).values
 
         plot_simulation_fit(
             ax,
             subds.rrup.values,
             basin_pSA,
             label=None,
-            color=color,
+            color=colour,
             span=1,  # for each basin only show smooth line
         )
 
