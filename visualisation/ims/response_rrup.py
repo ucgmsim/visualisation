@@ -135,13 +135,17 @@ def plot_simulation_fit(
     label: str | None,
     color: str,
     span: float = 1 / 3,
+    show_bands: bool = True,
 ) -> None:
     """Plot LOESS fit for a subset of simulation data."""
     rrup_out = np.linspace(rrup.min(), rrup.max(), num=100)
     fit, ci_low, ci_high = fit_loess_r(
         np.log(psa), np.log(rrup), np.log(rrup_out), span=span
     )
-    ax.fill_between(rrup_out, np.exp(ci_low), np.exp(ci_high), alpha=0.3, color=color)
+    if show_bands:
+        ax.fill_between(
+            rrup_out, np.exp(ci_low), np.exp(ci_high), alpha=0.3, color=color
+        )
     ax.plot(rrup_out, np.exp(fit), c=color, label=label)
 
 
@@ -442,8 +446,9 @@ def plot_combined_basin_plot(
             subds.rrup.values,
             basin_pSA,
             label=None,
-            color=colour,
+            color='red',
             span=1,  # for each basin only show smooth line
+            show_bands=False
         )
 
     ax.legend()
