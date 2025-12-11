@@ -425,14 +425,12 @@ def plot_combined_basin_plot(
         # Use the distinct color generated from the colormap
 
         basin_pSA = subds.pSA.sel(period=period, component=component).values
-
-        basin_misfit = np.log(basin_pSA) - np.interp(
-            basin_pSA.rrup.values, log_nshm_rrup, log_fit
-        )
+        log_rrup = np.log(subds.rrup.values)
+        basin_misfit = np.log(basin_pSA) - np.interp(log_rrup, log_nshm_rrup, log_fit)
         mean_misfit = np.mean(basin_misfit)
 
-        log_basin_rrup_min = np.log(subds.rrup.min().item())
-        log_basin_rrup_max = np.log(subds.rrup.max().item())
+        log_basin_rrup_min = log_rrup.min()
+        log_basin_rrup_max = log_rrup.max()
         log_basin_misfit_rrup = np.linspace(
             log_basin_rrup_min, log_basin_rrup_max, num=100
         )
