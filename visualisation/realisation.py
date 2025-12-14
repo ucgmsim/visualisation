@@ -17,6 +17,7 @@ import typer
 
 from pygmt_helper import plotting
 from qcore import cli
+from source_modelling.sources import Fault, Plane
 from visualisation import utils
 from workflow.realisations import (
     DomainParameters,
@@ -78,9 +79,7 @@ def plot_stations(
     )
 
 
-def plot_sources(
-    fig: pygmt.Figure, source_config: SourceConfig, **kwargs: dict[str, Any]
-) -> None:
+def plot_sources(fig: pygmt.Figure, source_config: SourceConfig, **kwargs: Any) -> None:
     """Plot the sources on the figure.
 
     Parameters
@@ -91,7 +90,8 @@ def plot_sources(
         The source configuration to plot.
     **kwargs : dict
         Additional keyword arguments to pass to the plotting function. If empty, the default is
-        - `pen="0.3p,black"` (polygon border colour)
+        - `pen="0.3p,black,--"` (polygon border colour)
+        - trace pen is found by taking the pen and stripping the "--"
 
     Examples
     --------
@@ -102,16 +102,24 @@ def plot_sources(
     >>> plot_sources(fig, source_config)
     >>> source_config.show()
     """
-    kwargs = {"pen": "0.3p,black", **(kwargs or {})}
+    pen = kwargs.get("pen", "0.3p,black,--")
+    assert isinstance(pen, str)
+    trace_pen = pen.removesuffix(",--")
+    interior_kwargs = {"pen": "0.3p,black", **(kwargs or {})}
 
     for source in source_config.source_geometries.values():
-        utils.plot_polygon(fig, utils.polygon_nztm_to_pygmt(source.geometry), **kwargs)
+        utils.plot_polygon(
+            fig, utils.polygon_nztm_to_pygmt(source.geometry), **interior_kwargs
+        )
+        if isinstance(source, Plane | Fault):
+            trace = shapely.LineString(source.bounds[:2])
+            utils.plot_polygon(fig, utils.polygon_nztm_to_pygmt(trace), pen=trace_pen)
 
 
 def plot_domain(
     fig: pygmt.Figure,
     domain_parameters: DomainParameters,
-    **kwargs: dict[str, Any],
+    **kwargs: Any,
 ) -> None:
     """Plot the domain on a figure.
 

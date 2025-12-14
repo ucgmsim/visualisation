@@ -12,11 +12,9 @@ import typer
 import xarray as xr
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from rpy2.robjects import default_converter, globalenv, numpy2ri, r
-from rpy2.robjects.conversion import localconverter
 
 from visualisation import utils
-from visualisation.utils import RuptureContext, SiteProperties
+from visualisation.utils import ConfidenceInterval, RuptureContext, SiteProperties
 from workflow.realisations import (
     Magnitudes,
     Rakes,
@@ -25,76 +23,6 @@ from workflow.realisations import (
 )
 
 app = typer.Typer()
-
-
-def nshm2022_logic_tree_prediction(
-    rupture_context: RuptureContext,
-    site_properties: SiteProperties,
-    period: float,
-    rrup: npt.NDArray[np.floating],
-) -> pd.DataFrame:
-    tect_type = oqw.constants.TectType.ACTIVE_SHALLOW
-    gmm_lt = oqw.constants.GMMLogicTree.NSHM2022
-    rupture_df = pd.DataFrame(
-        {"rrup": rrup, "vs30measured": False, **rupture_context, **site_properties}
-    )
-    for dist_metric in ["rjb", "rx", "ry"]:
-        rupture_df[dist_metric] = rupture_df["rrup"]
-
-    psa_results = oqw.run_gmm_logic_tree(
-        gmm_lt, tect_type, rupture_df, "pSA", periods=[period]
-    )
-    assert isinstance(psa_results, pd.DataFrame)
-    psa_results["rrup"] = rupture_df["rrup"]
-    return psa_results
-
-
-class ConfidenceInterval(NamedTuple):
-    mean: npt.NDArray[np.floating]
-    std_low: npt.NDArray[np.floating]
-    std_high: npt.NDArray[np.floating]
-
-
-def fit_loess_r(
-    y: npt.NDArray[np.floating],
-    x: npt.NDArray[np.floating],
-    x_out: npt.NDArray[np.floating],
-    **kwargs,
-) -> ConfidenceInterval:
-    """
-    Fit LOESS using R and return fitted values and prediction intervals.
-    """
-    loess_args = ", ".join(f"{k}={v}" for k, v in kwargs.items())
-    loess_call = f"loess(y ~ x, {loess_args})" if loess_args else "loess(y ~ x)"
-
-    with localconverter(default_converter + numpy2ri.converter):
-        globalenv["x"] = x
-        globalenv["y"] = y
-        globalenv["x_out"] = x_out
-
-        r(f"fit <- {loess_call}")
-        r("newdat <- data.frame(x=x_out)")
-        r("pred <- predict(fit, newdata=newdat, se=TRUE)")
-        r("residual_se <- fit$s")
-
-        fit_vals = r("pred$fit")
-        if not isinstance(fit_vals, np.ndarray):
-            raise ValueError(
-                f"Residual stderr evaluation failed, expected float found: {fit_vals=}"
-            )
-
-        residual_se_eval = r("residual_se")
-        if isinstance(residual_se_eval, np.ndarray):
-            residual_se = residual_se_eval.item()
-        else:
-            raise ValueError(
-                f"Residual stderr evaluation failed, expected float found: {residual_se_eval=}"
-            )
-
-    std_low = fit_vals - residual_se
-    std_high = fit_vals + residual_se
-
-    return ConfidenceInterval(fit_vals, std_low, std_high)
 
 
 def plot_nshm_fit(
@@ -114,7 +42,7 @@ def plot_nshm_fit(
         source_config, magnitudes, rakes, rupture_prop
     )
     site_properties = utils.compute_site_properties(site_ds.vs30.values)
-    logic_tree_results = nshm2022_logic_tree_prediction(
+    logic_tree_results = utils.nshm2022_logic_tree_prediction(
         rupture_context, site_properties, period, rrup
     )
     period_str = (
@@ -127,7 +55,7 @@ def plot_nshm_fit(
     ci_high = np.exp(mean + std)
     ax.fill_between(rrup, ci_low, ci_high, alpha=0.3, color=color)
     ax.plot(rrup, fit, c=color, label=label)
-    return ConfidenceInterval(mean, ci_low, ci_high)
+    return ConfidenceInterval(fit, ci_low, ci_high)
 
 
 def plot_simulation_fit(
@@ -141,7 +69,7 @@ def plot_simulation_fit(
 ) -> ConfidenceInterval:
     """Plot LOESS fit for a subset of simulation data."""
     rrup_out = np.linspace(rrup.min(), rrup.max(), num=100)
-    fit, ci_low, ci_high = fit_loess_r(
+    fit, ci_low, ci_high = utils.fit_loess_r(
         np.log(psa), np.log(rrup), np.log(rrup_out), span=span
     )
     if show_bands:
@@ -445,7 +373,11 @@ def plot_combined_basin_plot(
             color=colour,
             label=f"{human_readable_basin_name(basin)}",
         )
-        ax.plot(np.exp(log_basin_misfit_rrup), np.exp(nshm_subline), color=colour)
+        ax.plot(
+            np.exp(log_basin_misfit_rrup),
+            np.exp(nshm_subline),
+            color=utils.adjust_value(colour, 0.8),
+        )
 
     ax.legend()
 

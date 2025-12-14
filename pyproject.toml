@@ -27,6 +27,7 @@ plot-stoch = "visualisation.sources.plot_stoch:app"
 plot-ts = "visualisation.plot_ts:app"
 plot-response-rrup = "visualisation.ims.response_rrup:app"
 plot-response-spectra = "visualisation.waveforms.plot_response_spectra:app"
+plot-gmm-comparison = "visualisation.ims.gmm_comparison:app"
 
 [tool.setuptools.package-dir]
 visualisation = "visualisation"
