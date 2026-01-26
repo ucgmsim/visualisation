@@ -37,7 +37,6 @@ def plot_diff(
 ) -> None:
     intensity = dset["pSA"].sel(period=period, component="rotd50")
     pgv_value = intensity.to_series()
-    breakpoint()
     diff = np.log(pgv_value) - gmm_psa_value
     cmap_min = cmap_min or diff.min()
     cmap_max = cmap_max or diff.max()
@@ -188,7 +187,7 @@ def main(
         ticks,
         reverse,
     )
-    realisation.plot_domain(fig, domain)
+    realisation.plot_domain(fig, domain, pen="1p,black,-")
     realisation.plot_sources(fig, source_config)
 
     fig.savefig(output)
