@@ -41,9 +41,24 @@ def plot_nshm_fit(
     rupture_context = utils.compute_rupture_context(
         source_config, magnitudes, rakes, rupture_prop
     )
-    site_properties = utils.compute_site_properties(site_ds.vs30.values)
+    mean_vs30 = utils.mean_vs30(site_ds.vs30.values)
+    mean_z1pt0 = oqw.estimations.chiou_young_08_calc_z1p0(mean_vs30)
+    mean_z2pt5 = oqw.estimations.chiou_young_08_calc_z2p5(mean_vs30)
+    site_properties = SiteProperties(
+        vs30=mean_vs30,
+        vs30measured=False,
+        z1pt0=mean_z1pt0,
+        z2pt5=mean_z2pt5,
+        rrup=rrup,
+        rjb=rrup,
+        rx=rrup,
+        ry=rrup,
+    )
+
     logic_tree_results = utils.nshm2022_logic_tree_prediction(
-        rupture_context, site_properties, period, rrup
+        rupture_context,
+        site_properties,
+        period,
     )
     period_str = (
         f"{period:.2f}".rstrip("0") if not period.is_integer() else f"{int(period)}.0"

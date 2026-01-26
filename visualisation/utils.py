@@ -448,8 +448,9 @@ def get_gmm_prediction(
     rupture_context = compute_rupture_context(
         source_config, magnitudes, rakes, rupture_propagation
     )
-    breakpoint()
     gmm_df = nshm2022_logic_tree_prediction(rupture_context, site_properties, period)
+    gmm_df["station"] = sites.station.values
+    gmm_df = gmm_df.set_index("station")
     gmm_psa_value = gmm_df.loc[:, gmm_df.columns.str.endswith("_mean")].squeeze()
     return gmm_psa_value
 
