@@ -1,8 +1,6 @@
 """Create simulation video of surface ground motion levels."""
 
-import functools
-import io
-import multiprocessing as mp
+import re
 import shutil
 from pathlib import Path
 from typing import Annotated
@@ -11,20 +9,22 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import cartopy.io.img_tiles as cimgt
 import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+import pyproj
+import pyvista as pv
+from matplotlib.colors import LinearSegmentedColormap
 
 matplotlib.use("Agg")
 
-import ffmpeg
 import matplotlib.colors as mcolors
-import matplotlib.pyplot as plt
-import numpy as np
 import shapely
 import tqdm
 import typer
+import xarray as xr
 from matplotlib.animation import FFMpegWriter, FuncAnimation
 
 from qcore import cli, coordinates
-from qcore.xyts import XYTSFile
 from source_modelling import srf
 from workflow.realisations import DomainParameters, SourceConfig
 
@@ -195,23 +195,6 @@ def plot_cartographic_features(ax: plt.Axes, scale: str) -> list:
     return features
 
 
-def xyts_nztm_corners(xyts_file: XYTSFile) -> np.ndarray:
-    """Get the corners of the XYTS file in NZTM coordinates.
-
-    Parameters
-    ----------
-    xyts_file : XYTSFile
-            The XYTS file to get the corners from.
-
-    Returns
-    -------
-    np.ndarray
-            The corners of the XYTS file in NZTM coordinates.
-    """
-    corners_geo = np.array(xyts_file.corners())
-    return coordinates.wgs_depth_to_nztm(corners_geo[:, ::-1])[:, ::-1]
-
-
 def map_extents(
     nztm_corners: np.ndarray, padding: float
 ) -> tuple[float, float, float, float]:
@@ -311,198 +294,31 @@ def waveform_coordinates(nztm_corners: np.ndarray, nx: int, ny: int) -> np.ndarr
     return coords_nztm[::-1, :, :]  # Reverse order to (x, y) for NZTM
 
 
-def tslice_get(xyts_file: XYTSFile, index: int, downsample: int = 1) -> np.ndarray:
-    """Retrieve a single timeslice from an xyts file with downsampling
+def cmap_from_cpt(cpt_file: Path) -> tuple[float, float, LinearSegmentedColormap]:
+    line_re = r"^(?P<el>[0 -9\.\-]+)\s+(?P<r>\d+)/(?P<g>\d+)/(?P<b>\d+)"
 
-    Parameters
-    ----------
-    xyts_file : XYTSFile
-        The xyts file to retrieve from.
-    index : int
-        The timeslice index to read from.
-    downsample : int
-        If greater than 1, downsample the array in strides of `downsample` in
-        the x and y direction.
-
-    Returns
-    -------
-    array of float32
-        An array of shape (ny, nx) containing the downsampled frame data for `index`.
-    """
-    if downsample > 1:
-        frame_data = xyts_file.data[index, :, ::downsample, ::downsample]
-    else:
-        frame_data = xyts_file.data[index]  # shape: (3, ny, nx)
-    return np.linalg.norm(frame_data, axis=0)
-
-
-def render_single_frame(
-    frame_index: int,
-    dt: float,
-    xyts_file_path: Path,
-    source_config: SourceConfig,
-    nztm_corners: np.ndarray,
-    map_extent_nztm: tuple[float, float, float, float],
-    xr: np.ndarray,
-    yr: np.ndarray,
-    max_motion: float,
-    cmap: str,
-    shading: str,
-    simple_map: bool,
-    scale: str,
-    map_quality: int,
-    title: str | None,
-    width: float,
-    height: float,
-    dpi: int,
-    downsample: int,
-) -> bytes:
-    """Render a single frame of the animation.
-
-    Parameters
-    ----------
-    frame_index : int
-        The index of the frame to render.
-    dt : float
-        The time step of the simulation.
-    xyts_file_path : Path
-        The path to the XYTS file.
-    source_config : SourceConfig
-        The source configuration object.
-    nztm_corners : np.ndarray
-        The corners of the XYTS domain in NZTM coordinates.
-    map_extent_nztm : tuple[float, float, float, float]
-        The map extents for the figure (x_min, x_max, y_min, y_max).
-    xr : np.ndarray
-        The x coordinates of the gridpoints in NZTM coordinates.
-    yr : np.ndarray
-        The y coordinates of the gridpoints in NZTM coordinates.
-    max_motion : float
-        The maximum ground motion value for color scaling.
-    cmap : str
-        The colormap to use for the animation.
-    shading : str
-        The shading to apply to the colourmap.
-    simple_map : bool
-        If True, disable OpenStreetMap background and use a simple map.
-    scale : str
-        The scale for cartographic features.
-    map_quality : int
-        The quality of the map (lower values are lower quality).
-    title : str | None
-        The title for the animation.
-    width : float
-        The width of the figure in cm.
-    height : float
-        The height of the figure in cm.
-    dpi : int
-        The DPI for the figure.
-    downsample : int, optional
-        If greater than 1, downsample the timeslice array in strides of
-        `downsample` in the x and y direction. Provides a speedup for large
-        domains.
-
-    Returns
-    -------
-    bytes
-        The raw frame output for the frame index
-    """
-    xyts_file = XYTSFile(xyts_file_path)
-    # Create a new figure for this frame
-    cm = 1 / 2.54
-    fig = plt.figure(figsize=(width * cm, height * cm))
-    ax = fig.add_subplot(1, 1, 1, projection=NZTM_CRS)
-    ax.set_extent(map_extent_nztm, crs=NZTM_CRS)
-
-    # Add all static elements
-    if simple_map:
-        plot_cartographic_features(ax, scale)
-        plot_towns(ax, map_extent_nztm)
-    else:
-        request = cimgt.OSM(cache=True)
-        request._MAX_THREADS = (
-            1  # Limit to one thread because it is in a multiprocess pool.
-        )
-        ax.add_image(
-            request,
-            10,
-            interpolation="spline36",
-            regrid_shape=map_quality * 1000,
-            zorder=0,
-        )
-
-    ax.add_geometries(
-        [shapely.Polygon(nztm_corners)],
-        facecolor="none",
-        edgecolor="black",
-        linestyle="--",
-        zorder=1,
-        crs=NZTM_CRS,
-    )
-
-    ax.add_geometries(
-        [
-            shapely.transform(fault.geometry, lambda coords: coords[:, ::-1])
-            for fault in sorted(
-                source_config.source_geometries.values(),
-                key=lambda fault: -fault.centroid[-1],
-            )
-        ],
-        facecolor="red",
-        edgecolor="black",
-        zorder=2,
-        crs=NZTM_CRS,
-    )
-
-    # Add the actual data for this frame
-
-    current_data = tslice_get(xyts_file, frame_index, downsample=downsample)
-    pcm = ax.pcolormesh(
-        yr[::downsample, ::downsample],
-        xr[::downsample, ::downsample],
-        apply_cmap_with_alpha(current_data, 0, max_motion, cmap=cmap),
-        cmap=cmap,
-        vmin=0,
-        vmax=max_motion,
-        shading=shading,
-        zorder=3,
-        transform=NZTM_CRS,
-    )
-
-    # Add time text
-    current_time = frame_index * dt
-    ax.text(
-        0.98,
-        0.02,
-        f"Time: {current_time:.2f} s",
-        transform=ax.transAxes,
-        fontsize=12,
-        color="black",
-        fontweight="bold",
-        ha="right",
-        va="bottom",
-        bbox={"boxstyle": "round", "facecolor": "white", "alpha": 0.8},
-    )
-
-    if title:
-        fig.suptitle(title, fontsize=16)
-
-    plt.tight_layout(rect=[0.05, 0.05, 0.95, 0.95])
-    cbar = fig.colorbar(
-        pcm,
-        ax=ax,
-        orientation="vertical",
-        pad=0.02,
-        aspect=30,
-        shrink=0.8,
-    )
-    cbar.set_label("Ground Motion (cm/s)")
-
-    # Save the frame to a file
-    with io.BytesIO() as io_buf:
-        fig.savefig(io_buf, format="raw", dpi=dpi)
-        plt.close(fig)
-        return io_buf.getvalue()
+    colours = []
+    elevations = []
+    with open(cpt_file, "r") as f:
+        for line in f:
+            if m := re.match(line_re, line):
+                elevation = float(m.group("el"))
+                r = int(m.group("r"))
+                g = int(m.group("g"))
+                b = int(m.group("b"))
+                elevations.append(elevation)
+                colours.append((r, g, b))
+    colours_np = np.array(colours) / 255.0
+    elevations_np = np.array(elevations)
+    el_min = elevations_np.min()
+    el_max = elevations_np.max()
+    normalised = (elevations_np - el_min) / (el_max - el_min)
+    segmentdata = {
+        "red": [(frac, c[0], c[0]) for frac, c in zip(normalised, colours_np)],
+        "green": [(frac, c[1], c[1]) for frac, c in zip(normalised, colours_np)],
+        "blue": [(frac, c[2], c[2]) for frac, c in zip(normalised, colours_np)],
+    }
+    return el_min, el_max, LinearSegmentedColormap(cpt_file.stem, segmentdata)
 
 
 @cli.from_docstring(app, name="xyts")
@@ -583,92 +399,163 @@ def animate_low_frequency(
         )
         raise typer.Exit(code=1)
 
+    dem_dataset = xr.open_dataarray("dem.h5")
+    x_coords = dem_dataset.x.values
+    y_coords = dem_dataset.y.values
+    x, y = np.meshgrid(x_coords, y_coords)
+    z = dem_dataset.to_numpy()
+    z = np.where(np.isnan(z), -250, z)
+    z_max = z.max()
+    dem_grid = pv.StructuredGrid(x, y, z)
+    dem_grid["elevation"] = z.T.ravel()
+
     source_config = SourceConfig.read_from_realisation(realisation_ffp)
-    xyts_file = XYTSFile(xyts_ffp)
-
-    nztm_corners = xyts_nztm_corners(xyts_file)
-    map_extent_nztm = map_extents(nztm_corners, padding)
-
-    if zoom != 1:
-        centre = shapely.centroid(
-            shapely.union_all(
-                [fault.geometry for fault in source_config.source_geometries.values()]
+    planes = []
+    lines = []
+    plane_max = 0
+    for fault in source_config.source_geometries.values():
+        for plane in fault.planes:
+            bounds = plane.bounds
+            plane_max = max(plane_max, bounds[-1, 2])
+            bounds[:, [0, 1]] = bounds[:, [1, 0]]
+            bounds[:, 2] = z_max + 5
+            planes.extend(
+                [
+                    pv.Triangle([bounds[0], bounds[1], bounds[-1]]),
+                    pv.Triangle([bounds[1], bounds[2], bounds[-1]]),
+                ]
             )
-        )
-        map_extent_nztm = zoom_extents(
-            map_extent_nztm,
-            (centre.y, centre.x),
-            zoom,
-        )
+            point_a = bounds[0].copy()
+            point_a[2] = z_max + 10
+            point_b = bounds[1].copy()
+            point_b[2] = z_max + 10
+            lines.extend([point_a, point_b])
 
-    frame_count = frame_count or xyts_file.nt
-    xr, yr = waveform_coordinates(nztm_corners, xyts_file.nx, xyts_file.ny)
+    cmap_min, cmap_max, cmap = cmap_from_cpt(
+        Path("/home/jake/tmp/palm_springs_nz_topo.cpt")
+    )
+    xyts_dataset = xr.open_dataset(xyts_ffp)
+    (nt, ny, nx) = xyts_dataset.waveform.shape
+    proj = coordinates.SphericalProjection(
+        xyts_dataset.mlon, xyts_dataset.mlat, xyts_dataset.mrot
+    )
+    dx = xyts_dataset.dx
 
-    render_frame = functools.partial(
-        render_single_frame,
-        dt=xyts_file.dt,
-        shading=shading,
-        xyts_file_path=xyts_ffp.resolve(),
-        max_motion=max_motion,
+    y_sim_bounds = np.linspace(-0.5, 0.5, num=ny) * ny * (dx * 5)
+    x_sim_bounds = np.linspace(-0.5, 0.5, num=nx) * nx * (dx * 5)
+
+    y_sim, x_sim = np.meshgrid(y_sim_bounds, x_sim_bounds, indexing="ij")
+    print(y_sim.shape)
+
+    x_flat = x_sim.ravel(order="F")
+    y_flat = y_sim.ravel(order="F")
+
+    points = proj.inverse(x_flat, y_flat)
+    lon_sim = points[:, 1]
+    lat_sim = points[:, 0]
+
+    proj = pyproj.Transformer.from_crs(4326, 2193, always_xy=True)
+    x_nztm_flat, y_nztm_flat = proj.transform(lon_sim, lat_sim)
+
+    x_nztm = x_nztm_flat.reshape((ny, nx), order="F")
+    y_nztm = y_nztm_flat.reshape((ny, nx), order="F")
+    corners = np.array(
+        [
+            [x_nztm[0, 0], y_nztm[0, 0], z_max],
+            [x_nztm[-1, 0], y_nztm[-1, 0], z_max],
+            [x_nztm[-1, -1], y_nztm[-1, -1], z_max],
+            [x_nztm[0, -1], y_nztm[0, -1], z_max],
+            [x_nztm[0, 0], y_nztm[0, 0], z_max],
+        ]
+    )
+    z_plane = np.full((ny, nx), z_max + ((1 << 16) - 1) * 0.1)
+
+    grid = pv.StructuredGrid(x_nztm, y_nztm, z_plane)
+
+    grid["Ground Motion (cm/s)"] = grid.points[:, -1]
+    plotter = pv.Plotter(notebook=False, off_screen=True)
+    plotter.remove_all_lights()
+    plotter.ren_win.SetSize([1920, 1088])
+    # plotter.enable_anti_aliasing()
+
+    plotter.open_movie(output_mp4, framerate=fps, quality=10)
+    for plane in planes:
+        plotter.add_mesh(plane, color="red", lighting=False)
+
+    plotter.add_lines(corners, connected=True, color="black", width=3)
+    plotter.add_lines(np.array(lines), color="black", width=2)
+
+    plotter.add_mesh(
+        dem_grid,
+        lighting=False,
+        smooth_shading=False,
         cmap=cmap,
-        source_config=source_config,
-        nztm_corners=nztm_corners,
-        map_extent_nztm=map_extent_nztm,
-        xr=xr,
-        yr=yr,
-        simple_map=simple_map,
-        scale=scale,
-        map_quality=map_quality,
-        title=title,
-        width=width,
-        height=height,
-        dpi=dpi,
-        downsample=downsample,
+        clim=(cmap_min, cmap_max),
+        show_scalar_bar=False,
+    )
+    plotter.add_mesh(
+        grid,
+        lighting=False,
+        smooth_shading=False,
+        scalars="Ground Motion (cm/s)",
+        clim=[0, 100],
+        cmap="hot",
+        show_edges=False,
+        nan_opacity=0.0,
+        show_scalar_bar=True,
+        scalar_bar_args=dict(
+            title="Ground Motion\n(cm/s)\n",
+            vertical=True,
+            position_x=0.85,
+            position_y=0.25,
+            bold=True,
+            color="white",
+            height=0.5,
+            width=0.05,
+            n_labels=11,
+        ),
     )
 
-    # warm the OSM cache to speed up rendering by rendering the first frame
+    plotter.camera.tight()
+    # plotter.camera.set
+    plotter.set_background((173 / 255, 216 / 255, 230 / 255))
+    text = plotter.add_text("0.00s", name="time-label", position="lower_right")
 
-    frames = [render_frame(0)]
+    plotter.show(auto_close=False)
 
-    with mp.Pool() as pool:
-        # Render all frames in parallel
-        frames.extend(
-            tqdm.tqdm(
-                pool.imap(render_frame, range(frame_start, frame_start + frame_count)),
-                total=frame_count,
-                unit="frame",
-                desc="Rendering frames",
-                initial=1,
+    frame_chunk = 100
+    i_frame = frame_start
+    frames = None
+    scalars = np.empty((ny, nx), dtype=np.float32, order="F")
+    time = xyts_dataset.time.values
+    dt = xyts_dataset.attrs["dt"]
+    for i in tqdm.trange(
+        frame_start,
+        frame_start + min(frame_count or nt - frame_start, nt - frame_start),
+    ):
+        if i >= i_frame:
+            next = min(i_frame + frame_chunk, nt)
+            frames = (
+                xyts_dataset.waveform.isel(time=range(i_frame, next))
+                .astype(np.float32)
+                .values
             )
-        )
-    cm = 1 / 2.54
-    width_px = int(width * cm * dpi)
-    height_px = int(height * cm * dpi)
-    # Use ffmpeg to combine frames into video
-    process = (
-        ffmpeg.input(
-            "pipe:0", format="rawvideo", pix_fmt="rgba", s=f"{width_px}x{height_px}"
-        )
-        .output(
-            str(output_mp4),
-            pix_fmt="yuv420p",
-            r=fps,
-            vcodec="libx264",
-            crf=23,
-            vf="pad=ceil(iw/2)*2:ceil(ih/2)*2",
-        )
-        .overwrite_output()
-        .run_async(pipe_stdin=True)
-    )
+            i_frame = next
+        assert frames is not None
 
-    # Write the raw video data to FFmpeg's stdin
-    for frame in frames:
-        process.stdin.write(frame)
+        z_geometry = frames[i - i_frame]
+        np.copyto(scalars, frames[i - i_frame])
 
-    process.stdin.close()
+        scalars[scalars < 10] = np.nan
 
-    # Wait for FFmpeg to finish
-    process.wait()
+        grid["Ground Motion (cm/s)"] = scalars.ravel(order="F")
+
+        np.add(z_geometry, z_max, out=z_geometry)
+        grid.points[:, -1] = z_geometry.ravel(order="F")
+        if i % round(1 / dt):
+            text.set_text("lower_right", f"{time[i]:.2f}s")
+        plotter.write_frame()
+    plotter.close()
 
 
 def non_zero_data_points(
