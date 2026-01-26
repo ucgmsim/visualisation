@@ -105,13 +105,18 @@ def plot_sources(fig: pygmt.Figure, source_config: SourceConfig, **kwargs: Any) 
     pen = kwargs.get("pen", "0.3p,black,--")
     assert isinstance(pen, str)
     trace_pen = pen.removesuffix(",--")
-    interior_kwargs = {"pen": "0.3p,black", **(kwargs or {})}
+    interior_kwargs = {"pen": pen, **(kwargs or {})}
 
     for source in source_config.source_geometries.values():
         utils.plot_polygon(
             fig, utils.polygon_nztm_to_pygmt(source.geometry), **interior_kwargs
         )
-        if isinstance(source, Plane | Fault):
+        if isinstance(source, Fault):
+            trace = shapely.LineString(
+                np.concatenate([plane.bounds[:2] for plane in source.planes])
+            )
+            utils.plot_polygon(fig, utils.polygon_nztm_to_pygmt(trace), pen=trace_pen)
+        elif isinstance(source, Plane):
             trace = shapely.LineString(source.bounds[:2])
             utils.plot_polygon(fig, utils.polygon_nztm_to_pygmt(trace), pen=trace_pen)
 
