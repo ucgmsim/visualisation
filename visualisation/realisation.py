@@ -20,10 +20,11 @@ from qcore import cli
 from visualisation import utils
 from workflow.realisations import (
     DomainParameters,
-    RupturePropagationConfig,
+    Magnitudes,
     SourceConfig,
     VelocityModelParameters,
 )
+from workflow.scripts import generate_domain
 
 app = typer.Typer()
 
@@ -142,7 +143,7 @@ def plot_domain(
 def plot_rrup_polygon(
     fig: pygmt.Figure,
     region: utils.Region,
-    pgv_target: float,
+    rrup_target: float,
     rrup_bounding_polygon: shapely.Polygon,
     rrup_polygon_args: dict[str, Any] | None = None,
     label_args: dict[str, Any] | None = None,
@@ -155,7 +156,7 @@ def plot_rrup_polygon(
         The figure to plot on.
     region : BoundingBox
         The region of the plot.
-    pgv_target : float
+    rrup_target : float
         The PGV target for the polygon (used as a label).
     rrup_bounding_polygon : shapely.Polygon
         The RRup bounding polygon.
@@ -198,13 +199,16 @@ def plot_rrup_polygon(
         fig,
         region,
         utils.polygon_nztm_to_pygmt(rrup_bounding_polygon),
-        f"{pgv_target} cm/s",
+        f"{rrup_target:.0f} km",
         **label_args,
     )
 
 
 def plot_realisation(
-    realisation_ffp: Path,
+    magnitudes: Magnitudes,
+    domain_parameters: DomainParameters,
+    velocity_model_parameters: VelocityModelParameters,
+    source_config: SourceConfig,
     latitude_pad: float = 0,
     longitude_pad: float = 0,
     title: str | None = None,
@@ -212,16 +216,21 @@ def plot_realisation(
     width: float = 10,
     show_geonet_stations: bool = False,
     show_geometry: bool = True,
-    show_pgv_targets: bool = False,
-    pgv_targets: list[float] | None = None,
+    show_rrup_targets: bool = False,
     stations: Path | None = None,
 ) -> pygmt.Figure:
     """Plot the domain and sources of a realisation.
 
     Parameters
     ----------
-    realisation_ffp : Path
-        Path to the realisation file to plot.
+    magnitudes : Magnitudes
+        Magnitudes of the sources.
+    domain_parameters : DomainParameters
+        The domain extent.
+    velocity_model_parameters : VelocityModelParameters
+        The velocity model parameters.
+    source_config : SourceConfig
+        The sources to plot.
     latitude_pad : float
         Latitude padding in degrees.
     longitude_pad : float
@@ -236,11 +245,8 @@ def plot_realisation(
         Show GeoNet stations on the plot.
     show_geometry : bool
         Show source geometry on the plot.
-    show_pgv_targets : bool
-        Show PGV targets on the plot.
-    pgv_targets : list[float], optional
-        PGV targets to plot. If None, use PGV targets from the
-        realisation. A non-empty value implies `show_pgv_targets`.
+    show_rrup_targets : bool
+        Show rrup targets on the plot.
     stations : Path, optional
         Path to list of stations to plot.
 
@@ -256,48 +262,20 @@ def plot_realisation(
     ...     realisation_ffp=realisation_ffp,
     ...     width=5,
     ...     show_geometry=False,
-    ...     show_pgv_targets=False,
     ...     stations=None,
     ... )
     >>> fig.show()
     """
-    show_pgv_targets = show_pgv_targets or bool(pgv_targets)
-    rupture_propagation = RupturePropagationConfig.read_from_realisation(
-        realisation_ffp
-    )
-    domain_parameters = DomainParameters.read_from_realisation(realisation_ffp)
-
-    velocity_model_parameters = VelocityModelParameters.read_from_realisation(
-        realisation_ffp
-    )
-
-    source_config = SourceConfig.read_from_realisation(realisation_ffp)
-
     rrup_bounding_polygons: list[shapely.Polygon] = []
 
-    if show_pgv_targets:
-        fault_pgv_targets = pgv_targets or [
-            generate_velocity_model_parameters.pgv_target(
-                rupture_propagation, velocity_model_parameters
-            )
+    if show_rrup_targets:
+        r_surfaces = generate_domain.find_r_surfaces(
+            source_config, magnitudes, velocity_model_parameters.rrup_interpolants
+        )
+        rrup_bounding_polygons = [
+            shapely.buffer(source_config.source_geometries[name].geometry, r_surface)
+            for name, r_surface in r_surfaces.items()
         ]
-
-        for pgv_targets in fault_pgv_targets:
-            rrup_bounding_polygons.append(
-                shapely.union_all(
-                    [
-                        generate_velocity_model_parameters.find_rrup_bounding_polygon(
-                            *args, pgv_target=pgv_targets
-                        )
-                        for args in generate_velocity_model_parameters.dict_zip(
-                            source_config.source_geometries,
-                            rupture_propagation.magnitudes,
-                            rupture_propagation.rakes,
-                        ).values()
-                    ]
-                )
-            )
-
     region = utils.bounding_region_for(
         [domain_parameters.domain.polygon] + rrup_bounding_polygons,
         latitude_pad=latitude_pad,
@@ -319,11 +297,11 @@ def plot_realisation(
     if stations:
         plot_stations(fig, domain_parameters, stations)
 
-    if show_pgv_targets:
-        for pgv_target, rrup_bounding_polygon in zip(
-            fault_pgv_targets, rrup_bounding_polygons
+    if show_rrup_targets:
+        for rrup_target, rrup_bounding_polygon in zip(
+            r_surfaces.values(), rrup_bounding_polygons
         ):
-            plot_rrup_polygon(fig, region, pgv_target, rrup_bounding_polygon)
+            plot_rrup_polygon(fig, region, rrup_target / 1000, rrup_bounding_polygon)
 
     # Plot the legend overtop the other elements.
     if stations:
@@ -377,18 +355,10 @@ def plot_realisation_to_file(
         bool,
         typer.Option(),
     ] = True,
-    show_pgv_targets: Annotated[
+    show_rrup_targets: Annotated[
         bool,
         typer.Option(),
     ] = False,
-    pgv_targets: Annotated[
-        list[float] | None,
-        # Use a different option name because --pgv-targets is in
-        # plural form but only accepts one value each time it is
-        # invoked:
-        # --pgv-targets 0.1 --pgv-targets 0.2 vs --pgv-target 0.1 --pgv-target 0.2.
-        typer.Option("--pgv-target"),
-    ] = None,
     stations: Annotated[
         Path | None,
         typer.Option(
@@ -396,7 +366,7 @@ def plot_realisation_to_file(
             readable=True,
         ),
     ] = None,
-) -> pygmt.Figure:
+) -> None:
     """Plot the domain and sources of a realisation to a file.
 
     Parameters
@@ -421,11 +391,8 @@ def plot_realisation_to_file(
         Show GeoNet stations on the plot.
     show_geometry : bool
         Show source geometry on the plot.
-    show_pgv_targets : bool
-        Show PGV targets on the plot.
-    pgv_targets : list[float], optional
-        PGV targets to plot. If None, use PGV targets from the
-        realisation. A non-empty value implies `show_pgv_targets`.
+    show_rrup_targets : bool
+        Show rrup targets on the plot.
     stations : Path, optional
         Path to list of stations to plot.
 
@@ -441,8 +408,17 @@ def plot_realisation_to_file(
     ... )
     >>> fig.show()
     """
+    magnitudes = Magnitudes.read_from_realisation(realisation_ffp)
+    velocity_model_params = VelocityModelParameters.read_from_realisation(
+        realisation_ffp
+    )
+    domain = DomainParameters.read_from_realisation(realisation_ffp)
+    source_config = SourceConfig.read_from_realisation(realisation_ffp)
     fig = plot_realisation(
-        realisation_ffp,
+        magnitudes,
+        domain,
+        velocity_model_params,
+        source_config,
         latitude_pad=latitude_pad,
         longitude_pad=longitude_pad,
         title=title,
@@ -450,8 +426,7 @@ def plot_realisation_to_file(
         width=width,
         show_geonet_stations=show_geonet_stations,
         show_geometry=show_geometry,
-        show_pgv_targets=show_pgv_targets,
-        pgv_targets=pgv_targets,
+        show_rrup_targets=show_rrup_targets,
         stations=stations,
     )
     fig.savefig(output_ffp, dpi=dpi)
