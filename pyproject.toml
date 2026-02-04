@@ -15,10 +15,10 @@ dependencies = [
   "numpy",
   "ffmpeg-python",
   "pygmt",
-  "pygmt-helper >= 2025.12.1",
-  "source_modelling >= 2025.12.1",
+  "pygmt-helper>=2025.12.1",
+  "source-modelling>=2025.12.1",
   "workflow @ git+https://github.com/ucgmsim/workflow.git@pegasus",
-  "qcore >= 2025.12.2",
+  "qcore-utils>=2025.12.2",
   "geopandas",
   "pandas",
   "shapely",
@@ -59,6 +59,7 @@ plot-1d-velocity-model = "visualisation.plot_1d_velocity_model:app"
 plot-rupture-path = "visualisation.plot_rupture_path:app"
 plot-stoch = "visualisation.sources.plot_stoch:app"
 plot-ts = "visualisation.plot_ts:app"
+plot-realisation = "visualisation.realisation:app"
 
 [tool.setuptools.package-dir]
 visualisation = "visualisation"
