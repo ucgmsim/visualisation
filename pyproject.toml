@@ -8,7 +8,41 @@ authors = [{ name = "QuakeCoRE" }]
 description = "Visualisation repository for plotting scripts."
 readme = "README.md"
 requires-python = ">=3.12"
-dynamic = ["version", "dependencies"]
+dynamic = ["version"]
+dependencies = [
+  "cartopy",
+  "matplotlib",
+  "numpy",
+  "ffmpeg-python",
+  "pygmt",
+  "pygmt-helper >= 2025.12.1",
+  "source_modelling >= 2025.12.1",
+  "workflow @ git+https://github.com/ucgmsim/workflow.git@pegasus",
+  "qcore >= 2025.12.2",
+  "geopandas",
+  "pandas",
+  "shapely",
+  "scipy >= 1.15.0",
+  "pooch",
+  "typer",
+  "tqdm",
+]
+
+
+[project.optional-dependencies]
+test = [
+  "diffimg",
+  "pytest",
+  "pytest-cov",
+  "hypothesis[pandas, numpy]",
+  "hypothesis-networkx",
+]
+types = ["types-geopandas", "types-shapely", "scipy-stubs", "pandas-stubs"]
+dev = ["ty", "ruff", "deptry"]
+
+
+[tool.deptry]
+pep621_dev_dependency_groups = ["test", "dev", "types"]
 
 
 [project.scripts]
@@ -28,9 +62,6 @@ plot-ts = "visualisation.plot_ts:app"
 
 [tool.setuptools.package-dir]
 visualisation = "visualisation"
-
-[tool.setuptools.dynamic]
-dependencies = { file = ["requirements.txt"] }
 
 [tool.ruff.lint]
 extend-select = [
@@ -53,7 +84,7 @@ extend-select = [
   # Missing function argument type-annotation
   "ANN001",
   # Using except without specifying an exception type to catch
-  "BLE001"
+  "BLE001",
 ]
 ignore = ["D104"]
 
@@ -62,15 +93,15 @@ convention = "numpy"
 
 [tool.ruff.lint.isort]
 known-first-party = [
-    "source_modelling",
-    "visualisation",
-    "workflow",
-    "pygmt_helper",
-    "qcore",
-    "empirical",
-    "nshmdb",
-    "IM_calculation",
-    "mera"
+  "source_modelling",
+  "visualisation",
+  "workflow",
+  "pygmt_helper",
+  "qcore",
+  "empirical",
+  "nshmdb",
+  "IM_calculation",
+  "mera",
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -80,9 +111,7 @@ known-first-party = [
 "tests/**.py" = ["D"]
 
 [tool.coverage.run]
-omit = [
-     "visualisation/plot_ts.py"
-]
+omit = ["visualisation/plot_ts.py"]
 
 [tool.numpydoc_validation]
 checks = [
@@ -103,7 +132,7 @@ checks = [
   "YD01",
 ]
 # remember to use single quotes for regex in TOML
-exclude = [  # don't report on objects that match any of these regex
-    '\.undocumented_method$',
-    '\.__repr__$',
+exclude = [ # don't report on objects that match any of these regex
+  '\.undocumented_method$',
+  '\.__repr__$',
 ]
