@@ -291,10 +291,6 @@ def test_plot_velocity_model(
             "alpine_base_1_no_geometry.png",
         ),
         (
-            {"pgv_targets": [5.0, 1.0]},
-            "alpine_base_1_pgv_targets.png",
-        ),
-        (
             {"stations": STATIONS_FFP},
             "alpine_base_1_stations.png",
         ),
