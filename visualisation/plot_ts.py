@@ -332,6 +332,7 @@ def animate_low_frequency(
     padding: Annotated[float, typer.Option()] = 5.0,
     cmap: Annotated[str, typer.Option()] = "hot",
     scale: Annotated[str, typer.Option()] = "10m",
+    min_scale: Annotated[float, typer.Option()] = 10.0,
     shading: Annotated[str, typer.Option()] = "gouraud",
     frame_count: Annotated[int | None, typer.Option()] = None,
     frame_start: Annotated[int, typer.Option()] = 0,
@@ -344,6 +345,8 @@ def animate_low_frequency(
     simple_map: Annotated[bool, typer.Option()] = False,
     map_quality: Annotated[int, typer.Option()] = 4,
     downsample: Annotated[int, typer.Option()] = 1,
+    centre_lon: Annotated[float | None, typer.Option()] = None,
+    centre_lat: Annotated[float | None, typer.Option()] = None
 ) -> None:
     """Render low-frequency output as a 2D video of ground motions.
 
@@ -440,9 +443,8 @@ def animate_low_frequency(
         xyts_dataset.mlon, xyts_dataset.mlat, xyts_dataset.mrot
     )
     dx = xyts_dataset.dx
-
-    y_sim_bounds = np.linspace(-0.5, 0.5, num=ny) * ny * (dx * 5)
-    x_sim_bounds = np.linspace(-0.5, 0.5, num=nx) * nx * (dx * 5)
+    y_sim_bounds = np.linspace(-0.5, 0.5, num=ny) * ny * dx
+    x_sim_bounds = np.linspace(-0.5, 0.5, num=nx) * nx * dx
 
     y_sim, x_sim = np.meshgrid(y_sim_bounds, x_sim_bounds, indexing="ij")
     print(y_sim.shape)
@@ -498,7 +500,7 @@ def animate_low_frequency(
         lighting=False,
         smooth_shading=False,
         scalars="Ground Motion (cm/s)",
-        clim=[0, 100],
+        clim=[0, max_motion],
         cmap="hot",
         show_edges=False,
         nan_opacity=0.0,
@@ -517,6 +519,16 @@ def animate_low_frequency(
     )
 
     plotter.camera.tight()
+    if centre_lat and centre_lon:
+        centre_x, centre_y = proj.transform(centre_lon, centre_lat)
+        camera_height = z_max + 100000 
+    
+        plotter.camera.position = (centre_x, centre_y, camera_height)
+        plotter.camera.focal_point = (centre_x, centre_y, z_max)
+        plotter.camera.reset_clipping_range()
+
+    plotter.camera.zoom(zoom)
+    
     # plotter.camera.set
     plotter.set_background((173 / 255, 216 / 255, 230 / 255))
     text = plotter.add_text("0.00s", name="time-label", position="lower_right")
@@ -546,7 +558,7 @@ def animate_low_frequency(
         z_geometry = frames[i - i_frame]
         np.copyto(scalars, frames[i - i_frame])
 
-        scalars[scalars < 10] = np.nan
+        scalars[scalars < min_scale] = np.nan
 
         grid["Ground Motion (cm/s)"] = scalars.ravel(order="F")
 
