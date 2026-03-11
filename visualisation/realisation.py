@@ -25,7 +25,6 @@ from workflow.realisations import (
     SourceConfig,
     VelocityModelParameters,
 )
-from workflow.scripts import generate_velocity_model_parameters
 
 app = typer.Typer()
 
@@ -279,36 +278,6 @@ def plot_realisation(
 
     rrup_bounding_polygons: list[shapely.Polygon] = []
 
-    if show_pgv_targets:
-        rupture_propagation = RupturePropagationConfig.read_from_realisation(
-            realisation_ffp
-        )
-
-        velocity_model_parameters = VelocityModelParameters.read_from_realisation(
-            realisation_ffp
-        )
-
-        fault_pgv_targets = pgv_targets or [
-            generate_velocity_model_parameters.pgv_target(
-                rupture_propagation, velocity_model_parameters
-            )
-        ]
-
-        for pgv_targets in fault_pgv_targets:
-            rrup_bounding_polygons.append(
-                shapely.union_all(
-                    [
-                        generate_velocity_model_parameters.find_rrup_bounding_polygon(
-                            *args, pgv_target=pgv_targets
-                        )
-                        for args in generate_velocity_model_parameters.dict_zip(
-                            source_config.source_geometries,
-                            rupture_propagation.magnitudes,
-                            rupture_propagation.rakes,
-                        ).values()
-                    ]
-                )
-            )
 
     region = utils.bounding_region_for(
         [domain_parameters.domain.polygon] + rrup_bounding_polygons,
@@ -330,12 +299,6 @@ def plot_realisation(
 
     if stations:
         plot_stations(fig, domain_parameters, stations)
-
-    if show_pgv_targets:
-        for pgv_target, rrup_bounding_polygon in zip(
-            fault_pgv_targets, rrup_bounding_polygons
-        ):
-            plot_rrup_polygon(fig, region, pgv_target, rrup_bounding_polygon)
 
     # Plot the legend overtop the other elements.
     if stations:
