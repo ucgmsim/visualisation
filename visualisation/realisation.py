@@ -25,7 +25,7 @@ from workflow.realisations import (
     SourceConfig,
     VelocityModelParameters,
 )
-from workflow.scripts import generate_velocity_model_parameters
+
 
 app = typer.Typer()
 

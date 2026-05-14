@@ -470,6 +470,13 @@ def animate_low_frequency(
             [x_nztm[0, 0], y_nztm[0, 0], z_max],
         ]
     )
+    centre = np.mean(corners, axis=0)
+    if not (centre_lat and centre_lon):
+        centre_x, centre_y = centre[:2]
+    else:
+        centre_x, centre_y = proj.transform(centre_lon, centre_lat)
+
+        
     z_plane = np.full((ny, nx), z_max + ((1 << 16) - 1) * 0.1)
 
     grid = pv.StructuredGrid(x_nztm, y_nztm, z_plane)
@@ -519,13 +526,11 @@ def animate_low_frequency(
     )
 
     plotter.camera.tight()
-    if centre_lat and centre_lon:
-        centre_x, centre_y = proj.transform(centre_lon, centre_lat)
-        camera_height = z_max + 100000 
-    
-        plotter.camera.position = (centre_x, centre_y, camera_height)
-        plotter.camera.focal_point = (centre_x, centre_y, z_max)
-        plotter.camera.reset_clipping_range()
+    camera_height = z_max + 100000 
+
+    plotter.camera.position = (centre_x, centre_y, camera_height)
+    plotter.camera.focal_point = (centre_x, centre_y, z_max)
+    plotter.camera.reset_clipping_range()
 
     plotter.camera.zoom(zoom)
     
@@ -569,6 +574,217 @@ def animate_low_frequency(
         plotter.write_frame()
     plotter.close()
 
+
+@cli.from_docstring(app, name="xyts-diff")
+def render_difference_video(
+    realisation_ffp_1: Path,
+    realisation_ffp_2: Path,
+    xyts_ffp_1: Path,
+    xyts_ffp_2: Path,
+    output_mp4: Path,
+    max_diff: float = 10.0,
+    min_scale: float = 0.1,
+    cmap: str = "seismic", # Diverging/polar colormap for differences
+    frame_count: int | None = None,
+    frame_start: int = 0,
+    fps: int = 15,
+    zoom: float = 1.0,
+    centre_lat: float | None = None,
+    centre_lon: float | None = None,
+):
+    """Render the difference between two xyts ground motion simulations."""
+    
+    have_ffmpeg = shutil.which("ffmpeg")
+    if not have_ffmpeg:
+        print("You must have ffmpeg installed. See https://ffmpeg.org/download.html.")
+        return
+
+    # Load DEM
+    dem_dataset = xr.open_dataarray("dem.h5")
+    x_coords, y_coords = dem_dataset.x.values, dem_dataset.y.values
+    x, y = np.meshgrid(x_coords, y_coords)
+    z = dem_dataset.to_numpy()
+    z = np.where(np.isnan(z), -250, z)
+    z_max = z.max()
+    dem_grid = pv.StructuredGrid(x, y, z)
+    dem_grid["elevation"] = z.T.ravel()
+
+    # Process BOTH Source Geometries
+    planes = []
+    lines = []
+    
+    for real_ffp, color in [(realisation_ffp_1, "red"), (realisation_ffp_2, "blue")]:
+        source_config = SourceConfig.read_from_realisation(real_ffp)
+        for fault in source_config.source_geometries.values():
+            for plane in fault.planes:
+                bounds = plane.bounds
+                bounds[:, [0, 1]] = bounds[:, [1, 0]]
+                bounds[:, 2] = z_max + 5
+                
+                # Tag planes with a color so we can render both sources distinctly
+                planes.append((
+                    [
+                        pv.Triangle([bounds[0], bounds[1], bounds[-1]]),
+                        pv.Triangle([bounds[1], bounds[2], bounds[-1]]),
+                    ], 
+                    color
+                ))
+                
+                point_a = bounds[0].copy()
+                point_a[2] = z_max + 10
+                point_b = bounds[1].copy()
+                point_b[2] = z_max + 10
+                lines.extend([point_a, point_b])
+
+    # Base Topo Colormap (assuming you want to keep the background topo styling)
+    cmap_min, cmap_max, topo_cmap = cmap_from_cpt(Path("/home/jake/tmp/palm_springs_nz_topo.cpt"))
+
+    # Load both XYTS datasets (Metadata is assumed identical for grid matching)
+    xyts_1 = xr.open_dataset(xyts_ffp_1)
+    xyts_2 = xr.open_dataset(xyts_ffp_2)
+    
+    (nt, ny, nx) = xyts_1.waveform.shape
+    proj_spherical = coordinates.SphericalProjection(xyts_1.mlon, xyts_1.mlat, xyts_1.mrot)
+    dx = xyts_1.dx
+    
+    y_sim_bounds = np.linspace(-0.5, 0.5, num=ny) * ny * dx
+    x_sim_bounds = np.linspace(-0.5, 0.5, num=nx) * nx * dx
+    y_sim, x_sim = np.meshgrid(y_sim_bounds, x_sim_bounds, indexing="ij")
+
+    x_flat = x_sim.ravel(order="F")
+    y_flat = y_sim.ravel(order="F")
+
+    points = proj_spherical.inverse(x_flat, y_flat)
+    lon_sim, lat_sim = points[:, 1], points[:, 0]
+
+    proj_nztm = pyproj.Transformer.from_crs(4326, 2193, always_xy=True)
+    x_nztm_flat, y_nztm_flat = proj_nztm.transform(lon_sim, lat_sim)
+
+    x_nztm = x_nztm_flat.reshape((ny, nx), order="F")
+    y_nztm = y_nztm_flat.reshape((ny, nx), order="F")
+    
+    corners = np.array([
+        [x_nztm[0, 0], y_nztm[0, 0], z_max],
+        [x_nztm[-1, 0], y_nztm[-1, 0], z_max],
+        [x_nztm[-1, -1], y_nztm[-1, -1], z_max],
+        [x_nztm[0, -1], y_nztm[0, -1], z_max],
+        [x_nztm[0, 0], y_nztm[0, 0], z_max],
+    ])
+    
+    centre = np.mean(corners, axis=0)
+    if not (centre_lat and centre_lon):
+        centre_x, centre_y = centre[:2]
+    else:
+        centre_x, centre_y = proj_nztm.transform(centre_lon, centre_lat)
+
+    z_plane = np.full((ny, nx), z_max + ((1 << 16) - 1) * 0.1)
+    grid = pv.StructuredGrid(x_nztm, y_nztm, z_plane)
+    grid["Motion Difference (cm/s)"] = grid.points[:, -1]
+
+    # Setup Plotter
+    plotter = pv.Plotter(notebook=False, off_screen=True, window_size=[1920, 1088])
+    plotter.remove_all_lights()
+
+    plotter.open_movie(output_mp4, framerate=fps, quality=10)
+    
+    # Plot both sets of source planes
+    for plane_tris, color in planes:
+        for tri in plane_tris:
+            plotter.add_mesh(tri, color=color, lighting=False)
+
+    plotter.add_lines(corners, connected=True, color="black", width=3)
+    plotter.add_lines(np.array(lines), color="black", width=2)
+
+    plotter.add_mesh(
+        dem_grid,
+        lighting=False,
+        smooth_shading=False,
+        cmap=topo_cmap,
+        clim=(cmap_min, cmap_max),
+        show_scalar_bar=False,
+    )
+    
+    # The Grid plotting updated for difference
+    plotter.add_mesh(
+        grid,
+        lighting=False,
+        smooth_shading=False,
+        scalars="Motion Difference (cm/s)",
+        clim=[-max_diff, max_diff], # Polar/Diverging limits centered on 0
+        cmap=cmap, 
+        show_edges=False,
+        nan_opacity=0.0,
+        show_scalar_bar=True,
+        scalar_bar_args=dict(
+            title="Difference\n(cm/s)\n",
+            vertical=True,
+            position_x=0.85,
+            position_y=0.25,
+            bold=True,
+            color="white",
+            height=0.5,
+            width=0.05,
+            n_labels=11,
+        ),
+    )
+
+    plotter.camera.tight()
+    camera_height = z_max + 100000 
+    plotter.camera.position = (centre_x, centre_y, camera_height)
+    plotter.camera.focal_point = (centre_x, centre_y, z_max)
+    plotter.camera.reset_clipping_range()
+    plotter.camera.zoom(zoom)
+    
+    plotter.set_background((173 / 255, 216 / 255, 230 / 255))
+    text = plotter.add_text("0.00s", name="time-label", position="lower_right")
+    plotter.show(auto_close=False)
+
+    # Memory Efficient Frame Chunking
+    frame_chunk = 100
+    chunk_start = frame_start
+    frames_diff = None
+    scalars = np.empty((ny, nx), dtype=np.float32, order="F")
+    
+    time = xyts_1.time.values
+    dt = xyts_1.attrs["dt"]
+    
+    total_frames = min(frame_count or nt - frame_start, nt - frame_start)
+
+    for i in tqdm.trange(frame_start, frame_start + total_frames):
+        # Load next chunk only when needed
+        if frames_diff is None or i >= chunk_start + frame_chunk:
+            chunk_start = i
+            chunk_end = min(chunk_start + frame_chunk, nt)
+            
+            # Load chunks, convert to float32, and immediately compute difference
+            # Using slice is more robust with xarray than range()
+            f1 = xyts_1.waveform.isel(time=slice(chunk_start, chunk_end)).astype(np.float32).values
+            f2 = xyts_2.waveform.isel(time=slice(chunk_start, chunk_end)).astype(np.float32).values
+            
+            frames_diff = f1 - f2
+            
+            # Allow garbage collection to clean up f1 and f2
+            del f1, f2
+
+        idx_in_chunk = i - chunk_start
+        z_geometry = frames_diff[idx_in_chunk]
+        np.copyto(scalars, z_geometry)
+
+        # Mask out very small differences so we can see the map underneath
+        scalars[np.abs(scalars) < min_scale] = np.nan
+
+        grid["Motion Difference (cm/s)"] = scalars.ravel(order="F")
+        np.add(z_geometry, z_max, out=z_geometry)
+        grid.points[:, -1] = z_geometry.ravel(order="F")
+        
+        if i % round(1 / dt) == 0:
+            text.set_text("lower_right", f"{time[i]:.2f}s")
+            
+        plotter.write_frame()
+        
+    plotter.close()
+    xyts_1.close()
+    xyts_2.close()
 
 def non_zero_data_points(
     x: np.ndarray, y: np.ndarray, z: np.ndarray

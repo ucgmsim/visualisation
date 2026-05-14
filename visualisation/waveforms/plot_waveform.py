@@ -35,6 +35,7 @@ def plot_waveform(
     dataset_units: Units,
     plot_units: Units | None = None,
     ylim: float | None = None,
+    component_map: dict[str, str] | None = None,
     **kwargs,
 ) -> None:
     """Plot a waveform from a simulation.
@@ -73,10 +74,13 @@ def plot_waveform(
     if plot_units == Units.CMS:
         waveform = sp.integrate.cumulative_trapezoid(waveform, dx=dt, initial=0)
     axes = [ax_x, ax_y, ax_z]
+    component_map = component_map or dict()
     for i, component in enumerate(dataset.component):
         axes[i].plot(time, waveform[i])
         axes[i].grid()
-        axes[i].set_ylabel(f"{str(component.item())} [{plot_units}]")
+        raw_name = str(component.item())
+        component_name = component_map.get(raw_name, raw_name)
+        axes[i].set_ylabel(f"{component_name} [{plot_units}]")
         if ylim is not None:
             axes[i].set_ylim(bottom=-ylim, top=ylim)
     axes[-1].set_xlabel("time [s]")
@@ -96,6 +100,7 @@ def plot_waveform_cli(
     ylim: float | None = None,
     rows: float | None = None,
     columns: float | None = None,
+    rotation: float = 0.0,
 ) -> None:
     """Plot a station waveform.
 
@@ -157,6 +162,8 @@ def plot_waveform_cli(
             other.set_xticklabels([])
 
         all_station_axes.extend(axes)
+        # if not np.isclose(rotation, 0.0):
+
         plot_waveform(
             dset,
             station,
