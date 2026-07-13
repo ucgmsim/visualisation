@@ -10,7 +10,6 @@ readme = "README.md"
 requires-python = ">=3.12"
 dynamic = ["version", "dependencies"]
 
-
 [project.scripts]
 plot-srf-moment = "visualisation.sources.plot_srf_moment:app"
 plot-domain = "visualisation.realisation:app"
@@ -25,6 +24,10 @@ plot-1d-velocity-model = "visualisation.plot_1d_velocity_model:app"
 plot-rupture-path = "visualisation.plot_rupture_path:app"
 plot-stoch = "visualisation.sources.plot_stoch:app"
 plot-ts = "visualisation.plot_ts:app"
+plot-response-rrup = "visualisation.ims.response_rrup:app"
+plot-response-spectra = "visualisation.waveforms.plot_response_spectra:app"
+plot-waveform = "visualisation.waveforms.plot_waveform:app"
+plot-gmm-comparison = "visualisation.ims.gmm_comparison:app"
 
 [tool.setuptools.package-dir]
 visualisation = "visualisation"
@@ -53,7 +56,7 @@ extend-select = [
   # Missing function argument type-annotation
   "ANN001",
   # Using except without specifying an exception type to catch
-  "BLE001"
+  "BLE001",
 ]
 ignore = ["D104"]
 
@@ -62,15 +65,15 @@ convention = "numpy"
 
 [tool.ruff.lint.isort]
 known-first-party = [
-    "source_modelling",
-    "visualisation",
-    "workflow",
-    "pygmt_helper",
-    "qcore",
-    "empirical",
-    "nshmdb",
-    "IM_calculation",
-    "mera"
+  "source_modelling",
+  "visualisation",
+  "workflow",
+  "pygmt_helper",
+  "qcore",
+  "empirical",
+  "nshmdb",
+  "IM_calculation",
+  "mera",
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -80,9 +83,7 @@ known-first-party = [
 "tests/**.py" = ["D"]
 
 [tool.coverage.run]
-omit = [
-     "visualisation/plot_ts.py"
-]
+omit = ["visualisation/plot_ts.py"]
 
 [tool.numpydoc_validation]
 checks = [
@@ -103,7 +104,7 @@ checks = [
   "YD01",
 ]
 # remember to use single quotes for regex in TOML
-exclude = [  # don't report on objects that match any of these regex
-    '\.undocumented_method$',
-    '\.__repr__$',
+exclude = [ # don't report on objects that match any of these regex
+  '\.undocumented_method$',
+  '\.__repr__$',
 ]

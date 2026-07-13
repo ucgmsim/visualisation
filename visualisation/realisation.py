@@ -17,6 +17,7 @@ import typer
 
 from pygmt_helper import plotting
 from qcore import cli
+from source_modelling.sources import Fault, Plane
 from visualisation import utils
 from workflow.realisations import (
     DomainParameters,
@@ -77,9 +78,7 @@ def plot_stations(
     )
 
 
-def plot_sources(
-    fig: pygmt.Figure, source_config: SourceConfig, **kwargs: dict[str, Any]
-) -> None:
+def plot_sources(fig: pygmt.Figure, source_config: SourceConfig, **kwargs: Any) -> None:
     """Plot the sources on the figure.
 
     Parameters
@@ -90,7 +89,8 @@ def plot_sources(
         The source configuration to plot.
     **kwargs : dict
         Additional keyword arguments to pass to the plotting function. If empty, the default is
-        - `pen="0.3p,black"` (polygon border colour)
+        - `pen="0.3p,black,--"` (polygon border colour)
+        - trace pen is found by taking the pen and stripping the "--"
 
     Examples
     --------
@@ -101,16 +101,29 @@ def plot_sources(
     >>> plot_sources(fig, source_config)
     >>> source_config.show()
     """
-    kwargs = {"pen": "0.3p,black", **(kwargs or {})}
+    pen = kwargs.get("pen", "0.3p,black,--")
+    assert isinstance(pen, str)
+    trace_pen = pen.removesuffix(",--")
+    interior_kwargs = {"pen": pen, **(kwargs or {})}
 
     for source in source_config.source_geometries.values():
-        utils.plot_polygon(fig, utils.polygon_nztm_to_pygmt(source.geometry), **kwargs)
+        utils.plot_polygon(
+            fig, utils.polygon_nztm_to_pygmt(source.geometry), **interior_kwargs
+        )
+        if isinstance(source, Fault):
+            trace = shapely.LineString(
+                np.concatenate([plane.bounds[:2] for plane in source.planes])
+            )
+            utils.plot_polygon(fig, utils.polygon_nztm_to_pygmt(trace), pen=trace_pen)
+        elif isinstance(source, Plane):
+            trace = shapely.LineString(source.bounds[:2])
+            utils.plot_polygon(fig, utils.polygon_nztm_to_pygmt(trace), pen=trace_pen)
 
 
 def plot_domain(
     fig: pygmt.Figure,
     domain_parameters: DomainParameters,
-    **kwargs: dict[str, Any],
+    **kwargs: Any,
 ) -> None:
     """Plot the domain on a figure.
 
@@ -210,7 +223,6 @@ def plot_realisation(
     title: str | None = None,
     subtitle: str | None = None,
     width: float = 10,
-    show_geonet_stations: bool = False,
     show_geometry: bool = True,
     show_pgv_targets: bool = False,
     pgv_targets: list[float] | None = None,
@@ -232,8 +244,6 @@ def plot_realisation(
         Subtitle of the plot.
     width : float
         Width of the plot in cm.
-    show_geonet_stations : bool
-        Show GeoNet stations on the plot.
     show_geometry : bool
         Show source geometry on the plot.
     show_pgv_targets : bool
@@ -262,41 +272,11 @@ def plot_realisation(
     >>> fig.show()
     """
     show_pgv_targets = show_pgv_targets or bool(pgv_targets)
-    rupture_propagation = RupturePropagationConfig.read_from_realisation(
-        realisation_ffp
-    )
     domain_parameters = DomainParameters.read_from_realisation(realisation_ffp)
-
-    velocity_model_parameters = VelocityModelParameters.read_from_realisation(
-        realisation_ffp
-    )
 
     source_config = SourceConfig.read_from_realisation(realisation_ffp)
 
     rrup_bounding_polygons: list[shapely.Polygon] = []
-
-    if show_pgv_targets:
-        fault_pgv_targets = pgv_targets or [
-            generate_velocity_model_parameters.pgv_target(
-                rupture_propagation, velocity_model_parameters
-            )
-        ]
-
-        for pgv_targets in fault_pgv_targets:
-            rrup_bounding_polygons.append(
-                shapely.union_all(
-                    [
-                        generate_velocity_model_parameters.find_rrup_bounding_polygon(
-                            *args, pgv_target=pgv_targets
-                        )
-                        for args in generate_velocity_model_parameters.dict_zip(
-                            source_config.source_geometries,
-                            rupture_propagation.magnitudes,
-                            rupture_propagation.rakes,
-                        ).values()
-                    ]
-                )
-            )
 
     region = utils.bounding_region_for(
         [domain_parameters.domain.polygon] + rrup_bounding_polygons,
@@ -318,12 +298,6 @@ def plot_realisation(
 
     if stations:
         plot_stations(fig, domain_parameters, stations)
-
-    if show_pgv_targets:
-        for pgv_target, rrup_bounding_polygon in zip(
-            fault_pgv_targets, rrup_bounding_polygons
-        ):
-            plot_rrup_polygon(fig, region, pgv_target, rrup_bounding_polygon)
 
     # Plot the legend overtop the other elements.
     if stations:
@@ -448,7 +422,6 @@ def plot_realisation_to_file(
         title=title,
         subtitle=subtitle,
         width=width,
-        show_geonet_stations=show_geonet_stations,
         show_geometry=show_geometry,
         show_pgv_targets=show_pgv_targets,
         pgv_targets=pgv_targets,

@@ -61,9 +61,8 @@ def show_slip(
     region: tuple[float, float, float, float],
     srf_data: srf.SrfFile,
     annotations: bool,
-    projection: str = "M?",
+    contours: bool,
     realisation_ffp: Optional[Path] = None,
-    title: Optional[str] = None,
 ):
     """Show a slip map with optional contours.
 
@@ -94,31 +93,11 @@ def show_slip(
     >>> show_slip(fig, region, srf_data, annotations=True, projection="M6i", title="Slip Distribution")
     >>> fig.show()  # Displays the slip map with optional annotations
     """
-    subtitle = utils.format_description(
-        srf_data.points["slip"], units="cm", compact=True
-    )
-    title_args = [f"+t{title}+s{subtitle}".replace(" ", r"\040")] if title else []
     # Compute slip limits
-    fig.basemap(
-        region=region,
-        projection=projection,
-        frame=plotting.DEFAULT_PLT_KWARGS["frame_args"] + title_args,
-    )
-    fig.coast(
-        shorelines=["1/0.1p,black", "2/0.1p,black"],
-        resolution="f",
-        land="#666666",
-        water="skyblue",
-    )
-
-    slip_quantile = srf_data.points["slip"].quantile(0.98)
+    slip_quantile = np.quantile(srf_data.points["slip"], 0.9)
     slip_cb_max = max(int(np.round(slip_quantile, -1)), 10)
     cmap_limits = (0, slip_cb_max, slip_cb_max / 10)
-    slip_stats = utils.format_description(
-        srf_data.points["slip"], compact=True, units="cm"
-    )
     dx = srf_data.header.iloc[0]["len"] / srf_data.header.iloc[0]["nstk"]
-    subtitle = f"Slip: {slip_stats}, dx = {dx:.2f} km, {len(srf_data.header)} planes"
     grid_scale = min(utils.grid_scale_for_region(region), dx * 1000)
     for (_, segment), segment_points in zip(
         srf_data.header.iterrows(), srf_data.segments
@@ -150,23 +129,24 @@ def show_slip(
             reverse_cmap=True,
             plot_contours=False,
             cb_label="Slip (cm)",
-            continuous_cmap=True,
         )
 
-        # Plot time contours
-        time_grid = plotting.create_grid(
-            segment_points,
-            "tinit",
-            grid_spacing=f"{grid_scale}e/{grid_scale}e",
-            region=(
-                segment_points["lon"].min(),
-                segment_points["lon"].max(),
-                segment_points["lat"].min(),
-                segment_points["lat"].max(),
-            ),
-            set_water_to_nan=False,
-        )
-        fig.grdcontour(levels=1, grid=time_grid, pen="0.1p")
+        if contours:
+            # Plot time contours
+            time_grid = plotting.create_grid(
+                segment_points,
+                "tinit",
+                grid_spacing=f"{grid_scale}e/{grid_scale}e",
+                region=(
+                    segment_points["lon"].min(),
+                    segment_points["lon"].max(),
+                    segment_points["lat"].min(),
+                    segment_points["lat"].max(),
+                ),
+                set_water_to_nan=False,
+            )
+
+            fig.grdcontour(levels=1, grid=time_grid, pen="0.1p")
 
         # Plot bounds of the current segment.
         corners = segment_points.iloc[[0, nstk - 1, -1, (ndip - 1) * nstk]]
@@ -290,8 +270,13 @@ def plot_srf(
     latitude_pad: Annotated[float, typer.Option()] = 0,
     longitude_pad: Annotated[float, typer.Option()] = 0,
     annotations: Annotated[bool, typer.Option()] = True,
+    contours: Annotated[bool, typer.Option()] = True,
     width: Annotated[float, typer.Option(min=0)] = 17,
     show_inset: bool = False,
+    min_lat: float | None = None,
+    max_lat: float | None = None,
+    min_lon: float | None = None,
+    max_lon: float | None = None,
 ) -> None:
     """Plot multi-segment rupture with slip.
 
@@ -342,24 +327,36 @@ def plot_srf(
     """
     srf_data = srf.read_srf(srf_ffp)
     region = (
-        srf_data.points["lon"].min() - longitude_pad,
-        srf_data.points["lon"].max() + longitude_pad,
-        srf_data.points["lat"].min() - latitude_pad,
-        srf_data.points["lat"].max() + latitude_pad,
+        min_lon or srf_data.points["lon"].min() - longitude_pad,
+        max_lon or srf_data.points["lon"].max() + longitude_pad,
+        min_lat or srf_data.points["lat"].min() - latitude_pad,
+        max_lat or srf_data.points["lat"].max() + latitude_pad,
     )
-
-    fig = pygmt.Figure()
-
-    pygmt.config(FONT_SUBTITLE="9p,Helvetica,black", FORMAT_GEO_MAP="ddd.xx")
+    use_high_res = (region[1] - region[0]) * (region[3] - region[2]) < 0.5
+    fig = plotting.gen_region_fig(
+        title,
+        region,
+        high_res_topo=use_high_res,
+        plot_highways=False,
+        projection=f"M{width}c",
+        subtitle=utils.format_description(
+            srf_data.points["slip"], units="cm", compact=True
+        ),
+        config_options=dict(
+            FONT_SUBTITLE="9p,Helvetica,black",
+            FORMAT_GEO_MAP="ddd.xx",
+            MAP_FRAME_TYPE="plain",
+        ),
+        plot_kwargs=dict(water_color="white", topo_cmap_min=-900, topo_cmap_max=3100),
+    )
 
     show_slip(
         fig,
         region,
         srf_data,
         annotations,
-        projection=f"M{width}c",
+        contours,
         realisation_ffp=realisation_ffp,
-        title=title,
     )
     if show_inset:
         with fig.inset(position=f"jTR+w{np.sqrt(width)}c", margin=0.2):

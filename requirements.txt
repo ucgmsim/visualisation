@@ -4,10 +4,10 @@ matplotlib
 numpy
 ffmpeg-python
 pygmt
-pygmt_helper @ git+https://github.com/ucgmsim/pygmt_helper.git
-source_modelling @ git+https://github.com/ucgmsim/source_modelling.git
-workflow @ git+https://github.com/ucgmsim/workflow.git@pegasus
-qcore @ git+https://github.com/ucgmsim/qcore.git
+pygmt-helper
+source-modelling
+workflow @ git+https://github.com/ucgmsim/workflow.git
+qcore-utils
 geopandas
 pandas
 shapely
@@ -18,3 +18,5 @@ pytest-cov
 pytest-xdist
 typer
 tqdm
+rpy2
+xarray[io]
