@@ -60,37 +60,8 @@ def plot_rupture_path(
     >>> fig.savefig("rupture_path.png")
     """
     realisation.plot_sources(fig, source_config, fill="white")
-
-    for fault_name, parent_name in rup_prop_config.rupture_causality_tree.items():
-        if not parent_name:
-            continue
-
-        fault = source_config.source_geometries[fault_name]
-        parent = source_config.source_geometries[parent_name]
-        parent_point = utils.polygon_nztm_to_pygmt(
-            parent.geometry
-        ).representative_point()
-        fault_point = utils.polygon_nztm_to_pygmt(fault.geometry).representative_point()
-        data_for_plot = [[parent_point.x, parent_point.y, fault_point.x, fault_point.y]]
-
-        fig.plot(
-            data=data_for_plot,
-            style="=0.3c+ea45+s",
-            pen="0.5p,black",
-            fill="black",
-        )
-
-    initial_fault = source_config.source_geometries[rup_prop_config.initial_fault]
-    hypocentre = initial_fault.fault_coordinates_to_wgs_depth_coordinates(
-        rup_prop_config.hypocentre
-    )
-    fig.plot(
-        x=hypocentre[1],
-        y=hypocentre[0],
-        style="a0.3c",
-        pen="0.3p,black",
-        fill="gold",
-    )
+    realisation.plot_rupture_propagation(fig, source_config, rup_prop_config)
+    realisation.plot_hypocentre(fig, source_config, rup_prop_config)
 
 
 @cli.from_docstring(app)
