@@ -96,8 +96,9 @@ def plot_simulation_fit(
 
 
 def human_readable_basin_name(basin_name: str) -> str:
+    version_identifiers_removed = re.sub(r'_v\d+p\d+', '', basin_name)
     # NE_Otago -> NE Otago
-    basin_name_no_underscore = basin_name.replace("_", " ")
+    basin_name_no_underscore = version_identifiers_removed.replace("_", " ")
     # Greate(r)(W)ellington -> Greate(r) (W)ellington
     return re.sub(r"([a-z])([A-Z])", r"\1 \2", basin_name_no_underscore)
 
@@ -305,10 +306,9 @@ def plot_separate_basin_subplots(
 
 def plot_combined_basin_plot(
     realisation_ffp: Path,
-    simulation_ds: xr.Dataset,
+    psa: xr.Dataset,
     period: float,
     basins: list[str],
-    component: str = "rotd50",
     xmin: float | None = None,
     xmax: float | None = None,
     ymin: float | None = None,
@@ -324,7 +324,7 @@ def plot_combined_basin_plot(
         print("Warning: No basins specified. Plotting all stations only.")
         # Proceed with the rest of the function for the 'All Stations' plot
 
-    max_rrup, nshm_rrup = _get_plotting_params(simulation_ds)
+    max_rrup, nshm_rrup = _get_plotting_params(psa)
 
     fig, ax = plt.subplots(constrained_layout=True)
     all_axes = np.array([ax])  # For style helper consistency
@@ -332,14 +332,13 @@ def plot_combined_basin_plot(
     # 1. Plot NSHM fit and set axis scales/grid
     _plot_settings(ax)
     fit, ci_low, ci_high = plot_nshm_fit(
-        ax, realisation_ffp, simulation_ds, period, nshm_rrup
+        ax, realisation_ffp, psa, period, nshm_rrup
     )
 
     # 2. Plot All Stations (Base Layer)
-    all_pSA = simulation_ds.pSA.sel(period=period, component=component).values
     ax.scatter(
-        simulation_ds.rrup,
-        all_pSA,
+        psa.rrup,
+        psa.values,
         c="k",
         alpha=0.1,
         s=10,
@@ -347,8 +346,8 @@ def plot_combined_basin_plot(
     )
     plot_simulation_fit(
         ax,
-        simulation_ds.rrup.values,
-        all_pSA,
+        psa.rrup.values,
+        psa.values,
         label=None,
         color="tab:gray",
         span=span,
@@ -360,20 +359,21 @@ def plot_combined_basin_plot(
     log_nshm_rrup = np.log(nshm_rrup)
 
     for basin, colour in zip(basins, basin_colours):
-        subds = _get_basin_stations(simulation_ds, basin)
+        subds = _get_basin_stations(psa, basin)
 
         if len(subds.station) == 0:
             continue
 
         # Use the distinct color generated from the colormap
 
-        basin_pSA = subds.pSA.sel(period=period, component=component).values
-        log_rrup = np.log(subds.rrup.values)
+        basin_pSA = subds.values
+        log_rrup = np.log(subds.rrup)
         basin_misfit = np.log(basin_pSA) - np.interp(log_rrup, log_nshm_rrup, log_fit)
         mean_misfit = np.mean(basin_misfit)
 
-        log_basin_rrup_min = log_rrup.min()
-        log_basin_rrup_max = log_rrup.max()
+        log_basin_rrup_min = log_rrup.min().item()
+        log_basin_rrup_max = log_rrup.max().item()
+
         log_basin_misfit_rrup = np.linspace(
             log_basin_rrup_min, log_basin_rrup_max, num=100
         )
@@ -437,7 +437,7 @@ def plot_basin_split(
     Creates a single plot comparing simulated pSA for Basin stations against
     Non-Basin stations, along with the NSHM prediction.
     """
-    simulation_ds = xr.open_dataset(simulation_dataset_path, engine="h5netcdf")
+    simulation_ds = xr.open_dataset(simulation_dataset_path)
 
     fig = plot_basin_vs_no_basin(
         realisation_ffp,
@@ -508,7 +508,7 @@ def plot_basins_separate(
         )
         raise typer.Exit(code=1)
 
-    simulation_ds = xr.open_dataset(simulation_dataset_path, engine="h5netcdf")
+    simulation_ds = xr.open_dataset(simulation_dataset_path)
 
     fig = plot_separate_basin_subplots(
         realisation_ffp,
@@ -578,7 +578,7 @@ def plot_basins_combined(
             err=True,
         )
 
-    simulation_ds = xr.open_dataset(simulation_dataset_path, engine="h5netcdf")
+    simulation_ds = xr.open_dataset(simulation_dataset_path)
 
     fig = plot_combined_basin_plot(
         realisation_ffp,

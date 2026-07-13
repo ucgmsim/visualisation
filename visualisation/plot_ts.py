@@ -324,7 +324,7 @@ def cmap_from_cpt(cpt_file: Path) -> tuple[float, float, LinearSegmentedColormap
 @cli.from_docstring(app, name="xyts")
 def animate_low_frequency(
     realisation_ffp: Annotated[Path, typer.Argument(exists=True, dir_okay=False)],
-    xyts_ffp: Annotated[Path, typer.Argument(exists=True, dir_okay=False)],
+    xyts_ffp: Annotated[Path, typer.Argument(exists=True)],
     output_mp4: Annotated[
         Path, typer.Argument(writable=True, dir_okay=False, resolve_path=True)
     ],
@@ -346,7 +346,7 @@ def animate_low_frequency(
     map_quality: Annotated[int, typer.Option()] = 4,
     downsample: Annotated[int, typer.Option()] = 1,
     centre_lon: Annotated[float | None, typer.Option()] = None,
-    centre_lat: Annotated[float | None, typer.Option()] = None
+    centre_lat: Annotated[float | None, typer.Option()] = None,
 ) -> None:
     """Render low-frequency output as a 2D video of ground motions.
 
@@ -402,7 +402,7 @@ def animate_low_frequency(
         )
         raise typer.Exit(code=1)
 
-    dem_dataset = xr.open_dataarray("dem.h5")
+    dem_dataset = xr.open_dataarray("/home/jake/src/visualisation/dem.h5")
     x_coords = dem_dataset.x.values
     y_coords = dem_dataset.y.values
     x, y = np.meshgrid(x_coords, y_coords)
@@ -416,51 +416,33 @@ def animate_low_frequency(
     planes = []
     lines = []
     plane_max = 0
-    for fault in source_config.source_geometries.values():
-        for plane in fault.planes:
-            bounds = plane.bounds
-            plane_max = max(plane_max, bounds[-1, 2])
-            bounds[:, [0, 1]] = bounds[:, [1, 0]]
-            bounds[:, 2] = z_max + 5
-            planes.extend(
-                [
-                    pv.Triangle([bounds[0], bounds[1], bounds[-1]]),
-                    pv.Triangle([bounds[1], bounds[2], bounds[-1]]),
-                ]
-            )
-            point_a = bounds[0].copy()
-            point_a[2] = z_max + 10
-            point_b = bounds[1].copy()
-            point_b[2] = z_max + 10
-            lines.extend([point_a, point_b])
+    # for fault in source_config.source_geometries.values():
+    #     for plane in fault.planes:
+    #         bounds = plane.bounds
+    #         plane_max = max(plane_max, bounds[-1, 2])
+    #         bounds[:, [0, 1]] = bounds[:, [1, 0]]
+    #         bounds[:, 2] = z_max + 5
+    #         planes.extend(
+    #             [
+    #                 pv.Triangle([bounds[0], bounds[1], bounds[-1]]),
+    #                 pv.Triangle([bounds[1], bounds[2], bounds[-1]]),
+    #             ]
+    #         )
+    #         point_a = bounds[0].copy()
+    #         point_a[2] = z_max + 10
+    #         point_b = bounds[1].copy()
+    #         point_b[2] = z_max + 10
+    #         lines.extend([point_a, point_b])
 
     cmap_min, cmap_max, cmap = cmap_from_cpt(
         Path("/home/jake/tmp/palm_springs_nz_topo.cpt")
     )
     xyts_dataset = xr.open_dataset(xyts_ffp)
     (nt, ny, nx) = xyts_dataset.waveform.shape
-    proj = coordinates.SphericalProjection(
-        xyts_dataset.mlon, xyts_dataset.mlat, xyts_dataset.mrot
-    )
-    dx = xyts_dataset.dx
-    y_sim_bounds = np.linspace(-0.5, 0.5, num=ny) * ny * dx
-    x_sim_bounds = np.linspace(-0.5, 0.5, num=nx) * nx * dx
-
-    y_sim, x_sim = np.meshgrid(y_sim_bounds, x_sim_bounds, indexing="ij")
-    print(y_sim.shape)
-
-    x_flat = x_sim.ravel(order="F")
-    y_flat = y_sim.ravel(order="F")
-
-    points = proj.inverse(x_flat, y_flat)
-    lon_sim = points[:, 1]
-    lat_sim = points[:, 0]
-
+    lon_sim = xyts_dataset.longitude
+    lat_sim = xyts_dataset.latitude
     proj = pyproj.Transformer.from_crs(4326, 2193, always_xy=True)
-    x_nztm_flat, y_nztm_flat = proj.transform(lon_sim, lat_sim)
-
-    x_nztm = x_nztm_flat.reshape((ny, nx), order="F")
-    y_nztm = y_nztm_flat.reshape((ny, nx), order="F")
+    x_nztm, y_nztm = proj.transform(lon_sim.values, lat_sim.values)
     corners = np.array(
         [
             [x_nztm[0, 0], y_nztm[0, 0], z_max],
@@ -476,7 +458,6 @@ def animate_low_frequency(
     else:
         centre_x, centre_y = proj.transform(centre_lon, centre_lat)
 
-        
     z_plane = np.full((ny, nx), z_max + ((1 << 16) - 1) * 0.1)
 
     grid = pv.StructuredGrid(x_nztm, y_nztm, z_plane)
@@ -492,7 +473,7 @@ def animate_low_frequency(
         plotter.add_mesh(plane, color="red", lighting=False)
 
     plotter.add_lines(corners, connected=True, color="black", width=3)
-    plotter.add_lines(np.array(lines), color="black", width=2)
+    # plotter.add_lines(np.array(lines), color="black", width=2)
 
     plotter.add_mesh(
         dem_grid,
@@ -526,14 +507,14 @@ def animate_low_frequency(
     )
 
     plotter.camera.tight()
-    camera_height = z_max + 100000 
+    camera_height = z_max + 100000
 
     plotter.camera.position = (centre_x, centre_y, camera_height)
     plotter.camera.focal_point = (centre_x, centre_y, z_max)
     plotter.camera.reset_clipping_range()
 
     plotter.camera.zoom(zoom)
-    
+
     # plotter.camera.set
     plotter.set_background((173 / 255, 216 / 255, 230 / 255))
     text = plotter.add_text("0.00s", name="time-label", position="lower_right")
@@ -545,7 +526,7 @@ def animate_low_frequency(
     frames = None
     scalars = np.empty((ny, nx), dtype=np.float32, order="F")
     time = xyts_dataset.time.values
-    dt = xyts_dataset.attrs["dt"]
+    dt = time[1] - time[0]
     for i in tqdm.trange(
         frame_start,
         frame_start + min(frame_count or nt - frame_start, nt - frame_start),
@@ -584,7 +565,7 @@ def render_difference_video(
     output_mp4: Path,
     max_diff: float = 10.0,
     min_scale: float = 0.1,
-    cmap: str = "seismic", # Diverging/polar colormap for differences
+    cmap: str = "seismic",  # Diverging/polar colormap for differences
     frame_count: int | None = None,
     frame_start: int = 0,
     fps: int = 15,
@@ -593,7 +574,7 @@ def render_difference_video(
     centre_lon: float | None = None,
 ):
     """Render the difference between two xyts ground motion simulations."""
-    
+
     have_ffmpeg = shutil.which("ffmpeg")
     if not have_ffmpeg:
         print("You must have ffmpeg installed. See https://ffmpeg.org/download.html.")
@@ -612,7 +593,7 @@ def render_difference_video(
     # Process BOTH Source Geometries
     planes = []
     lines = []
-    
+
     for real_ffp, color in [(realisation_ffp_1, "red"), (realisation_ffp_2, "blue")]:
         source_config = SourceConfig.read_from_realisation(real_ffp)
         for fault in source_config.source_geometries.values():
@@ -620,16 +601,18 @@ def render_difference_video(
                 bounds = plane.bounds
                 bounds[:, [0, 1]] = bounds[:, [1, 0]]
                 bounds[:, 2] = z_max + 5
-                
+
                 # Tag planes with a color so we can render both sources distinctly
-                planes.append((
-                    [
-                        pv.Triangle([bounds[0], bounds[1], bounds[-1]]),
-                        pv.Triangle([bounds[1], bounds[2], bounds[-1]]),
-                    ], 
-                    color
-                ))
-                
+                planes.append(
+                    (
+                        [
+                            pv.Triangle([bounds[0], bounds[1], bounds[-1]]),
+                            pv.Triangle([bounds[1], bounds[2], bounds[-1]]),
+                        ],
+                        color,
+                    )
+                )
+
                 point_a = bounds[0].copy()
                 point_a[2] = z_max + 10
                 point_b = bounds[1].copy()
@@ -637,16 +620,20 @@ def render_difference_video(
                 lines.extend([point_a, point_b])
 
     # Base Topo Colormap (assuming you want to keep the background topo styling)
-    cmap_min, cmap_max, topo_cmap = cmap_from_cpt(Path("/home/jake/tmp/palm_springs_nz_topo.cpt"))
+    cmap_min, cmap_max, topo_cmap = cmap_from_cpt(
+        Path("/home/jake/tmp/palm_springs_nz_topo.cpt")
+    )
 
     # Load both XYTS datasets (Metadata is assumed identical for grid matching)
     xyts_1 = xr.open_dataset(xyts_ffp_1)
     xyts_2 = xr.open_dataset(xyts_ffp_2)
-    
+
     (nt, ny, nx) = xyts_1.waveform.shape
-    proj_spherical = coordinates.SphericalProjection(xyts_1.mlon, xyts_1.mlat, xyts_1.mrot)
+    proj_spherical = coordinates.SphericalProjection(
+        xyts_1.mlon, xyts_1.mlat, xyts_1.mrot
+    )
     dx = xyts_1.dx
-    
+
     y_sim_bounds = np.linspace(-0.5, 0.5, num=ny) * ny * dx
     x_sim_bounds = np.linspace(-0.5, 0.5, num=nx) * nx * dx
     y_sim, x_sim = np.meshgrid(y_sim_bounds, x_sim_bounds, indexing="ij")
@@ -662,15 +649,17 @@ def render_difference_video(
 
     x_nztm = x_nztm_flat.reshape((ny, nx), order="F")
     y_nztm = y_nztm_flat.reshape((ny, nx), order="F")
-    
-    corners = np.array([
-        [x_nztm[0, 0], y_nztm[0, 0], z_max],
-        [x_nztm[-1, 0], y_nztm[-1, 0], z_max],
-        [x_nztm[-1, -1], y_nztm[-1, -1], z_max],
-        [x_nztm[0, -1], y_nztm[0, -1], z_max],
-        [x_nztm[0, 0], y_nztm[0, 0], z_max],
-    ])
-    
+
+    corners = np.array(
+        [
+            [x_nztm[0, 0], y_nztm[0, 0], z_max],
+            [x_nztm[-1, 0], y_nztm[-1, 0], z_max],
+            [x_nztm[-1, -1], y_nztm[-1, -1], z_max],
+            [x_nztm[0, -1], y_nztm[0, -1], z_max],
+            [x_nztm[0, 0], y_nztm[0, 0], z_max],
+        ]
+    )
+
     centre = np.mean(corners, axis=0)
     if not (centre_lat and centre_lon):
         centre_x, centre_y = centre[:2]
@@ -686,7 +675,7 @@ def render_difference_video(
     plotter.remove_all_lights()
 
     plotter.open_movie(output_mp4, framerate=fps, quality=10)
-    
+
     # Plot both sets of source planes
     for plane_tris, color in planes:
         for tri in plane_tris:
@@ -703,15 +692,15 @@ def render_difference_video(
         clim=(cmap_min, cmap_max),
         show_scalar_bar=False,
     )
-    
+
     # The Grid plotting updated for difference
     plotter.add_mesh(
         grid,
         lighting=False,
         smooth_shading=False,
         scalars="Motion Difference (cm/s)",
-        clim=[-max_diff, max_diff], # Polar/Diverging limits centered on 0
-        cmap=cmap, 
+        clim=[-max_diff, max_diff],  # Polar/Diverging limits centered on 0
+        cmap=cmap,
         show_edges=False,
         nan_opacity=0.0,
         show_scalar_bar=True,
@@ -729,12 +718,12 @@ def render_difference_video(
     )
 
     plotter.camera.tight()
-    camera_height = z_max + 100000 
+    camera_height = z_max + 100000
     plotter.camera.position = (centre_x, centre_y, camera_height)
     plotter.camera.focal_point = (centre_x, centre_y, z_max)
     plotter.camera.reset_clipping_range()
     plotter.camera.zoom(zoom)
-    
+
     plotter.set_background((173 / 255, 216 / 255, 230 / 255))
     text = plotter.add_text("0.00s", name="time-label", position="lower_right")
     plotter.show(auto_close=False)
@@ -744,10 +733,10 @@ def render_difference_video(
     chunk_start = frame_start
     frames_diff = None
     scalars = np.empty((ny, nx), dtype=np.float32, order="F")
-    
+
     time = xyts_1.time.values
     dt = xyts_1.attrs["dt"]
-    
+
     total_frames = min(frame_count or nt - frame_start, nt - frame_start)
 
     for i in tqdm.trange(frame_start, frame_start + total_frames):
@@ -755,14 +744,22 @@ def render_difference_video(
         if frames_diff is None or i >= chunk_start + frame_chunk:
             chunk_start = i
             chunk_end = min(chunk_start + frame_chunk, nt)
-            
+
             # Load chunks, convert to float32, and immediately compute difference
             # Using slice is more robust with xarray than range()
-            f1 = xyts_1.waveform.isel(time=slice(chunk_start, chunk_end)).astype(np.float32).values
-            f2 = xyts_2.waveform.isel(time=slice(chunk_start, chunk_end)).astype(np.float32).values
-            
+            f1 = (
+                xyts_1.waveform.isel(time=slice(chunk_start, chunk_end))
+                .astype(np.float32)
+                .values
+            )
+            f2 = (
+                xyts_2.waveform.isel(time=slice(chunk_start, chunk_end))
+                .astype(np.float32)
+                .values
+            )
+
             frames_diff = f1 - f2
-            
+
             # Allow garbage collection to clean up f1 and f2
             del f1, f2
 
@@ -776,15 +773,16 @@ def render_difference_video(
         grid["Motion Difference (cm/s)"] = scalars.ravel(order="F")
         np.add(z_geometry, z_max, out=z_geometry)
         grid.points[:, -1] = z_geometry.ravel(order="F")
-        
+
         if i % round(1 / dt) == 0:
             text.set_text("lower_right", f"{time[i]:.2f}s")
-            
+
         plotter.write_frame()
-        
+
     plotter.close()
     xyts_1.close()
     xyts_2.close()
+
 
 def non_zero_data_points(
     x: np.ndarray, y: np.ndarray, z: np.ndarray

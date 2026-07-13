@@ -7,7 +7,7 @@ pygmt
 pygmt-helper
 source-modelling
 workflow @ git+https://github.com/ucgmsim/workflow.git
-qcore @ git+https://github.com/ucgmsim/qcore.git
+qcore-utils
 geopandas
 pandas
 shapely

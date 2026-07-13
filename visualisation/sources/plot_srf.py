@@ -94,7 +94,7 @@ def show_slip(
     >>> fig.show()  # Displays the slip map with optional annotations
     """
     # Compute slip limits
-    slip_quantile = srf_data.points["slip"].max()
+    slip_quantile = np.quantile(srf_data.points["slip"], 0.9)
     slip_cb_max = max(int(np.round(slip_quantile, -1)), 10)
     cmap_limits = (0, slip_cb_max, slip_cb_max / 10)
     dx = srf_data.header.iloc[0]["len"] / srf_data.header.iloc[0]["nstk"]
@@ -337,6 +337,7 @@ def plot_srf(
         title,
         region,
         high_res_topo=use_high_res,
+        plot_highways=False,
         projection=f"M{width}c",
         subtitle=utils.format_description(
             srf_data.points["slip"], units="cm", compact=True
