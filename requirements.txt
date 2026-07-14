@@ -1,5 +1,6 @@
 diffimg
 cartopy
+h5py
 matplotlib
 numpy
 ffmpeg-python

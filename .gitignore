@@ -184,3 +184,6 @@ devenv.lock
 
 # pre-commit
 .pre-commit-config.yaml
+
+# Velocity models are hundreds of megabytes each.
+*.h5
