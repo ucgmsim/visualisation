@@ -173,8 +173,14 @@ def _add_coastlines(ax: plt.Axes) -> None:
     if cfeature is None or _COASTLINES_UNAVAILABLE:
         return
     try:
+        coastline = cfeature.COASTLINE.with_scale("50m")
+        # Force the Natural Earth geometry to load *now*. cartopy otherwise
+        # fetches it lazily at savefig() time, so on an offline machine the
+        # download error would escape this handler and crash the render
+        # instead of degrading to a coastline-free map.
+        list(coastline.geometries())
         ax.add_feature(
-            cfeature.COASTLINE.with_scale("50m"),
+            coastline,
             linewidth=0.5,
             edgecolor=style.INK_SECONDARY,
         )
