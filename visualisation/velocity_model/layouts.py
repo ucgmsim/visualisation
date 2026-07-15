@@ -1,27 +1,28 @@
 """Three ways of looking at the same velocity model.
 
-The three sheets answer three different questions, and are deliberately not three
-skins on one figure:
+The sheets answer different questions, and are deliberately not skins on one
+figure:
 
 ``qa``
     "Is this model broken?" Built to be flicked through a hundred at a time.
-    Graded checks sit across the top, and every panel below earns its place by
-    being somewhere a defect would show.
+    Every panel earns its place by being somewhere a defect would show: the
+    velocity maps, the ratio maps, two cross-sections, and a row of whole-model
+    diagnostics no map can show. Nothing but the panel titles is written on it.
 
 ``poster``
-    "What does this model look like?" A cut-away block carries the figure and
-    everything else supports it.
+    "What does this model look like?" A single cut-away block, and nothing else.
 
-``explorer``
-    "What is actually in here?" The full contact sheet: every field at every
-    sampled depth, over the distributions the maps cannot show.
+``coverage``
+    "Do the basin labels and the sea stop where they should?" Both are surface
+    features, so at every depth below the surface their share of the model should
+    have decayed to nothing. One panel of two depth curves makes that plain.
 
-All three render from one
+All render from one
 :class:`~visualisation.velocity_model.reader.VelocityModelSummary`, so the file
-is read once however many sheets are asked for.
+is read once however many sheets are asked for. The graded quality checks live in
+:mod:`~visualisation.velocity_model.checks`; they are no longer drawn on the
+figure, but the command-line tool still reports them.
 """
-
-import textwrap
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -29,7 +30,7 @@ from matplotlib.colors import LogNorm, Normalize
 from matplotlib.figure import Figure
 from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec, SubplotSpec
 
-from visualisation.velocity_model import checks, reader, style
+from visualisation.velocity_model import reader, style
 
 try:
     import cartopy.crs as ccrs
@@ -57,8 +58,9 @@ MAP_PAD = 0.05
 BLOCK_DEPTH_EXAGGERATION = 3.0
 
 #: How much of its axes the block fills. A 3D axes shrinks itself to its box
-#: aspect and leaves the rest empty, so this claims the space back.
-BLOCK_ZOOM = 1.75
+#: aspect and leaves the rest empty, so this claims the space back. The poster is
+#: nothing but the block, so it is pushed harder there than a panel could be.
+BLOCK_ZOOM = 1.95
 
 #: A colour bar attached to a map steals this share of the axes height.
 _BAR_SHARE = 0.09
@@ -66,7 +68,7 @@ _BAR_SHARE = 0.09
 _COLUMN_WIDTH = 3.6
 _GAP_W = 0.42
 _GAP_H = 0.72
-_MARGIN = (0.58, 0.30, 0.34, 0.72)  # left, right, top, bottom
+_MARGIN = (0.58, 0.30, 0.42, 0.55)  # left, right, top, bottom
 
 #: Set once, if coastlines cannot be drawn (no cached Natural Earth data and no
 #: network). Everything else still works without them.
@@ -672,112 +674,6 @@ def _draw_fractions(ax: plt.Axes, summary: reader.VelocityModelSummary) -> None:
     _legend(ax, "center right")
 
 
-def _subtitle(summary: reader.VelocityModelSummary) -> str:
-    """One line describing the model's geometry and provenance.
-
-    Parameters
-    ----------
-    summary : reader.VelocityModelSummary
-        The model summary.
-
-    Returns
-    -------
-    str
-        The description.
-    """
-    meta = summary.meta
-    nz, ny, nx = meta.shape
-    parts = [f"{nx} × {ny} × {nz} cells"]
-    if meta.spacing_km:
-        parts.append(f"{meta.spacing_km * 1000:.0f} m spacing")
-    if meta.extent_km:
-        parts.append(f"{meta.extent_km[0]:.0f} × {meta.extent_km[1]:.0f} km")
-    parts.append(f"{meta.depth_km[0]:.0f}–{meta.depth_km[-1]:.1f} km deep")
-    if meta.origin:
-        parts.append(f"origin {meta.origin[0]:.3f}, {meta.origin[1]:.3f}")
-    if meta.rotation_deg is not None:
-        parts.append(f"rotated {meta.rotation_deg:.1f}°")
-    if meta.model_version:
-        parts.append(f"NZVM v{meta.model_version}")
-    if meta.topo_type:
-        parts.append(meta.topo_type.lower().replace("_", " "))
-    return "  ·  ".join(parts)
-
-
-def _draw_header(
-    ax: plt.Axes,
-    summary: reader.VelocityModelSummary,
-    title: str,
-    graded: list[checks.Check],
-) -> None:
-    """Draw the title block and, if given, the strip of graded checks.
-
-    Parameters
-    ----------
-    ax : matplotlib.pyplot.Axes
-        A blank axes spanning the top of the figure.
-    summary : reader.VelocityModelSummary
-        The model summary.
-    title : str
-        What this sheet is.
-    graded : list of checks.Check
-        The checks to display. May be empty.
-    """
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0, 1)
-    ax.axis("off")
-
-    ax.text(0, 0.97, summary.meta.name, fontsize=19, fontweight="bold", va="top")
-    ax.text(0, 0.64, title, fontsize=10.5, color=style.INK_SECONDARY, va="top")
-    ax.text(0, 0.48, _subtitle(summary), fontsize=8.5, color=style.INK_MUTED, va="top")
-    if not graded:
-        return
-
-    for i, check in enumerate(graded):
-        x = i / len(graded)
-        ax.text(
-            x,
-            0.26,
-            check.glyph,
-            fontsize=11,
-            fontweight="bold",
-            color=check.colour,
-            va="top",
-        )
-        ax.text(x + 0.013, 0.26, check.name, fontsize=8.5, color=style.INK, va="top")
-        ax.text(
-            x + 0.013,
-            0.13,
-            textwrap.fill(check.detail, 40),
-            fontsize=7.5,
-            color=style.INK_MUTED,
-            va="top",
-            linespacing=1.4,
-        )
-
-
-def _footer(figure: Figure, summary: reader.VelocityModelSummary) -> None:
-    """Note how the figure was produced, along the bottom of the sheet.
-
-    Parameters
-    ----------
-    figure : matplotlib.figure.Figure
-        The figure.
-    summary : reader.VelocityModelSummary
-        The model summary.
-    """
-    figure.text(
-        0.006,
-        0.006,
-        f"Read in {summary.read_seconds:.0f} s  ·  statistics from "
-        f"{summary.profile.n_columns:,} full-depth columns  ·  water "
-        f"({summary.water_fraction * 100:.0f}% of the surface) excluded from "
-        f"colour scales and rock statistics",
-        fontsize=7.5,
-        color=style.INK_MUTED,
-    )
-
-
 def plot_qa(summary: reader.VelocityModelSummary) -> Figure:
     """Build the quality-assurance screening sheet.
 
@@ -791,24 +687,20 @@ def plot_qa(summary: reader.VelocityModelSummary) -> Figure:
     matplotlib.figure.Figure
         The sheet.
     """
-    graded = checks.run_checks(summary)
     layers = summary.layers
     sediment = reader.sediment_depth_km(summary)
     maps = _map_row_height(summary)
 
-    figure, grid = _sheet(len(layers), [1.55, maps, maps, 2.9, 3.0])
-    _draw_header(
-        figure.add_subplot(grid[0, :]),
-        summary,
-        "Quality-assurance screen — every panel is here because a defect would show in it",
-        graded,
-    )
+    # No header, no footer, no check strip: the panels speak for themselves, and
+    # the only text is their titles. Four rows -- two of maps, the sections, and
+    # the diagnostics.
+    figure, grid = _sheet(len(layers), [maps, maps, 2.9, 3.3])
 
     # Shear-wave velocity: the field ground motion actually depends on. Scaled
     # per panel, because one scale spanning 0.5 to 4.9 km/s would flatten every
     # layer into a single tone.
     for i, layer in enumerate(layers):
-        ax = _map_axes(figure, grid[1, i], summary)
+        ax = _map_axes(figure, grid[0, i], summary)
         mesh = _draw_field_map(
             ax,
             summary,
@@ -828,7 +720,7 @@ def plot_qa(summary: reader.VelocityModelSummary) -> Figure:
     # midpoint, so anything coloured is a departure -- and because the scale
     # never moves, that stays true from one file to the next.
     for i, layer in enumerate(layers):
-        ax = _map_axes(figure, grid[2, i], summary)
+        ax = _map_axes(figure, grid[1, i], summary)
         norm, label = _vpvs_norm(layer.depth_km, sediment)
         mesh = _draw_field_map(
             ax, summary, layer.vpvs, layer.water, style.RATIO_CMAP, norm
@@ -839,7 +731,7 @@ def plot_qa(summary: reader.VelocityModelSummary) -> Figure:
     # Two orthogonal cuts, sized in proportion to their true length.
     lengths = [section.distance_km[-1] for section in summary.sections]
     cuts = GridSpecFromSubplotSpec(
-        1, 2, subplot_spec=grid[3, :], width_ratios=lengths, wspace=0.10
+        1, 2, subplot_spec=grid[2, :], width_ratios=lengths, wspace=0.10
     )
     for i, section in enumerate(summary.sections):
         ax = figure.add_subplot(cuts[0, i])
@@ -857,80 +749,13 @@ def plot_qa(summary: reader.VelocityModelSummary) -> Figure:
         bar.ax.tick_params(labelsize=7, length=2)
         bar.outline.set_visible(False)
 
-    # The diagnostics no map can show.
-    diagnostics = GridSpecFromSubplotSpec(1, 4, subplot_spec=grid[4, :], wspace=0.26)
-
-    ax = figure.add_subplot(diagnostics[0, 0])
-    _draw_depth_density(ax, summary, "vs", style.FIELD_LABELS["vs"])
-    ax.set_title("Vs against depth (whole model)", loc="left")
-
-    ax = figure.add_subplot(diagnostics[0, 1])
-    _draw_depth_density(
-        ax,
-        summary,
-        "vpvs",
-        style.FIELD_LABELS["vpvs"],
-        style.POISSON_SOLID_VPVS,
-        _rock_limits(summary, "vpvs"),
-    )
-    ax.set_title("Vp/Vs against depth (scaled to rock)", loc="left")
-
-    _draw_brocher(figure.add_subplot(diagnostics[0, 2]), summary)
-    _draw_fractions(figure.add_subplot(diagnostics[0, 3]), summary)
-
-    _footer(figure, summary)
-    return figure
-
-
-def plot_explorer(summary: reader.VelocityModelSummary) -> Figure:
-    """Build the exploration contact sheet: every field at every sampled depth.
-
-    Parameters
-    ----------
-    summary : reader.VelocityModelSummary
-        The model summary.
-
-    Returns
-    -------
-    matplotlib.figure.Figure
-        The sheet.
-    """
-    layers = summary.layers
-    sediment = reader.sediment_depth_km(summary)
-    maps = _map_row_height(summary)
-
-    figure, grid = _sheet(len(layers), [1.20, maps, maps, maps, maps, 3.0])
-    _draw_header(
-        figure.add_subplot(grid[0, :]),
-        summary,
-        "Contact sheet — every field at every sampled depth, over the distributions behind them",
-        [],
-    )
-
-    for row, field in enumerate(("vp", "vs", "rho", "vpvs"), start=1):
-        for i, layer in enumerate(layers):
-            ax = _map_axes(figure, grid[row, i], summary)
-            if field == "vpvs":
-                values = layer.vpvs
-                cmap = style.RATIO_CMAP
-                norm, label = _vpvs_norm(layer.depth_km, sediment)
-            else:
-                values = layer.fields[field]
-                cmap = style.FIELD_CMAP
-                norm = Normalize(*_robust_limits(values, layer.water))
-                label = style.FIELD_LABELS[field]
-            mesh = _draw_field_map(ax, summary, values, layer.water, cmap, norm)
-            if i == 0:
-                _draw_basin_outline(ax, summary)
-            name = style.FIELD_LABELS[field].split(" (")[0]
-            ax.set_title(f"{name} at {layer.depth_km:.1f} km", loc="left")
-            _slim_colourbar(figure, mesh, ax, label)
-
-    # Absolute values live down here. Each map above is scaled to its own depth,
-    # which is what makes its structure legible -- and what hides the trend.
-    bottom = GridSpecFromSubplotSpec(1, 5, subplot_spec=grid[5, :], wspace=0.30)
+    # The diagnostics no map can show. The four depth profiles group together --
+    # everything with depth on its y-axis -- and the density-against-Vp scatter,
+    # the one panel without it, comes last. (Basin/water coverage with depth is
+    # its own sheet now.)
+    diagnostics = GridSpecFromSubplotSpec(1, 5, subplot_spec=grid[3, :], wspace=0.34)
     for i, field in enumerate(("vp", "vs", "rho", "vpvs")):
-        ax = figure.add_subplot(bottom[0, i])
+        ax = figure.add_subplot(diagnostics[0, i])
         _draw_depth_density(
             ax,
             summary,
@@ -941,9 +766,9 @@ def plot_explorer(summary: reader.VelocityModelSummary) -> Figure:
         )
         name = style.FIELD_LABELS[field].split(" (")[0]
         ax.set_title(f"{name} against depth", loc="left")
-    _draw_fractions(figure.add_subplot(bottom[0, 4]), summary)
 
-    _footer(figure, summary)
+    _draw_brocher(figure.add_subplot(diagnostics[0, 4]), summary)
+
     return figure
 
 
@@ -1071,8 +896,40 @@ def _block_diagram(
     ax.set_anchor("C")
 
 
+def plot_coverage(summary: reader.VelocityModelSummary) -> Figure:
+    """Build the coverage sheet: how far basin labels and water reach with depth.
+
+    Two depth curves, each the share of the model that a surface feature -- the
+    sea, and the sedimentary basins -- still occupies at every depth. Both should
+    be a spike pinned to the surface that falls to the axis immediately below it;
+    a curve that stays out to the right at depth is the tell that a mask or a
+    label has escaped the shallows it belongs to. It earns a sheet of its own
+    because it reads a defect off a single line rather than a field of colour.
+
+    Parameters
+    ----------
+    summary : reader.VelocityModelSummary
+        The model summary.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        The sheet.
+    """
+    figure = Figure(figsize=(7.5, 8.0))
+    # A single tall panel; the margins leave room for the axis labels and for the
+    # leader line that calls out any basin label surviving to the base.
+    ax = figure.add_axes((0.12, 0.09, 0.80, 0.84))
+    _draw_fractions(ax, summary)
+    return figure
+
+
 def plot_poster(summary: reader.VelocityModelSummary) -> Figure:
-    """Build the presentation poster: a cut-away block, with maps supporting it.
+    """Build the presentation poster: the cut-away velocity block, and nothing else.
+
+    No title, no maps, no annotation -- just the block and its colour scale, as a
+    hero image. Everything the stripped-away text used to say is either obvious
+    from the object or lives in the file name.
 
     Parameters
     ----------
@@ -1084,45 +941,13 @@ def plot_poster(summary: reader.VelocityModelSummary) -> Figure:
     matplotlib.figure.Figure
         The poster.
     """
-    layers = summary.layers
-    maps = _map_row_height(summary)
-
-    figure, grid = _sheet(len(layers), [1.30, 7.2, maps])
-    _draw_header(
-        figure.add_subplot(grid[0, :]), summary, "Shear-wave velocity structure", []
-    )
-
-    ax = figure.add_subplot(grid[1, :], projection="3d")
+    figure = Figure(figsize=(15, 11))
+    # Near full-bleed: with no other panels there is no reason to leave a margin,
+    # beyond a strip on the right for the colour bar and its tick labels.
+    ax = figure.add_axes((0.0, 0.0, 0.9, 1.0), projection="3d")
     _block_diagram(figure, ax, summary)
-    extent = summary.meta.extent_km
-    depth = summary.profile.depth_km
-    size = f"{extent[0]:.0f} × {extent[1]:.0f} km" if extent else "the model domain"
-    ax.set_title(
-        f"The near corner cut away, to the two sections beneath it\n"
-        f"{size}, {depth[0]:.0f}–{depth[-1]:.0f} km deep, "
-        f"depth exaggerated ×{BLOCK_DEPTH_EXAGGERATION:.0f}",
-        loc="left",
-        fontsize=11,
-        color=style.INK_SECONDARY,
-        pad=-30,
-    )
-
-    for i, layer in enumerate(layers):
-        ax = _map_axes(figure, grid[2, i], summary)
-        mesh = _draw_field_map(
-            ax,
-            summary,
-            layer.fields["vs"],
-            layer.water,
-            style.FIELD_CMAP,
-            Normalize(*_robust_limits(layer.fields["vs"], layer.water)),
-        )
-        ax.set_title(f"{layer.depth_km:.1f} km", loc="left")
-        _slim_colourbar(figure, mesh, ax, style.FIELD_LABELS["vs"])
-
-    _footer(figure, summary)
     return figure
 
 
 #: The sheets, by name.
-LAYOUTS = {"qa": plot_qa, "poster": plot_poster, "explorer": plot_explorer}
+LAYOUTS = {"qa": plot_qa, "poster": plot_poster, "coverage": plot_coverage}

@@ -10,7 +10,7 @@ Screen a model for defects::
 
     plot-velocity-model velocity_model.h5 out/
 
-Produce all three sheets, reading the file only once::
+Produce every sheet, reading the file only once::
 
     plot-velocity-model velocity_model.h5 out/ --layout all
 """
@@ -22,7 +22,7 @@ from typing import Annotated
 import typer
 
 from qcore import cli
-from visualisation.velocity_model import layouts, reader, style
+from visualisation.velocity_model import checks, layouts, reader, style
 
 app = typer.Typer()
 
@@ -32,7 +32,7 @@ class Layout(StrEnum):
 
     QA = auto()
     POSTER = auto()
-    EXPLORER = auto()
+    COVERAGE = auto()
     ALL = auto()
 
 
@@ -74,12 +74,18 @@ def plot_velocity_model(
         block_faces="poster" in wanted,
     )
 
+    # The graded checks are no longer drawn on the figure, so report them here --
+    # this is the screening verdict a batch run wants to grep.
+    typer.echo(f"{summary.meta.name}  (read in {summary.read_seconds:.0f} s)")
+    for check in checks.run_checks(summary):
+        typer.echo(f"  [{check.glyph}] {check.status:<8} {check.name}: {check.detail}")
+
     output_directory.mkdir(parents=True, exist_ok=True)
     for name in wanted:
         figure = layouts.LAYOUTS[name](summary)
         destination = output_directory / f"{summary.meta.name}_{name}.png"
         figure.savefig(destination, dpi=dpi)
-        typer.echo(f"wrote {destination} in {summary.read_seconds:.0f} s of reading")
+        typer.echo(f"wrote {destination}")
 
 
 def _depth_spread(count: int) -> list[float]:
