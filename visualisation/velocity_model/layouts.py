@@ -29,6 +29,7 @@ import numpy as np
 from matplotlib.colors import LogNorm, Normalize
 from matplotlib.figure import Figure
 from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec, SubplotSpec
+from matplotlib.patches import Rectangle
 
 from visualisation.velocity_model import reader, style
 
@@ -58,9 +59,19 @@ MAP_PAD = 0.05
 BLOCK_DEPTH_EXAGGERATION = 3.0
 
 #: How much of its axes the block fills. A 3D axes shrinks itself to its box
-#: aspect and leaves the rest empty, so this claims the space back. The poster is
-#: nothing but the block, so it is pushed harder there than a panel could be.
-BLOCK_ZOOM = 1.95
+#: aspect and leaves the rest empty, so this claims the space back. What caps it
+#: is the far corner of the top face: pushed much past this the corner leaves the
+#: frame, and a block diagram with a corner of its own domain cropped off is
+#: worse than a slightly smaller one.
+BLOCK_ZOOM = 1.65
+
+#: The block's Vs colour scale, in km/s. Fixed rather than fitted to each file,
+#: for the same reason the ratio maps are: a poster is looked at beside other
+#: posters, and a scale stretched to fit would hand two different models the same
+#: colours for different rock. The range spans a crustal model end to end, from
+#: the shear-velocity floor of soft sediment to uppermost mantle, so fixing it
+#: costs no contrast that was carrying information.
+BLOCK_VS_RANGE = (0.5, 5.0)
 
 #: A colour bar attached to a map steals this share of the axes height.
 _BAR_SHARE = 0.09
@@ -778,6 +789,33 @@ def plot_qa(summary: reader.VelocityModelSummary) -> Figure:
     return figure
 
 
+def _vertical_exaggeration(ax: plt.Axes) -> float:
+    """How much a 3D axes stretches depth against map distance.
+
+    Measured off the axes rather than taken from
+    :data:`BLOCK_DEPTH_EXAGGERATION`, because the box aspect only fixes the ratio
+    of the drawn *edges* -- what that works out to per kilometre depends on the
+    axis limits too. The two agree only while every limit sits exactly on the
+    data, which :func:`_block_diagram` pins them to; measuring rather than
+    asserting is what keeps the caption honest if that ever stops holding.
+
+    Parameters
+    ----------
+    ax : matplotlib.pyplot.Axes
+        A 3D axes, with its limits and box aspect already set.
+
+    Returns
+    -------
+    float
+        Drawn length per kilometre of depth, over drawn length per kilometre of
+        map distance.
+    """
+    edge_x, _, edge_z = ax.get_box_aspect()
+    left, right = ax.get_xlim3d()
+    top, bottom = ax.get_zlim3d()
+    return (edge_z / abs(bottom - top)) / (edge_x / abs(right - left))
+
+
 def _block_diagram(
     figure: Figure, ax: plt.Axes, summary: reader.VelocityModelSummary
 ) -> None:
@@ -814,9 +852,12 @@ def _block_diagram(
     depth = summary.profile.depth_km
 
     palette = _palette(style.FIELD_CMAP)
+    # One scale for the whole block. The top face and the four walls are cut from
+    # the same rock, and a single colour bar can only ever annotate one mapping.
+    scale = Normalize(*BLOCK_VS_RANGE)
 
     grid_x, grid_y = np.meshgrid(x, y)
-    colours = palette(Normalize(*_robust_limits(vs.data, surface.water))(vs))
+    colours = palette(scale(vs))
     colours[:half_y, half_x:, 3] = 0.0  # the notch
     ax.plot_surface(
         grid_x,
@@ -827,13 +868,6 @@ def _block_diagram(
         rstride=1,
         cstride=1,
         antialiased=False,
-    )
-
-    faces = summary.sections + summary.edges
-    walls = Normalize(
-        *_robust_limits(
-            np.concatenate([f.fields["vs"][~f.water].ravel() for f in faces])
-        )
     )
 
     def draw_wall(
@@ -860,7 +894,7 @@ def _block_diagram(
             mesh_along if along == "x" else constant,
             constant if along == "x" else mesh_along,
             mesh_depth,
-            facecolors=palette(walls(values[:, columns])),
+            facecolors=palette(scale(values[:, columns])),
             shade=False,
             rstride=2,
             cstride=1,
@@ -878,25 +912,89 @@ def _block_diagram(
     # The depth axis is exaggerated: 44 km beside 400 km would otherwise be a
     # sliver. This factor sets how much.
     exaggeration = BLOCK_DEPTH_EXAGGERATION * (depth[-1] - depth[0]) / x[-1]
+    # All three limits are pinned to the data. Depth always was, but the map pair
+    # were left to autoscale, which padded them by a margin and then rounded
+    # outward to the locator -- inflating the map span by about an eighth, and the
+    # stretch along with it. The box aspect only fixes the ratio of the drawn
+    # edges, so the limits are the other half of what sets the scale, and
+    # BLOCK_DEPTH_EXAGGERATION only means what it says while all three sit on
+    # the data exactly.
+    ax.set_xlim(x[0], x[-1])
+    ax.set_ylim(y[0], y[-1])
     ax.set_zlim(depth[-1], depth[0])
     ax.set_box_aspect((x[-1], y[-1], exaggeration * x[-1]), zoom=BLOCK_ZOOM)
     ax.view_init(elev=26, azim=-58)
     ax.set_facecolor(style.SURFACE)
-    # A 3D axes frame around a block diagram is scaffolding, not information --
-    # the dimensions are already stated in the caption. Take it away.
+    # A 3D axes frame around a block diagram is scaffolding, not information.
+    # Take it away.
     ax.set_axis_off()
 
-    bar = figure.colorbar(
-        plt.cm.ScalarMappable(norm=walls, cmap=palette),
-        ax=ax,
-        fraction=0.016,
-        pad=0.0,
-        aspect=22,
-        shrink=0.5,
+    # Two things the block cannot say about itself. Taking the frame away leaves
+    # no depth axis to read the stretch off, and a block diagram that does not
+    # admit its exaggeration is a misleading one. The water is inferred from the
+    # fields rather than taken from a coastline, so the rule that produced it
+    # belongs on the sheet too -- and both floors are needed to state it, since
+    # they are rarely the same number. Bottom left, clear of block and bar.
+    vs_floor, vp_floor = summary.meta.water_floors
+    figure.text(
+        0.02,
+        0.02,
+        f"Vertical depth exaggeration {_vertical_exaggeration(ax):g}×."
+        f"  Water inferred where Vs and Vp both sit at their minima,"
+        f" {vs_floor:g} and {vp_floor:g} km/s.",
+        fontsize=13,
+        color=style.INK_SECONDARY,
     )
-    bar.set_label(style.FIELD_LABELS["vs"], fontsize=8.5, color=style.INK_SECONDARY)
-    bar.ax.tick_params(labelsize=7.5, length=2)
+
+    # Sized for a poster rather than for a panel: read from across a room, the
+    # scale has to be legible at the same distance the block is. ``fraction`` is
+    # left slack so that ``aspect`` is what governs the width -- which also makes
+    # it the bar's height over its width, and so the swatch's route to squareness.
+    bar_aspect = 14
+    bar = figure.colorbar(
+        plt.cm.ScalarMappable(norm=scale, cmap=palette),
+        ax=ax,
+        fraction=0.05,
+        pad=0.0,
+        aspect=bar_aspect,
+        shrink=0.78,
+    )
+    bar.set_label(style.FIELD_LABELS["vs"], fontsize=15, color=style.INK_SECONDARY)
+    bar.ax.tick_params(labelsize=12.5, length=4)
     bar.outline.set_visible(False)
+
+    # Water is the one thing on the block that is not a value, which is exactly
+    # why it cannot appear on the scale. Key it as a swatch instead, hung off the
+    # bar's own axes rather than placed in figure coordinates: ``aspect`` shrinks
+    # the drawn bar inside its allotted position at draw time, so a swatch
+    # measured off get_position() comes out wider than the bar it belongs to.
+    # In the bar's coordinates a square is 1 wide by 1/aspect tall, and an offset
+    # of a tick length plus its pad puts the label exactly where the tick labels
+    # start -- so the exception reads as part of the scale it is an exception to.
+    side = 1.0 / bar_aspect
+    foot = -1.6 * side
+    bar.ax.add_patch(
+        Rectangle(
+            (0.0, foot),
+            1.0,
+            side,
+            transform=bar.ax.transAxes,
+            clip_on=False,
+            facecolor=style.WATER,
+            edgecolor="none",
+        )
+    )
+    bar.ax.annotate(
+        "water",
+        xy=(1.0, foot + side / 2),
+        xycoords="axes fraction",
+        xytext=(7.5, 0),
+        textcoords="offset points",
+        va="center",
+        annotation_clip=False,
+        fontsize=12.5,
+        color=style.INK_SECONDARY,
+    )
     # Attaching a colour bar to a 3D axes re-anchors the parent, which shunts the
     # block off to one side. Put it back in the middle.
     ax.set_anchor("C")

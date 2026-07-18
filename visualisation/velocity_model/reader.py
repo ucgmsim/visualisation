@@ -87,6 +87,10 @@ class ModelMetadata:
         Topography handling, if recorded.
     min_vs : float or None
         Enforced minimum shear-wave velocity, if recorded.
+    water_floors : tuple of float
+        The Vs and Vp values at or below which a cell is taken to be water, as
+        resolved by :func:`water_thresholds`. Retained so that a figure can state
+        the rule it drew, which is derived per file rather than fixed.
     """
 
     name: str
@@ -99,6 +103,7 @@ class ModelMetadata:
     model_version: str | None
     topo_type: str | None
     min_vs: float | None
+    water_floors: tuple[float, float]
 
 
 @dataclasses.dataclass
@@ -329,6 +334,47 @@ def _packing(dataset: h5py.Dataset) -> tuple[float, float]:
         float(scale[0]) if scale is not None else 1.0,
         float(offset[0]) if offset is not None else 0.0,
     )
+
+
+def _field_floors(handle: h5py.File) -> dict[str, float]:
+    """The lowest value each packed field is able to represent.
+
+    Parameters
+    ----------
+    handle : h5py.File
+        Open velocity model file.
+
+    Returns
+    -------
+    dict of str to float
+        Field name to floor, in that field's own units.
+    """
+    return {name: _packing(handle[name])[1] for name in FIELDS}
+
+
+def water_thresholds(
+    floors: dict[str, float], min_vs: float | None
+) -> tuple[float, float]:
+    """The Vs and Vp values at or below which a cell counts as water.
+
+    The two are rarely the same number, so both are needed to state the rule.
+    Vs is held to the model's declared minimum wherever the file records one,
+    because a model may enforce a floor above the one its packing could reach.
+    Vp has no declared equivalent, so it is held to the packing floor.
+
+    Parameters
+    ----------
+    floors : dict of str to float
+        The lowest value each field can represent.
+    min_vs : float or None
+        The model's enforced minimum Vs, when recorded.
+
+    Returns
+    -------
+    tuple of float
+        The Vs and Vp thresholds, in km/s.
+    """
+    return (min_vs if min_vs is not None else floors["vs"]), floors["vp"]
 
 
 def _unpack(dataset: h5py.Dataset, raw: np.ndarray) -> np.ndarray:
@@ -565,10 +611,10 @@ def _water_mask(
         Boolean mask, True where the cell is water. Empty for an inland domain,
         and for every layer below the surface.
     """
-    vs_floor = min_vs if min_vs is not None else floors["vs"]
+    vs_floor, vp_floor = water_thresholds(floors, min_vs)
     tolerance = 1e-3
     return (fields["vs"] <= vs_floor + tolerance) & (
-        fields["vp"] <= floors["vp"] + tolerance
+        fields["vp"] <= vp_floor + tolerance
     )
 
 
@@ -592,6 +638,7 @@ def _read_metadata(handle: h5py.File, path: Path) -> ModelMetadata:
     extent_y = _float_attr(handle, "extent_y")
     origin_lat = _float_attr(handle, "origin_lat")
     origin_lon = _float_attr(handle, "origin_lon")
+    min_vs = _float_attr(handle, "min_vs")
     return ModelMetadata(
         name=path.stem,
         shape=(nz, ny, nx),
@@ -606,7 +653,8 @@ def _read_metadata(handle: h5py.File, path: Path) -> ModelMetadata:
         rotation_deg=_float_attr(handle, "origin_rot"),
         model_version=_attr(handle, "model_version"),
         topo_type=_attr(handle, "topo_type"),
-        min_vs=_float_attr(handle, "min_vs"),
+        min_vs=min_vs,
+        water_floors=water_thresholds(_field_floors(handle), min_vs),
     )
 
 
@@ -669,7 +717,7 @@ def _read_layers(
         The layers, and the decimated surface basin labels (None if the model
         carries no basin field).
     """
-    floors = {name: _packing(handle[name])[1] for name in FIELDS}
+    floors = _field_floors(handle)
     layers = []
     for index in indices:
         fields = {
@@ -724,7 +772,7 @@ def _cut(
     Section
         The section.
     """
-    floors = {name: _packing(handle[name])[1] for name in FIELDS}
+    floors = _field_floors(handle)
     fields = {name: _unpack(handle[name], take(name)) for name in ("vp", "vs")}
     n_samples = fields["vs"].shape[1]
     return Section(
