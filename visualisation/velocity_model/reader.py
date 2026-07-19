@@ -87,10 +87,6 @@ class ModelMetadata:
         Topography handling, if recorded.
     min_vs : float or None
         Enforced minimum shear-wave velocity, if recorded.
-    water_floors : tuple of float
-        The Vs and Vp values at or below which a cell is taken to be water, as
-        resolved by :func:`water_thresholds`. Retained so that a figure can state
-        the rule it drew, which is derived per file rather than fixed.
     """
 
     name: str
@@ -103,7 +99,6 @@ class ModelMetadata:
     model_version: str | None
     topo_type: str | None
     min_vs: float | None
-    water_floors: tuple[float, float]
 
 
 @dataclasses.dataclass
@@ -137,6 +132,33 @@ class Layer:
             The ratio, shaped ``(ny, nx)``.
         """
         return self.fields["vp"] / self.fields["vs"]
+
+    @property
+    def log_vs_vp(self) -> np.ndarray:
+        """Natural log of the Vs/Vp ratio of the layer.
+
+        The log is what makes the two directions of the ratio comparable.
+        Departures from the Poisson solid are multiplicative -- halving Vs and
+        doubling it are the same size of anomaly -- but on a linear ratio axis
+        the second lands four times further from centre than the first. Taking
+        the log restores the symmetry, which is what lets one diverging colour
+        ramp mean the same thing on both sides of its midpoint.
+
+        Written Vs over Vp rather than the conventional way up so that the value
+        falls as the ground softens, matching the Vs maps beside it: low is soft
+        in both. Conventional Vp/Vs runs the other way, and neighbouring panels
+        that disagree about which end is which are panels that get misread.
+
+        Returns
+        -------
+        numpy.ndarray
+            The log ratio, shaped ``(ny, nx)``. A cell with a zero velocity has
+            no defined ratio and comes back non-finite, to be drawn as no-data
+            rather than as an extreme; the model this was written against floors
+            both fields well above zero, but not every model has to.
+        """
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return np.log(self.fields["vs"] / self.fields["vp"])
 
 
 @dataclasses.dataclass
@@ -654,7 +676,6 @@ def _read_metadata(handle: h5py.File, path: Path) -> ModelMetadata:
         model_version=_attr(handle, "model_version"),
         topo_type=_attr(handle, "topo_type"),
         min_vs=min_vs,
-        water_floors=water_thresholds(_field_floors(handle), min_vs),
     )
 
 

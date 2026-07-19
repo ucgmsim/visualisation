@@ -4,9 +4,11 @@ Colour is assigned by the job it does, not by taste:
 
 - **Magnitude** (Vp, Vs, density) uses one perceptually uniform sequential ramp
   so that "dark is slow, bright is fast" only has to be learnt once.
-- **Polarity** (the Vp/Vs ratio) uses a diverging blue-red ramp with a neutral
-  midpoint pinned to the Poisson-solid value of sqrt(3). Rock sits within a
-  hair of that value, so anomalies glow without any threshold being chosen.
+- **Polarity** (the velocity ratio, plotted as ln(Vs/Vp)) uses a diverging
+  red-blue ramp, warm where the ground is soft. Its midpoint is not pinned to
+  anything: the ratio maps stretch to each panel's own spread, so the neutral
+  band falls in the middle of whatever that depth contains rather than on a
+  physical value.
 - **Identity** (basin labels) uses a fixed categorical order, never cycled. Past
   the eighth basin the tail folds into a single "other" colour.
 - **State** (the QA badges) uses a reserved status palette that is never used for
@@ -46,12 +48,12 @@ CATEGORICAL = (
 )
 OTHER = "#898781"
 
-# Cells clamped to the model's velocity floor (open water, in a coastal domain).
-# Deliberately outside every data ramp so it can never be mistaken for a value.
-WATER = "#c8d6e2"
-
 FIELD_CMAP = "viridis"  # magnitude: perceptually uniform, monotone lightness
-RATIO_CMAP = "RdBu_r"  # polarity: warm/cool poles, neutral midpoint
+# Polarity: warm/cool poles, neutral midpoint. Runs warm-to-cool rather than the
+# other way because the panel plots ln(Vs/Vp), which falls as the ground softens.
+# Soft ground keeps the warm end it had when the panel plotted Vp/Vs the
+# conventional way up -- the ramp is reversed so the meaning need not be.
+RATIO_CMAP = "RdBu"
 DENSITY_CMAP = "Blues"  # counts: single hue, light to dark
 
 #: A Poisson solid has Vp/Vs = sqrt(3). Rock sits close to it; water does not.

@@ -29,7 +29,6 @@ import numpy as np
 from matplotlib.colors import LogNorm, Normalize
 from matplotlib.figure import Figure
 from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec, SubplotSpec
-from matplotlib.patches import Rectangle
 
 from visualisation.velocity_model import reader, style
 
@@ -42,14 +41,6 @@ except ImportError:  # pragma: no cover - cartopy is a declared dependency
     ccrs = None
     cfeature = None
     _PROJECTION = None
-
-#: Vp/Vs is dimensionless and its physical centre -- the Poisson-solid sqrt(3) --
-#: is the same in every model. So the ratio maps use fixed scales rather than
-#: adaptive ones, which buys comparability between files as well as between
-#: depths. Two are needed: rock hugs sqrt(3) so tightly that a scale wide enough
-#: for saturated sediment would render the entire crust a single flat tone.
-VPVS_ROCK_HALF_RANGE = 0.30
-VPVS_SEDIMENT_HALF_RANGE = 0.90
 
 #: Degrees of padding around the domain on the maps.
 MAP_PAD = 0.05
@@ -93,7 +84,13 @@ _COASTLINES_UNAVAILABLE = False
 
 
 def _palette(name: str) -> plt.matplotlib.colors.Colormap:
-    """A colour map that renders water as water rather than as a value.
+    """A colour map that renders no-data as absence rather than as a value.
+
+    Water is not special-cased. A sea cell is clamped to the model's velocity
+    floor, and that floor is a real value, so it colours from the bottom of the
+    ramp like any other cell. That leaves ``bad`` for genuine no-data, which
+    takes the sheet background: left transparent it would punch holes through
+    the faces of the block.
 
     Parameters
     ----------
@@ -103,9 +100,9 @@ def _palette(name: str) -> plt.matplotlib.colors.Colormap:
     Returns
     -------
     matplotlib.colors.Colormap
-        The colour map, with masked cells set to the water colour.
+        The colour map, with no-data set to the background colour.
     """
-    return plt.get_cmap(name).with_extremes(bad=style.WATER)
+    return plt.get_cmap(name).with_extremes(bad=style.SURFACE)
 
 
 def _map_aspect(summary: reader.VelocityModelSummary) -> float:
@@ -285,17 +282,14 @@ def _draw_basin_outline(ax: plt.Axes, summary: reader.VelocityModelSummary) -> N
 
 def _robust_limits(
     values: np.ndarray,
-    mask: np.ndarray | None = None,
     span: tuple[float, float] = (2, 98),
 ) -> tuple[float, float]:
-    """Percentile limits that ignore masked cells and outliers.
+    """Percentile limits that ignore no-data and outliers.
 
     Parameters
     ----------
     values : numpy.ndarray
         The field.
-    mask : numpy.ndarray, optional
-        Cells to exclude, such as water.
     span : tuple of float, optional
         Lower and upper percentiles.
 
@@ -304,8 +298,7 @@ def _robust_limits(
     tuple of float
         The limits, widened if the field turns out to be flat.
     """
-    keep = values if mask is None else values[~mask]
-    keep = keep[np.isfinite(keep)]
+    keep = values[np.isfinite(values)]
     if keep.size == 0:
         return 0.0, 1.0
     low, high = np.percentile(keep, span)
@@ -314,43 +307,18 @@ def _robust_limits(
     return float(low), float(high)
 
 
-def _vpvs_norm(depth_km: float, sediment_km: float) -> tuple[Normalize, str]:
-    """The fixed Vp/Vs colour scale appropriate to a depth.
-
-    Both scales are centred on sqrt(3), so the neutral midpoint always means
-    "ordinary rock" and any colour at all is a signed departure from it. Which
-    of the two is used depends only on depth, so it stays reproducible from file
-    to file.
-
-    Parameters
-    ----------
-    depth_km : float
-        Depth of the layer.
-    sediment_km : float
-        Depth below which the model is rock rather than sediment.
-
-    Returns
-    -------
-    tuple
-        The colour scale, and a note naming it.
-    """
-    centre = style.POISSON_SOLID_VPVS
-    if depth_km >= sediment_km:
-        half, note = VPVS_ROCK_HALF_RANGE, "rock scale"
-    else:
-        half, note = VPVS_SEDIMENT_HALF_RANGE, "sediment scale"
-    return Normalize(centre - half, centre + half), f"Vp/Vs ({note}, √3 at centre)"
-
-
 def _draw_field_map(
     ax: plt.Axes,
     summary: reader.VelocityModelSummary,
     values: np.ndarray,
-    water: np.ndarray,
     cmap: str,
     norm: Normalize,
 ) -> plt.cm.ScalarMappable:
-    """Draw one field over the domain, with water rendered as water.
+    """Draw one field over the domain, exactly as the model stores it.
+
+    Sea cells are not held back. They sit at the model's velocity floor, so they
+    colour from the bottom of the ramp along with everything else, and what the
+    panel shows is the model rather than an interpretation of it.
 
     Parameters
     ----------
@@ -360,8 +328,6 @@ def _draw_field_map(
         The model summary.
     values : numpy.ndarray
         The field to draw.
-    water : numpy.ndarray
-        Cells clamped to the velocity floor.
     cmap : str
         Name of the colour map.
     norm : matplotlib.colors.Normalize
@@ -376,7 +342,7 @@ def _draw_field_map(
     mesh = ax.pcolormesh(
         summary.lon,
         summary.lat,
-        np.ma.masked_where(water | ~np.isfinite(values), values),
+        np.ma.masked_where(~np.isfinite(values), values),
         cmap=palette,
         norm=norm,
         shading="auto",
@@ -474,7 +440,7 @@ def _draw_section(
     mesh = ax.pcolormesh(
         section.distance_km,
         section.depth_km,
-        np.ma.masked_where(section.water, values),
+        values,
         cmap=palette,
         norm=norm,
         shading="auto",
@@ -711,7 +677,6 @@ def plot_qa(summary: reader.VelocityModelSummary) -> Figure:
         The sheet.
     """
     layers = summary.layers
-    sediment = reader.sediment_depth_km(summary)
     maps = _map_row_height(summary)
 
     # No header, no footer, no check strip: the panels speak for themselves, and
@@ -721,16 +686,17 @@ def plot_qa(summary: reader.VelocityModelSummary) -> Figure:
 
     # Shear-wave velocity: the field ground motion actually depends on. Scaled
     # per panel, because one scale spanning 0.5 to 4.9 km/s would flatten every
-    # layer into a single tone.
+    # layer into a single tone. The sea is inside the stretch rather than held
+    # out of it, so the surface panel's scale reaches down to the floor the sea
+    # sits on and colours it like any other cell.
     for i, layer in enumerate(layers):
         ax = _map_axes(figure, grid[0, i], summary)
         mesh = _draw_field_map(
             ax,
             summary,
             layer.fields["vs"],
-            layer.water,
             style.FIELD_CMAP,
-            Normalize(*_robust_limits(layer.fields["vs"], layer.water)),
+            Normalize(*_robust_limits(layer.fields["vs"])),
         )
         if i == 0:
             _draw_basin_outline(ax, summary)
@@ -739,17 +705,24 @@ def plot_qa(summary: reader.VelocityModelSummary) -> Figure:
             ax.set_title(f"Vs at {layer.depth_km:.1f} km", loc="left")
         _slim_colourbar(figure, mesh, ax, style.FIELD_LABELS["vs"])
 
-    # Vp/Vs on a fixed scale anchored to sqrt(3): ordinary rock is the neutral
-    # midpoint, so anything coloured is a departure -- and because the scale
-    # never moves, that stays true from one file to the next.
+    # The velocity ratio, stretched per panel exactly as the Vs row above is, and
+    # for the same reason: rock sits so close to the Poisson solid that any window
+    # wide enough to be safe across every file rendered the deep panels a flat
+    # white. Nothing is pinned now -- the midpoint of each scale is wherever that
+    # depth's own spread puts it, not sqrt(3) -- so a colour here reads against the
+    # rest of its own panel and against nothing else. Plotted as a log, and
+    # inverted to Vs over Vp, for the reasons on the property.
     for i, layer in enumerate(layers):
         ax = _map_axes(figure, grid[1, i], summary)
-        norm, label = _vpvs_norm(layer.depth_km, sediment)
         mesh = _draw_field_map(
-            ax, summary, layer.vpvs, layer.water, style.RATIO_CMAP, norm
+            ax,
+            summary,
+            layer.log_vs_vp,
+            style.RATIO_CMAP,
+            Normalize(*_robust_limits(layer.log_vs_vp)),
         )
-        ax.set_title(f"Vp/Vs at {layer.depth_km:.1f} km", loc="left")
-        _slim_colourbar(figure, mesh, ax, label)
+        ax.set_title(f"ln(Vs/Vp) at {layer.depth_km:.1f} km", loc="left")
+        _slim_colourbar(figure, mesh, ax, "ln(Vs/Vp)")
 
     # Two orthogonal cuts, sized in proportion to their true length. Unlike the
     # single-depth maps above, a section spans the model's whole velocity range,
@@ -850,7 +823,7 @@ def _block_diagram(
         The model summary.
     """
     surface = summary.layers[0]
-    vs = np.ma.masked_where(surface.water, surface.fields["vs"])
+    vs = surface.fields["vs"]
     ny, nx = vs.shape
 
     # Camera over (+x, -y), so the near corner -- and the notch -- is (x max, y min).
@@ -895,7 +868,7 @@ def _block_diagram(
         position : float
             Where the face sits on the other axis, in kilometres.
         """
-        values = np.ma.masked_where(section.water, section.fields["vs"])
+        values = section.fields["vs"]
         span = (x if along == "x" else y)[columns]
         mesh_along, mesh_depth = np.meshgrid(span, depth)
         constant = np.full_like(mesh_along, position)
@@ -938,72 +911,31 @@ def _block_diagram(
     # Take it away.
     ax.set_axis_off()
 
-    # Two things the block cannot say about itself. Taking the frame away leaves
-    # no depth axis to read the stretch off, and a block diagram that does not
-    # admit its exaggeration is a misleading one. The water is inferred from the
-    # fields rather than taken from a coastline, so the rule that produced it
-    # belongs on the sheet too -- and both floors are needed to state it, since
-    # they are rarely the same number. Bottom left, clear of block and bar.
-    vs_floor, vp_floor = summary.meta.water_floors
+    # Taking the frame away leaves no depth axis to read the stretch off, and a
+    # block diagram that does not admit its exaggeration is a misleading one --
+    # so state it. Bottom left, out of the way of both block and colour bar.
     figure.text(
         0.02,
         0.02,
-        f"Vertical depth exaggeration {_vertical_exaggeration(ax):g}×."
-        f"  Water inferred where Vs and Vp both sit at their minima,"
-        f" {vs_floor:g} and {vp_floor:g} km/s.",
+        f"Vertical depth exaggeration {_vertical_exaggeration(ax):g}×",
         fontsize=13,
         color=style.INK_SECONDARY,
     )
 
     # Sized for a poster rather than for a panel: read from across a room, the
     # scale has to be legible at the same distance the block is. ``fraction`` is
-    # left slack so that ``aspect`` is what governs the width -- which also makes
-    # it the bar's height over its width, and so the swatch's route to squareness.
-    bar_aspect = 14
+    # left slack so that ``aspect`` is what governs the width.
     bar = figure.colorbar(
         plt.cm.ScalarMappable(norm=scale, cmap=palette),
         ax=ax,
         fraction=0.05,
         pad=0.0,
-        aspect=bar_aspect,
+        aspect=14,
         shrink=0.78,
     )
     bar.set_label(style.FIELD_LABELS["vs"], fontsize=15, color=style.INK_SECONDARY)
     bar.ax.tick_params(labelsize=12.5, length=4)
     bar.outline.set_visible(False)
-
-    # Water is the one thing on the block that is not a value, which is exactly
-    # why it cannot appear on the scale. Key it as a swatch instead, hung off the
-    # bar's own axes rather than placed in figure coordinates: ``aspect`` shrinks
-    # the drawn bar inside its allotted position at draw time, so a swatch
-    # measured off get_position() comes out wider than the bar it belongs to.
-    # In the bar's coordinates a square is 1 wide by 1/aspect tall, and an offset
-    # of a tick length plus its pad puts the label exactly where the tick labels
-    # start -- so the exception reads as part of the scale it is an exception to.
-    side = 1.0 / bar_aspect
-    foot = -1.6 * side
-    bar.ax.add_patch(
-        Rectangle(
-            (0.0, foot),
-            1.0,
-            side,
-            transform=bar.ax.transAxes,
-            clip_on=False,
-            facecolor=style.WATER,
-            edgecolor="none",
-        )
-    )
-    bar.ax.annotate(
-        "water",
-        xy=(1.0, foot + side / 2),
-        xycoords="axes fraction",
-        xytext=(7.5, 0),
-        textcoords="offset points",
-        va="center",
-        annotation_clip=False,
-        fontsize=12.5,
-        color=style.INK_SECONDARY,
-    )
     # Attaching a colour bar to a 3D axes re-anchors the parent, which shunts the
     # block off to one side. Put it back in the middle.
     ax.set_anchor("C")
@@ -1064,3 +996,12 @@ def plot_poster(summary: reader.VelocityModelSummary) -> Figure:
 
 #: The sheets, by name.
 LAYOUTS = {"qa": plot_qa, "poster": plot_poster, "coverage": plot_coverage}
+
+#: How finely each sheet wants to be sampled, as a multiple of the resolution
+#: asked for on the command line. Relative rather than absolute so that one
+#: ``--dpi`` still moves every sheet together; a sheet not listed here is drawn
+#: at the requested value. Only the QA sheet needs more, and it needs it because
+#: of what it packs in: five columns of maps, two cross-sections and a row of
+#: thumbnail diagnostics share the page the poster spends on a single block, so
+#: its tick labels and hairlines are the smallest marks the tool draws.
+LAYOUT_DPI_SCALE = {"qa": 1.5}

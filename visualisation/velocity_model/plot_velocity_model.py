@@ -43,7 +43,7 @@ def plot_velocity_model(
     ],
     output_directory: Annotated[Path, typer.Argument(file_okay=False, writable=True)],
     layout: Annotated[Layout, typer.Option(case_sensitive=False)] = Layout.QA,
-    dpi: Annotated[int, typer.Option(min=40)] = 110,
+    dpi: Annotated[int, typer.Option(min=40)] = 200,
     depth_levels: Annotated[int, typer.Option(min=2, max=8)] = 5,
     target_samples: Annotated[int, typer.Option(min=100)] = reader.TARGET_SAMPLES,
 ) -> None:
@@ -58,7 +58,13 @@ def plot_velocity_model(
     layout : Layout
         Which sheet to produce. "all" produces every sheet from one read.
     dpi : int
-        Resolution of the output figures.
+        Baseline resolution of the output figures. Every size in the sheets is
+        set in points, so this changes how finely they are sampled and nothing
+        else -- text and rules keep their proportions at any value. Sheets that
+        pack more into the page are drawn above the baseline, by the factors in
+        ``layouts.LAYOUT_DPI_SCALE``. The default takes being zoomed into on
+        screen without going soft, while staying small enough to run over a
+        whole directory of models; raise it for sheets that will be printed.
     depth_levels : int
         How many depths to slice, spread through the model's depth range.
     target_samples : int
@@ -84,7 +90,8 @@ def plot_velocity_model(
     for name in wanted:
         figure = layouts.LAYOUTS[name](summary)
         destination = output_directory / f"{summary.meta.name}_{name}.png"
-        figure.savefig(destination, dpi=dpi)
+        sheet_dpi = round(dpi * layouts.LAYOUT_DPI_SCALE.get(name, 1.0))
+        figure.savefig(destination, dpi=sheet_dpi)
         typer.echo(f"wrote {destination}")
 
 
