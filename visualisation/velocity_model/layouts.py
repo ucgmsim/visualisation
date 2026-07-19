@@ -65,13 +65,19 @@ BLOCK_DEPTH_EXAGGERATION = 3.0
 #: worse than a slightly smaller one.
 BLOCK_ZOOM = 1.65
 
-#: The block's Vs colour scale, in km/s. Fixed rather than fitted to each file,
-#: for the same reason the ratio maps are: a poster is looked at beside other
-#: posters, and a scale stretched to fit would hand two different models the same
+#: The fixed Vs colour scale, in km/s, shared by the cut-away block and the QA
+#: cross-sections. Fixed rather than fitted to each file, for the same reason the
+#: ratio maps are: these panels get looked at beside the same panels from another
+#: file, and a scale stretched to fit would hand two different models the same
 #: colours for different rock. The range spans a crustal model end to end, from
 #: the shear-velocity floor of soft sediment to uppermost mantle, so fixing it
 #: costs no contrast that was carrying information.
-BLOCK_VS_RANGE = (0.5, 5.0)
+#:
+#: The per-depth Vs maps deliberately do not use it. Each of those panels is a
+#: single depth, where the whole domain can sit within a few per cent of one
+#: value, and a full-range scale would flatten it to a single tone -- hiding the
+#: lateral variation the panel exists to show. They keep their own stretch.
+VS_RANGE = (0.5, 5.0)
 
 #: A colour bar attached to a map steals this share of the axes height.
 _BAR_SHARE = 0.09
@@ -745,7 +751,10 @@ def plot_qa(summary: reader.VelocityModelSummary) -> Figure:
         ax.set_title(f"Vp/Vs at {layer.depth_km:.1f} km", loc="left")
         _slim_colourbar(figure, mesh, ax, label)
 
-    # Two orthogonal cuts, sized in proportion to their true length.
+    # Two orthogonal cuts, sized in proportion to their true length. Unlike the
+    # single-depth maps above, a section spans the model's whole velocity range,
+    # so it can carry the fixed scale -- which makes the two cuts comparable with
+    # each other, with the block, and with the same cut from any other file.
     lengths = [section.distance_km[-1] for section in summary.sections]
     cuts = GridSpecFromSubplotSpec(
         1, 2, subplot_spec=grid[2, :], width_ratios=lengths, wspace=0.10
@@ -758,7 +767,7 @@ def plot_qa(summary: reader.VelocityModelSummary) -> Figure:
             section,
             section.fields["vs"],
             style.FIELD_CMAP,
-            Normalize(*_robust_limits(section.fields["vs"], section.water)),
+            Normalize(*VS_RANGE),
             f"{section.label} — Vs",
         )
         bar = figure.colorbar(mesh, ax=ax, pad=0.012, fraction=0.028, aspect=13)
@@ -854,7 +863,7 @@ def _block_diagram(
     palette = _palette(style.FIELD_CMAP)
     # One scale for the whole block. The top face and the four walls are cut from
     # the same rock, and a single colour bar can only ever annotate one mapping.
-    scale = Normalize(*BLOCK_VS_RANGE)
+    scale = Normalize(*VS_RANGE)
 
     grid_x, grid_y = np.meshgrid(x, y)
     colours = palette(scale(vs))
