@@ -216,6 +216,133 @@ def plot_rrup_polygon(
     )
 
 
+def plot_hypocentre(
+    fig: pygmt.Figure,
+    source_config: SourceConfig,
+    rupture_propagation: RupturePropagationConfig,
+    **kwargs: dict[str, Any],
+) -> None:
+    """Plot the rupture hypocentre on a figure.
+
+    The hypocentre is taken from the initial fault of the rupture
+    causality tree and converted from fault-local (s, d) coordinates to
+    global (lat, lon, depth) coordinates. Only the lat / lon are plotted
+    as this is a map view.
+
+    Parameters
+    ----------
+    fig : pygmt.Figure
+        The figure to plot on.
+    source_config : SourceConfig
+        The source configuration (used to locate the initial fault).
+    rupture_propagation : RupturePropagationConfig
+        The rupture propagation configuration containing the hypocentre.
+    **kwargs : dict
+        Additional keyword arguments to pass to the plotting function. If empty, the default is
+        - `style="a0.3c"` (star marker)
+        - `pen="0.3p,black"` (marker border colour)
+        - `fill="gold"` (marker fill colour)
+        - `label="Hypocentre"` (legend entry)
+
+    Examples
+    --------
+    >>> import pygmt
+    >>> from workflow.realisations import RupturePropagationConfig, SourceConfig
+    >>> source_config = SourceConfig.read_from_realisation("realisation.json")
+    >>> rup_prop_config = RupturePropagationConfig.read_from_realisation("realisation.json")
+    >>> fig = pygmt.Figure()
+    >>> plot_hypocentre(fig, source_config, rup_prop_config)
+    >>> fig.show()
+    """
+    kwargs = {
+        "style": "a0.3c",
+        "pen": "0.3p,black",
+        "fill": "gold",
+        "label": "Hypocentre",
+        **(kwargs or {}),
+    }
+
+    initial_fault = source_config.source_geometries[rupture_propagation.initial_fault]
+    hypocentre = initial_fault.fault_coordinates_to_wgs_depth_coordinates(
+        rupture_propagation.hypocentre
+    )
+    fig.plot(
+        x=hypocentre[1],
+        y=hypocentre[0],
+        **kwargs,
+    )
+
+
+def plot_rupture_propagation(
+    fig: pygmt.Figure,
+    source_config: SourceConfig,
+    rupture_propagation: RupturePropagationConfig,
+    **kwargs: dict[str, Any],
+) -> None:
+    """Plot the rupture propagation on a figure.
+
+    The rupture propagation is drawn as directed arrows from each parent
+    fault to the fault it triggers, following the rupture causality
+    tree. Arrows run between the representative points of the fault
+    geometries. The hypocentre is not drawn here; use `plot_hypocentre`
+    for that.
+
+    Parameters
+    ----------
+    fig : pygmt.Figure
+        The figure to plot on.
+    source_config : SourceConfig
+        The source configuration (used to locate the faults).
+    rupture_propagation : RupturePropagationConfig
+        The rupture propagation configuration containing the causality
+        tree.
+    **kwargs : dict
+        Additional keyword arguments to pass to the plotting function. If empty, the default is
+        - `style="=0.3c+ea45+s"` (arrow from the parent to the child fault)
+        - `pen="0.5p,black"` (arrow line colour)
+        - `fill="black"` (arrowhead fill colour)
+        - `label="Rupture propagation"` (legend entry)
+
+    Examples
+    --------
+    >>> import pygmt
+    >>> from workflow.realisations import RupturePropagationConfig, SourceConfig
+    >>> source_config = SourceConfig.read_from_realisation("realisation.json")
+    >>> rup_prop_config = RupturePropagationConfig.read_from_realisation("realisation.json")
+    >>> fig = pygmt.Figure()
+    >>> plot_rupture_propagation(fig, source_config, rup_prop_config)
+    >>> fig.show()
+    """
+    kwargs = {
+        "style": "=0.3c+ea45+s",
+        "pen": "0.5p,black",
+        "fill": "black",
+        **(kwargs or {}),
+    }
+    # Draw the legend label on only the first arrow so the legend gets a
+    # single "Rupture propagation" entry.
+    label = kwargs.pop("label", "Rupture propagation")
+    for fault_name, parent_name in rupture_propagation.rupture_causality_tree.items():
+        if not parent_name:
+            continue
+        fault = source_config.source_geometries[fault_name]
+        parent = source_config.source_geometries[parent_name]
+        parent_point = utils.polygon_nztm_to_pygmt(
+            parent.geometry
+        ).representative_point()
+        fault_point = utils.polygon_nztm_to_pygmt(
+            fault.geometry
+        ).representative_point()
+        arrow_kwargs = dict(kwargs)
+        if label:
+            arrow_kwargs["label"] = label
+            label = None
+        fig.plot(
+            data=[[parent_point.x, parent_point.y, fault_point.x, fault_point.y]],
+            **arrow_kwargs,
+        )
+
+
 def plot_realisation(
     realisation_ffp: Path,
     latitude_pad: float = 0,
@@ -225,6 +352,8 @@ def plot_realisation(
     width: float = 10,
     show_geometry: bool = True,
     show_pgv_targets: bool = False,
+    show_hypocentre: bool = False,
+    show_rupture_propagation: bool = False,
     pgv_targets: list[float] | None = None,
     stations: Path | None = None,
 ) -> pygmt.Figure:
@@ -248,6 +377,12 @@ def plot_realisation(
         Show source geometry on the plot.
     show_pgv_targets : bool
         Show PGV targets on the plot.
+    show_hypocentre : bool
+        Show the rupture hypocentre on the plot.
+    show_rupture_propagation : bool
+        Show the rupture propagation as directed arrows from each parent
+        fault to the fault it triggers. Combine with show_hypocentre to
+        also mark the rupture origin.
     pgv_targets : list[float], optional
         PGV targets to plot. If None, use PGV targets from the
         realisation. A non-empty value implies `show_pgv_targets`.
@@ -267,6 +402,7 @@ def plot_realisation(
     ...     width=5,
     ...     show_geometry=False,
     ...     show_pgv_targets=False,
+    ...     show_hypocentre=True,
     ...     stations=None,
     ... )
     >>> fig.show()
@@ -299,8 +435,19 @@ def plot_realisation(
     if stations:
         plot_stations(fig, domain_parameters, stations)
 
+    if show_rupture_propagation or show_hypocentre:
+        rupture_propagation = RupturePropagationConfig.read_from_realisation(
+            realisation_ffp
+        )
+
+        if show_rupture_propagation:
+            plot_rupture_propagation(fig, source_config, rupture_propagation)
+
+        if show_hypocentre:
+            plot_hypocentre(fig, source_config, rupture_propagation)
+
     # Plot the legend overtop the other elements.
-    if stations:
+    if stations or show_hypocentre or show_rupture_propagation:
         fig.legend(position="jTR+o0.2c", box="+gwhite+p1p")
 
     return fig
@@ -355,6 +502,14 @@ def plot_realisation_to_file(
         bool,
         typer.Option(),
     ] = False,
+    show_hypocentre: Annotated[
+        bool,
+        typer.Option(),
+    ] = False,
+    show_rupture_propagation: Annotated[
+        bool,
+        typer.Option(),
+    ] = False,
     pgv_targets: Annotated[
         list[float] | None,
         # Use a different option name because --pgv-targets is in
@@ -397,6 +552,12 @@ def plot_realisation_to_file(
         Show source geometry on the plot.
     show_pgv_targets : bool
         Show PGV targets on the plot.
+    show_hypocentre : bool
+        Show the rupture hypocentre on the plot.
+    show_rupture_propagation : bool
+        Show the rupture propagation as directed arrows from each parent
+        fault to the fault it triggers. Combine with show_hypocentre to
+        also mark the rupture origin.
     pgv_targets : list[float], optional
         PGV targets to plot. If None, use PGV targets from the
         realisation. A non-empty value implies `show_pgv_targets`.
@@ -411,6 +572,7 @@ def plot_realisation_to_file(
     ...     width=5,
     ...     show_geometry=False,
     ...     show_pgv_targets=False,
+    ...     show_hypocentre=True,
     ...     stations=None,
     ... )
     >>> fig.show()
@@ -424,6 +586,8 @@ def plot_realisation_to_file(
         width=width,
         show_geometry=show_geometry,
         show_pgv_targets=show_pgv_targets,
+        show_hypocentre=show_hypocentre,
+        show_rupture_propagation=show_rupture_propagation,
         pgv_targets=pgv_targets,
         stations=stations,
     )
