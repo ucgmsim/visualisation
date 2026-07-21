@@ -1056,7 +1056,7 @@ def read_summary(
         Stride applied within a sample block before histogramming.
     block_faces : bool, optional
         Also read the two domain edges the cut-away block diagram needs. Only
-        the poster uses them, so this is off by default.
+        the cut-away block sheet uses them, so this is off by default.
 
     Returns
     -------

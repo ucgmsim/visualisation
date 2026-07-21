@@ -9,10 +9,10 @@ figure:
     velocity maps, the ratio maps, two cross-sections, and a row of whole-model
     diagnostics no map can show. Nothing but the panel titles is written on it.
 
-``poster``
+``cutaway_block``
     "What does this model look like?" A single cut-away block, and nothing else.
 
-``coverage``
+``feature_depth``
     "Do the basin labels and the sea stop where they should?" Both are surface
     features, so at every depth below the surface their share of the model should
     have decayed to nothing. One panel of two depth curves makes that plain.
@@ -750,7 +750,7 @@ def plot_qa(summary: reader.VelocityModelSummary) -> Figure:
 
     # The diagnostics no map can show. The four depth profiles group together --
     # everything with depth on its y-axis -- and the density-against-Vp scatter,
-    # the one panel without it, comes last. (Basin/water coverage with depth is
+    # the one panel without it, comes last. (Basin/water share with depth is
     # its own sheet now.)
     diagnostics = GridSpecFromSubplotSpec(1, 5, subplot_spec=grid[3, :], wspace=0.34)
     for i, field in enumerate(("vp", "vs", "rho", "vpvs")):
@@ -922,7 +922,7 @@ def _block_diagram(
         color=style.INK_SECONDARY,
     )
 
-    # Sized for a poster rather than for a panel: read from across a room, the
+    # Sized for the hero image rather than for a panel: read from across a room, the
     # scale has to be legible at the same distance the block is. ``fraction`` is
     # left slack so that ``aspect`` is what governs the width.
     bar = figure.colorbar(
@@ -941,8 +941,8 @@ def _block_diagram(
     ax.set_anchor("C")
 
 
-def plot_coverage(summary: reader.VelocityModelSummary) -> Figure:
-    """Build the coverage sheet: how far basin labels and water reach with depth.
+def plot_feature_depth(summary: reader.VelocityModelSummary) -> Figure:
+    """Build the feature-depth sheet: how far basin labels and water reach with depth.
 
     Two depth curves, each the share of the model that a surface feature -- the
     sea, and the sedimentary basins -- still occupies at every depth. Both should
@@ -969,8 +969,8 @@ def plot_coverage(summary: reader.VelocityModelSummary) -> Figure:
     return figure
 
 
-def plot_poster(summary: reader.VelocityModelSummary) -> Figure:
-    """Build the presentation poster: the cut-away velocity block, and nothing else.
+def plot_cutaway_block(summary: reader.VelocityModelSummary) -> Figure:
+    """Build the cut-away block sheet: the cut-away velocity block, and nothing else.
 
     No title, no maps, no annotation -- just the block and its colour scale, as a
     hero image. Everything the stripped-away text used to say is either obvious
@@ -984,7 +984,7 @@ def plot_poster(summary: reader.VelocityModelSummary) -> Figure:
     Returns
     -------
     matplotlib.figure.Figure
-        The poster.
+        The sheet.
     """
     figure = Figure(figsize=(15, 11))
     # Near full-bleed: with no other panels there is no reason to leave a margin,
@@ -995,13 +995,17 @@ def plot_poster(summary: reader.VelocityModelSummary) -> Figure:
 
 
 #: The sheets, by name.
-LAYOUTS = {"qa": plot_qa, "poster": plot_poster, "coverage": plot_coverage}
+LAYOUTS = {
+    "qa": plot_qa,
+    "cutaway_block": plot_cutaway_block,
+    "feature_depth": plot_feature_depth,
+}
 
 #: How finely each sheet wants to be sampled, as a multiple of the resolution
 #: asked for on the command line. Relative rather than absolute so that one
 #: ``--dpi`` still moves every sheet together; a sheet not listed here is drawn
 #: at the requested value. Only the QA sheet needs more, and it needs it because
 #: of what it packs in: five columns of maps, two cross-sections and a row of
-#: thumbnail diagnostics share the page the poster spends on a single block, so
+#: thumbnail diagnostics share the page the cut-away sheet spends on a single block, so
 #: its tick labels and hairlines are the smallest marks the tool draws.
 LAYOUT_DPI_SCALE = {"qa": 1.5}

@@ -31,8 +31,8 @@ class Layout(StrEnum):
     """The summary sheets that can be produced."""
 
     QA = auto()
-    POSTER = auto()
-    COVERAGE = auto()
+    CUTAWAY_BLOCK = auto()
+    FEATURE_DEPTH = auto()
     ALL = auto()
 
 
@@ -77,7 +77,7 @@ def plot_velocity_model(
         velocity_model_file,
         depth_fractions=tuple(_depth_spread(depth_levels)),
         target_samples=target_samples,
-        block_faces="poster" in wanted,
+        block_faces="cutaway_block" in wanted,
     )
 
     # The graded checks are no longer drawn on the figure, so report them here --
