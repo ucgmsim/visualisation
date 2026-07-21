@@ -23,7 +23,6 @@ from workflow.realisations import (
     DomainParameters,
     RupturePropagationConfig,
     SourceConfig,
-    VelocityModelParameters,
 )
 
 app = typer.Typer()
