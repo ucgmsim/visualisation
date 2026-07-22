@@ -1768,24 +1768,6 @@
                 }
             }
         },
-        "rakes": {
-            "Alpine: Caswell": 180.0,
-            "Alpine: Caswell - South George": 180.0,
-            "Alpine: George landward": 180.0,
-            "Alpine: George to Jacksons": 180.0,
-            "Alpine: Jacksons to Kaniere": 160.0,
-            "Alpine: Nancy": 180.0,
-            "Alpine: Resolution - Charles": 180.0
-        },
-        "magnitudes": {
-            "Alpine: Caswell": 7.075268533910645,
-            "Alpine: Caswell - South George": 7.006250455312539,
-            "Alpine: George landward": 6.949016182128432,
-            "Alpine: George to Jacksons": 7.539732815372826,
-            "Alpine: Jacksons to Kaniere": 7.686555462026519,
-            "Alpine: Nancy": 6.907697516773393,
-            "Alpine: Resolution - Charles": 6.843603413660329
-        },
         "hypocentre": {
             "s": 0.2920050189518198,
             "d": 0.3760386477506699
@@ -2071,12 +2053,10 @@
         "min_vs": 0.5,
         "version": "2.06",
         "topo_type": "SQUASHED_TAPERED",
-        "dt": 0.01,
         "ds_multiplier": 1.2,
-        "resolution": 0.2,
         "vs30": 500.0,
         "s_wave_velocity": 3500.0,
-        "pgv_interpolants": [
+        "rrup_interpolants": [
             [
                 3.5,
                 1.0
@@ -2085,10 +2065,10 @@
                 8.0,
                 1.0
             ]
-        ]
+        ],
+        "fault_buffer": 2.0
     },
     "domain": {
-        "resolution": 0.2,
         "domain": [
             {
                 "latitude": -45.721425525413245,
@@ -2108,7 +2088,31 @@
             }
         ],
         "depth": 57.0,
-        "duration": 326.3542379193343,
-        "dt": 0.01
+        "duration": 326.3542379193343
+    },
+    "rakes": {
+        "rakes": {
+            "Alpine: Caswell": 180.0,
+            "Alpine: Caswell - South George": 180.0,
+            "Alpine: George landward": 180.0,
+            "Alpine: George to Jacksons": 180.0,
+            "Alpine: Jacksons to Kaniere": 160.0,
+            "Alpine: Nancy": 180.0,
+            "Alpine: Resolution - Charles": 180.0
+        }
+    },
+    "magnitudes": {
+        "magnitudes": {
+            "Alpine: Caswell": 7.075268533910645,
+            "Alpine: Caswell - South George": 7.006250455312539,
+            "Alpine: George landward": 6.949016182128432,
+            "Alpine: George to Jacksons": 7.539732815372826,
+            "Alpine: Jacksons to Kaniere": 7.686555462026519,
+            "Alpine: Nancy": 6.907697516773393,
+            "Alpine: Resolution - Charles": 6.843603413660329
+        }
+    },
+    "resolution": {
+        "resolution": 0.2
     }
 }

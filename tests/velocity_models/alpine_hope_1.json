@@ -4888,6 +4888,12 @@
                 }
             }
         },
+        "hypocentre": {
+            "s": 0.28834051444354913,
+            "d": 0.37656992573994313
+        }
+    },
+    "rakes": {
         "rakes": {
             "Alpine: Caswell": 180.0,
             "Alpine: Caswell - South George": 180.0,
@@ -4909,7 +4915,9 @@
             "Opouawe - Uruti": 90.0,
             "Te Rapa 1": 160.0,
             "Te Rapa 2": 135.0
-        },
+        }
+    },
+    "magnitudes": {
         "magnitudes": {
             "Alpine: Caswell": 7.222494569719501,
             "Alpine: Caswell - South George": 7.153476491121392,
@@ -4931,10 +4939,6 @@
             "Opouawe - Uruti": 7.726949142063866,
             "Te Rapa 1": 6.964187713698422,
             "Te Rapa 2": 7.1787434705813915
-        },
-        "hypocentre": {
-            "s": 0.28834051444354913,
-            "d": 0.37656992573994313
         }
     }
 }

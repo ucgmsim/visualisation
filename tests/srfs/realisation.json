@@ -363,14 +363,6 @@
                 }
             }
         },
-        "rakes": {
-            "NW Cardrona South": 110.0,
-            "Nevis": 110.0
-        },
-        "magnitudes": {
-            "NW Cardrona South": 7.0383204560996475,
-            "Nevis": 7.279339798929065
-        },
         "hypocentre": {
             "s": 0.6544811148455182,
             "d": 0.35266626891892594
@@ -656,5 +648,17 @@
                 "Qs": 230.0
             }
         ]
+    },
+    "rakes": {
+        "rakes": {
+            "NW Cardrona South": 110.0,
+            "Nevis": 110.0
+        }
+    },
+    "magnitudes": {
+        "magnitudes": {
+            "NW Cardrona South": 7.0383204560996475,
+            "Nevis": 7.279339798929065
+        }
     }
 }
