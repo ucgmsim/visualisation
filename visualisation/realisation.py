@@ -487,12 +487,6 @@ def plot_realisation_to_file(
             min=0,
         ),
     ] = 300,
-    show_geonet_stations: Annotated[
-        bool,
-        typer.Option(
-            show_default=False,
-        ),
-    ] = False,
     show_geometry: Annotated[
         bool,
         typer.Option(),
@@ -545,8 +539,6 @@ def plot_realisation_to_file(
         Width of the plot in cm.
     dpi : float
         DPI of the plot (higher is better quality).
-    show_geonet_stations : bool
-        Show GeoNet stations on the plot.
     show_geometry : bool
         Show source geometry on the plot.
     show_pgv_targets : bool
