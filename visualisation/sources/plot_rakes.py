@@ -54,7 +54,16 @@ def plot_rakes(
     )
 
     fig = plotting.gen_region_fig(
-        title, projection=f"M{width}c", region=region, map_data=None
+        title,
+        projection=f"M{width}c",
+        region=region,
+        # gen_region_fig dropped its `map_data` argument and now loads the NZ
+        # map data itself. These reproduce what map_data=None used to give:
+        # plain coastlines, no topography or roads.
+        plot_topo=False,
+        plot_roads=False,
+        plot_highways=False,
+        plot_kwargs={"land_color": "#666666", "water_color": "skyblue"},
     )
     i = 0
 
