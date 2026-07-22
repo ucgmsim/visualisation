@@ -122,7 +122,17 @@ def plot_rupture_path_to_file(
         longitude_pad=longitude_pad,
     )
     fig = plotting.gen_region_fig(
-        title, region, projection=f"M{width}c", subtitle=subtitle
+        title,
+        region,
+        projection=f"M{width}c",
+        subtitle=subtitle,
+        # gen_region_fig now loads the NZ map data itself and defaults to
+        # drawing topography and highways. These keep the plain coastline
+        # basemap this plot has always used.
+        plot_topo=False,
+        plot_roads=False,
+        plot_highways=False,
+        plot_kwargs={"land_color": "#666666", "water_color": "skyblue"},
     )
     plot_rupture_path(fig, source_config, rup_prop_config)
     fig.savefig(output_ffp)

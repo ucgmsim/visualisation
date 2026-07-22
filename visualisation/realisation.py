@@ -424,6 +424,13 @@ def plot_realisation(
         region,
         projection=f"M{width}c",
         subtitle=subtitle,
+        # gen_region_fig now loads the NZ map data itself and defaults to
+        # drawing topography and highways. These keep the plain coastline
+        # basemap this plot has always used.
+        plot_topo=False,
+        plot_roads=False,
+        plot_highways=False,
+        plot_kwargs={"land_color": "#666666", "water_color": "skyblue"},
     )
 
     plot_domain(fig, domain_parameters)
