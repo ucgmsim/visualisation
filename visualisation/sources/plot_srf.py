@@ -63,6 +63,7 @@ def show_slip(
     annotations: bool,
     contours: bool,
     realisation_ffp: Optional[Path] = None,
+    dip_skip_threshold: float = 1.0,
 ):
     """Show a slip map with optional contours.
 
@@ -99,39 +100,49 @@ def show_slip(
     cmap_limits = (0, slip_cb_max, slip_cb_max / 10)
     dx = srf_data.header.iloc[0]["len"] / srf_data.header.iloc[0]["nstk"]
     grid_scale = min(utils.grid_scale_for_region(region), dx * 1000)
-    for (_, segment), segment_points in zip(
-        srf_data.header.iterrows(), srf_data.segments
+    skipped_vertical = []
+    for seg_idx, ((_, segment), segment_points) in enumerate(
+        zip(srf_data.header.iterrows(), srf_data.segments)
     ):
         nstk = segment["nstk"]
         ndip = segment["ndip"]
 
-        # Create standard slip heatmap.
-        cur_grid = plotting.create_grid(
-            segment_points,
-            "slip",
-            grid_spacing=f"{grid_scale}e/{grid_scale}e",
-            region=(
-                segment_points["lon"].min(),
-                segment_points["lon"].max(),
-                segment_points["lat"].min(),
-                segment_points["lat"].max(),
-            ),
-            set_water_to_nan=False,
-        )
+        # Near-vertical (dip ~ 90 deg) planes collapse to a line in map view,
+        # so gridding their slip is ill-posed (blank grids or GMT errors). Skip
+        # the slip heatmap and time contours for them; the fault trace is still
+        # drawn below (cf. srf.py geometry: dip==90 planes are LineStrings).
+        near_vertical = abs(segment["dip"] - 90.0) <= dip_skip_threshold
+        if near_vertical:
+            skipped_vertical.append(seg_idx)
 
-        plotting.plot_grid(
-            fig,
-            cur_grid,
-            "hot",
-            cmap_limits,
-            ("white", "black"),
-            transparency=0,
-            reverse_cmap=True,
-            plot_contours=False,
-            cb_label="Slip (cm)",
-        )
+        # Create the standard slip heatmap (skipped for near-vertical planes).
+        if not near_vertical:
+            cur_grid = plotting.create_grid(
+                segment_points,
+                "slip",
+                grid_spacing=f"{grid_scale}e/{grid_scale}e",
+                region=(
+                    segment_points["lon"].min(),
+                    segment_points["lon"].max(),
+                    segment_points["lat"].min(),
+                    segment_points["lat"].max(),
+                ),
+                set_water_to_nan=False,
+            )
 
-        if contours:
+            plotting.plot_grid(
+                fig,
+                cur_grid,
+                "hot",
+                cmap_limits,
+                ("white", "black"),
+                transparency=0,
+                reverse_cmap=True,
+                plot_contours=False,
+                cb_label="Slip (cm)",
+            )
+
+        if contours and not near_vertical:
             # Plot time contours
             time_grid = plotting.create_grid(
                 segment_points,
@@ -161,7 +172,9 @@ def show_slip(
             pen="0.8p,black",
         )
 
-        if not annotations:
+        # Skip time-annotations on near-vertical planes: their contours are not
+        # drawn, and the labels would pile up along the collapsed surface trace.
+        if not annotations or near_vertical:
             continue
 
         # Custom annotation implementation. Rough algorithm is:
@@ -188,6 +201,15 @@ def show_slip(
                         font="5p",
                         fill="white",
                     )
+
+    if skipped_vertical:
+        typer.echo(
+            f"WARNING: skipped slip rendering for {len(skipped_vertical)} "
+            f"near-vertical plane(s) (dip within {dip_skip_threshold} degrees of "
+            f"90): segment indices {skipped_vertical}. Their surface traces are "
+            f"still drawn; slip on these planes is not shown.",
+            err=True,
+        )
 
     # Plot the hypocentre.
     hypocentre = srf_data.points[
@@ -271,6 +293,7 @@ def plot_srf(
     longitude_pad: Annotated[float, typer.Option()] = 0,
     annotations: Annotated[bool, typer.Option()] = True,
     contours: Annotated[bool, typer.Option()] = True,
+    dip_skip_threshold: Annotated[float, typer.Option(min=0)] = 1.0,
     width: Annotated[float, typer.Option(min=0)] = 17,
     show_inset: bool = False,
     min_lat: float | None = None,
@@ -298,6 +321,9 @@ def plot_srf(
         Longitude padding to apply (degrees).
     annotations : bool
         Label contours.
+    dip_skip_threshold : float
+        Skip slip rendering for planes whose dip is within this many degrees
+        of vertical (90 deg); their fault trace is still drawn. Default 1.0.
     width : float
         Width of plot (in cm).
     show_inset : bool
@@ -357,6 +383,7 @@ def plot_srf(
         annotations,
         contours,
         realisation_ffp=realisation_ffp,
+        dip_skip_threshold=dip_skip_threshold,
     )
     if show_inset:
         with fig.inset(position=f"jTR+w{np.sqrt(width)}c", margin=0.2):
