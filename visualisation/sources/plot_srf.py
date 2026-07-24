@@ -62,7 +62,9 @@ def show_slip(
     srf_data: srf.SrfFile,
     annotations: bool,
     contours: bool,
+    projection: str = "M?",
     realisation_ffp: Optional[Path] = None,
+    title: Optional[str] = None,
     dip_skip_threshold: float = 1.0,
 ):
     """Show a slip map with optional contours.
@@ -77,12 +79,16 @@ def show_slip(
         The SRF file.
     annotations : bool
         If True, display annotations of slip times.
+    contours : bool
+        If True, draw rupture time contours.
     projection : str
         The projection to apply. Defaults to autoexpanding mercator projection.
     realisation_ffp : Optional[Path]
         The realisation to use for jump points, if any.
     title : Optional[str]
         The title of the slip plot.
+    dip_skip_threshold : float
+        Skip slip rendering for planes within this many degrees of vertical.
 
     Examples
     --------
@@ -94,8 +100,24 @@ def show_slip(
     >>> show_slip(fig, region, srf_data, annotations=True, projection="M6i", title="Slip Distribution")
     >>> fig.show()  # Displays the slip map with optional annotations
     """
+    subtitle = utils.format_description(
+        srf_data.points["slip"], units="cm", compact=True
+    )
+    title_args = [f"+t{title}+s{subtitle}".replace(" ", r"\040")] if title else []
+    fig.basemap(
+        region=region,
+        projection=projection,
+        frame=plotting.DEFAULT_PLT_KWARGS["frame_args"] + title_args,
+    )
+    fig.coast(
+        shorelines=["1/0.1p,black", "2/0.1p,black"],
+        resolution="f",
+        land="#666666",
+        water="skyblue",
+    )
+
     # Compute slip limits
-    slip_quantile = np.quantile(srf_data.points["slip"], 0.9)
+    slip_quantile = srf_data.points["slip"].quantile(0.98)
     slip_cb_max = max(int(np.round(slip_quantile, -1)), 10)
     cmap_limits = (0, slip_cb_max, slip_cb_max / 10)
     dx = srf_data.header.iloc[0]["len"] / srf_data.header.iloc[0]["nstk"]
@@ -140,6 +162,7 @@ def show_slip(
                 reverse_cmap=True,
                 plot_contours=False,
                 cb_label="Slip (cm)",
+                continuous_cmap=True,
             )
 
         if contours and not near_vertical:
@@ -358,23 +381,9 @@ def plot_srf(
         min_lat or srf_data.points["lat"].min() - latitude_pad,
         max_lat or srf_data.points["lat"].max() + latitude_pad,
     )
-    use_high_res = (region[1] - region[0]) * (region[3] - region[2]) < 0.5
-    fig = plotting.gen_region_fig(
-        title,
-        region,
-        high_res_topo=use_high_res,
-        plot_highways=False,
-        projection=f"M{width}c",
-        subtitle=utils.format_description(
-            srf_data.points["slip"], units="cm", compact=True
-        ),
-        config_options=dict(
-            FONT_SUBTITLE="9p,Helvetica,black",
-            FORMAT_GEO_MAP="ddd.xx",
-            MAP_FRAME_TYPE="plain",
-        ),
-        plot_kwargs=dict(water_color="white", topo_cmap_min=-900, topo_cmap_max=3100),
-    )
+    fig = pygmt.Figure()
+
+    pygmt.config(FONT_SUBTITLE="9p,Helvetica,black", FORMAT_GEO_MAP="ddd.xx")
 
     show_slip(
         fig,
@@ -382,7 +391,9 @@ def plot_srf(
         srf_data,
         annotations,
         contours,
+        projection=f"M{width}c",
         realisation_ffp=realisation_ffp,
+        title=title,
         dip_skip_threshold=dip_skip_threshold,
     )
     if show_inset:
